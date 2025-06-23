@@ -8,10 +8,20 @@ import {
 } from "@/components/ui/card";
 import { useActionState } from "react";
 import { createPool, CreatePoolState } from "@/app/baby/create/actions";
+import { toast } from "sonner"
+import { useEffect } from "react";
 
 export function CreateBabyPoolForm() {
 	const initialState: CreatePoolState = { message: null, errors: {} };
 	const [state, formAction] = useActionState(createPool, initialState);
+
+	useEffect(() => {
+		if (state.message) {
+			toast.error(state.message);
+		} else if (state.message === null && Object.keys(state.errors ?? {}).length === 0) {
+			toast.success("Pool created successfully!");
+		}
+	}, [state]);
 
 	return (
 		<form action={formAction}>
@@ -36,34 +46,17 @@ export function CreateBabyPoolForm() {
 						required
 					/>
 				</div>
-				{/* Birth Date Guess Slider */}
 				<div>
-					<Label htmlFor="birth_date_deviation">Birth Date Guess (days from due date)</Label>
-					<input
-						id="birth_date_deviation"
-						name="birth_date_deviation"
-						type="range"
-						min="-14"
-						max="14"
-						defaultValue="0"
-						step="1"
-						className="w-full"
-						onInput={e => {
-							const label = document.getElementById('birth_date_deviation_value');
-							if (label) label.textContent = e.currentTarget.value + ' days';
-						}}
+					<Label htmlFor="slug">Pool Slug</Label>
+					<Input
+						id="slug"
+						name="slug"
+						defaultValue=""
+						placeholder="e.g. smith-family-2025"
+						required
 					/>
-					<div className="text-xs text-gray-600 flex justify-between">
-						<span>-14</span>
-						<span>0</span>
-						<span>+14</span>
-					</div>
-					<div id="birth_date_deviation_value" className="text-sm text-center">0 days</div>
 				</div>
 				
-				{state.message && (
-					<div className="text-red-500 text-sm">{state.message}</div>
-				)}
 			</CardContent>
 			<CardFooter>
 				<Button

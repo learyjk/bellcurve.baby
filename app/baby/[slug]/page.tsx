@@ -1,14 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import { Tables } from "@/database.types";
 import { notFound } from "next/navigation";
-import { GuessSliders } from "@/components/ui/baby/guess-sliders";
+import { BabyPoolClient } from "./client";
 
-export default async function BabyPoolPage({ params }: { params: { slug: string } }) {
+export default async function BabyPoolPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("pools")
     .select("*")
-    .eq("slug", params.slug)
+    .eq("slug", slug)
     .single();
 
   if (error || !data) {
@@ -54,8 +55,7 @@ export default async function BabyPoolPage({ params }: { params: { slug: string 
           <span className="font-semibold">Actual Birth Weight:</span> {pool.actual_birth_weight} g
         </div>
       )}
-      {/* Guess Sliders (Client Component) */}
-      <GuessSliders />
+      <BabyPoolClient pool={pool} />
     </div>
   );
 }

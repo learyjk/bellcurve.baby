@@ -22,7 +22,8 @@ export async function createPool(
     data: { user },
     error: userError,
   } = await supabase.auth.getUser();
-  if (!user || !user.id) {
+  if (!user || !user.id || userError) {
+    console.error("User not authenticated or error fetching user:", userError);
     return {
       message: "You must be logged in to create a pool.",
       errors: {},

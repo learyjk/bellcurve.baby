@@ -1,12 +1,16 @@
 "use client";
-import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { getBetPrice } from "@/lib/bets/getBetPrice";
 
-export function GuessSliders() {
-  const [birthDateDeviation, setBirthDateDeviation] = useState(0);
-  const [weightGuess, setWeightGuess] = useState(7.6);
-
+export function GuessSliders({
+  birthDateDeviation,
+  weightGuess,
+  onValueChange,
+}: {
+  birthDateDeviation: number;
+  weightGuess: number;
+  onValueChange: (values: { birthDateDeviation?: number; weightGuess?: number }) => void;
+}) {
   // Calculate price using getBetPrice
   const price = getBetPrice({
     dayOffset: birthDateDeviation,
@@ -23,12 +27,12 @@ export function GuessSliders() {
         <Slider
           id="birth_date_deviation"
           name="birth_date_deviation"
-          defaultValue={[0]}
+          defaultValue={[birthDateDeviation]}
           min={-14}
           max={14}
           step={1}
           className="w-full"
-          onValueChange={val => setBirthDateDeviation(val[0])}
+          onValueChange={val => onValueChange({ birthDateDeviation: val[0] })}
         />
         <div className="text-xs text-gray-600 flex justify-between">
           <span>-14</span>
@@ -47,12 +51,12 @@ export function GuessSliders() {
         <Slider
           id="weight_guess"
           name="weight_guess"
-          defaultValue={[7.6]}
+          defaultValue={[weightGuess]}
           min={5}
           max={9}
           step={0.1}
           className="w-full"
-          onValueChange={val => setWeightGuess(val[0])}
+          onValueChange={val => onValueChange({ weightGuess: val[0] })}
         />
         <div className="text-xs text-gray-600 flex justify-between">
           <span>5</span>
@@ -67,6 +71,7 @@ export function GuessSliders() {
       <div className="mt-6 text-center">
         <span className="font-semibold">Your Bet Price:</span> ${price}
       </div>
+      
     </>
   );
 }

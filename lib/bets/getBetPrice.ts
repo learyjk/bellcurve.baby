@@ -4,7 +4,7 @@ export function getBetPrice({
   muDay = 0, // peak at due date
   sigmaDay = 5,
   muWeight = 7.6, // peak at avg baby weight
-  sigmaWeight = 0.5,
+  sigmaWeight = 0.75,
   basePrice = 5,
   maxPremium = 20, // how much extra for perfect bet
 }: {

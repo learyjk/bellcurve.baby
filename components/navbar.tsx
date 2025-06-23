@@ -1,6 +1,6 @@
 import * as React from "react"
 import Link from "next/link"
-import { CircleCheckIcon, CircleHelpIcon, CircleIcon } from "lucide-react"
+// import { CircleCheckIcon, CircleHelpIcon, CircleIcon } from "lucide-react"
 
 import {
   NavigationMenu,
@@ -9,7 +9,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
+  // navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { AuthButton } from "@/components/auth-button"
 
@@ -37,19 +37,19 @@ export async function Navbar() {
                     </Link>
                   </NavigationMenuLink>
                 </li>
+                <ListItem href="/baby" title="My Babies">
+                  See My Babies
+                </ListItem>
+                <ListItem href="/baby/create" title="Create Baby Pool">
+                  Create My Baby Pool
+                </ListItem>
                 <ListItem href="/notes" title="Notes">
                   View and manage your notes.
-                </ListItem>
-                <ListItem href="/protected" title="Protected">
-                  Protected route example.
-                </ListItem>
-                <ListItem href="/baby/create" title="Protected">
-                  Create My Baby Pool
                 </ListItem>
               </ul>
             </NavigationMenuContent>
           </NavigationMenuItem>
-          <NavigationMenuItem>
+          {/* <NavigationMenuItem>
             <NavigationMenuTrigger>With Icon</NavigationMenuTrigger>
             <NavigationMenuContent>
               <ul className="grid w-[200px] gap-4">
@@ -80,7 +80,7 @@ export async function Navbar() {
             <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
               <Link href="/notes">Notes</Link>
             </NavigationMenuLink>
-          </NavigationMenuItem>
+          </NavigationMenuItem> */}
         </NavigationMenuList>
       </NavigationMenu>
       <div className="ml-4">
