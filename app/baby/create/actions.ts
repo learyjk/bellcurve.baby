@@ -14,6 +14,9 @@ export async function createPool(
   const baby_name = formData.get("baby_name") as string;
   const due_date = formData.get("due_date") as string;
   const slug = formData.get("slug") as string;
+  const price_floor = parseFloat(formData.get("price_floor") as string);
+  const price_ceiling = parseFloat(formData.get("price_ceiling") as string);
+  const sigma_days = parseFloat(formData.get("sigma_days") as string);
 
   const supabase = await createClient();
 
@@ -38,11 +41,39 @@ export async function createPool(
     };
   }
 
+  // Validate pricing
+  if (!price_floor || !price_ceiling || !sigma_days) {
+    return {
+      message: "Price floor, price ceiling, and pricing style are required.",
+      errors: {},
+    };
+  }
+
+  if (price_floor >= price_ceiling) {
+    return {
+      message: "Maximum price must be greater than minimum price.",
+      errors: {},
+    };
+  }
+
+  if (price_floor < 0.01 || price_ceiling < 0.01) {
+    return {
+      message: "Prices must be at least $0.01.",
+      errors: {},
+    };
+  }
+
   const poolData: TablesInsert<"pools"> = {
     baby_name,
     due_date,
     slug,
     user_id,
+    price_floor,
+    price_ceiling,
+    sigma_days,
+    // Set reasonable defaults for weight distribution
+    mu_weight: 7.6, // Average baby weight in lbs
+    sigma_weight: 0.75, // Standard deviation for weight
   };
   const { error } = await supabase.from("pools").insert(poolData);
 

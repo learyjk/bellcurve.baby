@@ -1,9 +1,9 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getBetPrice } from "@/lib/bets/getBetPrice";
 import { Tables, TablesInsert } from "@/database.types";
 import { revalidatePath } from "next/cache";
+import { getBetPrice } from "@/lib/data/bets/getBetPrice";
 
 export async function submitGuess(data: {
   pool: Tables<"pools">;

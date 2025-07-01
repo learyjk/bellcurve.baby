@@ -3,11 +3,17 @@ import { Tables } from "@/database.types";
 import * as THREE from "three";
 import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, Text, Billboard } from "@react-three/drei";
-import { getBetPrice } from "@/lib/bets/getBetPrice";
 import { useControls } from "leva";
 import { useEffect, useMemo } from "react";
+import { getBetPrice } from "@/lib/data/bets/getBetPrice";
 
-function CameraController({ position, fov }: { position: [number, number, number]; fov: number }) {
+function CameraController({
+  position,
+  fov,
+}: {
+  position: [number, number, number];
+  fov: number;
+}) {
   const { camera } = useThree();
   useEffect(() => {
     if (camera instanceof THREE.PerspectiveCamera) {
@@ -216,7 +222,9 @@ export function BabyGuessVisual({
         basePrice,
         maxPremium,
       });
-      points.push(new THREE.Vector3((weight - muWeight) * weightScale, price, date));
+      points.push(
+        new THREE.Vector3((weight - muWeight) * weightScale, price, date)
+      );
     }
   }
 
