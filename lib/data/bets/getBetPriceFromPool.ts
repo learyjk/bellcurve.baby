@@ -51,10 +51,10 @@ export function getBetPriceFromPool({
  */
 export function getBetPrice({
   dayOffset, // -14 to +14
-  weightLbs, // 5 to 9
+  weightLbs, // average baby weight in lbs +/- 2 on either side.
   muDay = 0, // peak at due date
   sigmaDay = 5,
-  muWeight = 7.6, // peak at avg baby weight
+  muWeight = 7.6, // peak at avg baby weight. Change to avg of father + mother weights?
   sigmaWeight = 0.75,
   basePrice = 5,
   maxPremium = 20, // how much extra for perfect bet
