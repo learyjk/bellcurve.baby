@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Tables, TablesInsert } from "@/database.types";
 import { revalidatePath } from "next/cache";
-import { getBetPrice } from "@/lib/data/bets/getBetPrice";
+import { getBetPriceFromPool } from "@/lib/data/bets/getBetPriceFromPool";
 
 export async function submitGuess(data: {
   pool: Tables<"pools">;
@@ -30,14 +30,10 @@ export async function submitGuess(data: {
     guessedBirthDate.getDate() + data.birthDateDeviation
   );
 
-  const calculatedPrice = getBetPrice({
+  const calculatedPrice = getBetPriceFromPool({
     dayOffset: data.birthDateDeviation,
     weightLbs: data.weightGuess,
-    muWeight: data.pool.mu_weight ?? 7.6,
-    sigmaWeight: data.pool.sigma_weight ?? 0.75,
-    sigmaDay: data.pool.sigma_days ?? 5,
-    basePrice: data.pool.price_floor ?? 5,
-    maxPremium: (data.pool.price_ceiling ?? 25) - (data.pool.price_floor ?? 5),
+    pool: data.pool,
   });
 
   const betData: TablesInsert<"bets"> = {

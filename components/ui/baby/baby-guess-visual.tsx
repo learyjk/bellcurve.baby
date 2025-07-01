@@ -5,7 +5,7 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, Text, Billboard } from "@react-three/drei";
 import { useControls } from "leva";
 import { useEffect, useMemo } from "react";
-import { getBetPrice } from "@/lib/data/bets/getBetPrice";
+import { getBetPriceFromPool } from "@/lib/data/bets/getBetPriceFromPool";
 
 function CameraController({
   position,
@@ -196,46 +196,37 @@ export function BabyGuessVisual({
 }) {
   // Pool parameters with defaults
   const muWeight = pool.mu_weight ?? 7.6;
-  const sigmaWeight = pool.sigma_weight ?? 0.75;
-  const sigmaDay = pool.sigma_days ?? 5;
-  const basePrice = pool.price_floor ?? 5;
-  const maxPremium = (pool.price_ceiling ?? 25) - basePrice;
   const weightScale = 7;
 
   // Generate points for the 3D scatter plot
-  const points = [];
-  const dateSegments = 60;
-  const widthSegments = 60;
-  const dateRange = 28; // -14 to 14 days
-  const weightRange = 4; // 5 to 9 lbs
+  const points = useMemo(() => {
+    const pts = [];
+    const dateSegments = 60;
+    const widthSegments = 60;
+    const dateRange = 28; // -14 to 14 days
+    const weightRange = 4; // 5 to 9 lbs
 
-  for (let i = 0; i <= dateSegments; i++) {
-    const date = (i / dateSegments - 0.5) * dateRange;
-    for (let j = 0; j <= widthSegments; j++) {
-      const weight = 5 + (j / widthSegments) * weightRange;
-      const price = getBetPrice({
-        dayOffset: date,
-        weightLbs: weight,
-        muWeight,
-        sigmaWeight,
-        sigmaDay,
-        basePrice,
-        maxPremium,
-      });
-      points.push(
-        new THREE.Vector3((weight - muWeight) * weightScale, price, date)
-      );
+    for (let i = 0; i <= dateSegments; i++) {
+      const date = (i / dateSegments - 0.5) * dateRange;
+      for (let j = 0; j <= widthSegments; j++) {
+        const weight = 5 + (j / widthSegments) * weightRange;
+        const price = getBetPriceFromPool({
+          dayOffset: date,
+          weightLbs: weight,
+          pool,
+        });
+        pts.push(
+          new THREE.Vector3((weight - muWeight) * weightScale, price, date)
+        );
+      }
     }
-  }
+    return pts;
+  }, [pool, muWeight, weightScale]);
 
-  const guessPrice = getBetPrice({
+  const guessPrice = getBetPriceFromPool({
     dayOffset: birthDateDeviation,
     weightLbs: weightGuess,
-    muWeight,
-    sigmaWeight,
-    sigmaDay,
-    basePrice,
-    maxPremium,
+    pool,
   });
 
   return (
@@ -246,8 +237,8 @@ export function BabyGuessVisual({
         muWeight={muWeight}
         guessPrice={guessPrice}
         birthDateDeviation={birthDateDeviation}
-        widthSegments={widthSegments}
-        dateSegments={dateSegments}
+        widthSegments={60}
+        dateSegments={60}
         weightScale={weightScale}
       />
     </div>

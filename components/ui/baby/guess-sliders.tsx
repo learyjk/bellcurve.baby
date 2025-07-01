@@ -1,6 +1,5 @@
 "use client";
 import { Slider } from "@/components/ui/slider";
-import { getBetPrice } from "@/lib/data/bets/getBetPrice";
 import { getBetPriceFromPool } from "@/lib/data/bets/getBetPriceFromPool";
 import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
 import { Tables } from "@/database.types";
@@ -17,7 +16,7 @@ export function GuessSliders({
     birthDateDeviation?: number;
     weightGuess?: number;
   }) => void;
-  pool?: Tables<"pools">;
+  pool: Tables<"pools">;
 }) {
   // Use the pool's mean weight if available, otherwise default to 7.6
   const meanWeight = pool?.mu_weight ?? 7.6;
@@ -25,28 +24,11 @@ export function GuessSliders({
   const weightMax = meanWeight + 2;
 
   // Calculate price using pool configuration if available, otherwise use legacy function
-  const price = pool
-    ? getBetPriceFromPool({
-        dayOffset: birthDateDeviation,
-        weightLbs: weightGuess,
-        pool,
-      })
-    : getBetPrice({
-        dayOffset: birthDateDeviation,
-        weightLbs: weightGuess,
-      });
-
-  // Calculate individual prices for date and weight
-  const datePrice = pool
-    ? getBetPriceFromPool({
-        dayOffset: birthDateDeviation,
-        weightLbs: meanWeight,
-        pool,
-      })
-    : getBetPrice({ dayOffset: birthDateDeviation, weightLbs: meanWeight });
-  const weightPrice = pool
-    ? getBetPriceFromPool({ dayOffset: 0, weightLbs: weightGuess, pool })
-    : getBetPrice({ dayOffset: 0, weightLbs: weightGuess });
+  const price = getBetPriceFromPool({
+    dayOffset: birthDateDeviation,
+    weightLbs: weightGuess,
+    pool,
+  });
 
   // Use the pool's sigma for weight, or default to 0.7
   const sigmaWeight = pool?.sigma_weight ?? 0.7;
@@ -56,24 +38,24 @@ export function GuessSliders({
   const weightCurveSigma = sigmaWeight;
 
   // Calculate the base price (both at mean)
-  const basePrice = pool
-    ? getBetPriceFromPool({ dayOffset: 0, weightLbs: meanWeight, pool })
-    : getBetPrice({ dayOffset: 0, weightLbs: meanWeight });
+  const basePrice = getBetPriceFromPool({
+    dayOffset: 0,
+    weightLbs: meanWeight,
+    pool,
+  });
   // Date contribution: price(date deviation, mean weight) - base
-  const dateContribution =
-    (pool
-      ? getBetPriceFromPool({
-          dayOffset: birthDateDeviation,
-          weightLbs: meanWeight,
-          pool,
-        })
-      : getBetPrice({ dayOffset: birthDateDeviation, weightLbs: meanWeight })) -
-    basePrice;
+  const dateContribution = getBetPriceFromPool({
+    dayOffset: birthDateDeviation,
+    weightLbs: meanWeight,
+    pool,
+  });
+
   // Weight contribution: price(mean date, weight deviation) - base
-  const weightContribution =
-    (pool
-      ? getBetPriceFromPool({ dayOffset: 0, weightLbs: weightGuess, pool })
-      : getBetPrice({ dayOffset: 0, weightLbs: weightGuess })) - basePrice;
+  const weightContribution = getBetPriceFromPool({
+    dayOffset: 0,
+    weightLbs: weightGuess,
+    pool,
+  });
 
   return (
     <>

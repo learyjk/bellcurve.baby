@@ -55,9 +55,7 @@ export function BabyPoolClient({ pool }: { pool: Tables<"pools"> }) {
           <div className="text-lg font-semibold text-gray-700 mb-2">
             Your Bet Price
           </div>
-          <div className="text-3xl font-bold text-blue-600 mb-2">
-            ${price}
-          </div>
+          <div className="text-3xl font-bold text-blue-600 mb-2">${price}</div>
           <div className="text-sm text-gray-600">
             Based on your current guess
           </div>
@@ -74,18 +72,22 @@ export function BabyPoolClient({ pool }: { pool: Tables<"pools"> }) {
       </div>
 
       <div className="mt-8 text-center">
-        <Button onClick={handleSubmit} disabled={isPending} className="w-full h-12 text-lg">
+        <Button
+          onClick={handleSubmit}
+          disabled={isPending}
+          className="w-full h-12 text-lg"
+        >
           {isPending ? "Submitting..." : "Submit My Guess"}
         </Button>
       </div>
 
-      <div className="mt-10">
+      {/* <div className="mt-10">
         <BabyGuessVisual
           pool={pool}
           birthDateDeviation={birthDateDeviation}
           weightGuess={weightGuess}
         />
-      </div>
+      </div> */}
     </div>
   );
 }
