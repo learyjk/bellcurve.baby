@@ -1,19 +1,29 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { Tables } from "@/database.types";
 import { GuessSliders } from "@/components/ui/baby/guess-sliders";
 import { Button } from "@/components/ui/button";
 import { createCheckoutSession } from "./actions";
+import { DataTable } from "@/app/baby/data-table";
+import { betColumns } from "./bet-columns";
+import { getBetsForPool } from "./bet-actions";
 import { getBetPrice } from "@/lib/helpers/pricing";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
+// Bets table is server-side, so we fetch via API route or prop. For demo, fetch client-side.
+// You may want to move this to server component for SEO/SSR.
 
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-);
-
-export function BabyPoolClient({ pool }: { pool: Tables<"pools"> }) {
+export function BabyPoolClient({
+  pool,
+  bets,
+}: {
+  pool: Tables<"pools">;
+  bets: Tables<"bets">[];
+}) {
+  const stripePromise = loadStripe(
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+  );
   const [birthDateDeviation, setBirthDateDeviation] = useState(0);
   const [weightGuess, setWeightGuess] = useState(pool.mu_weight ?? 7.6);
   const [isPending, startTransition] = useTransition();
@@ -110,6 +120,11 @@ export function BabyPoolClient({ pool }: { pool: Tables<"pools"> }) {
             ? "Redirecting to payment..."
             : `Place Bet for $${totalPrice.toFixed(2)}`}
         </Button>
+      </div>
+
+      <div className="mt-12">
+        <h2 className="text-xl font-bold mb-4 text-center">Previous Bets</h2>
+        <DataTable columns={betColumns} data={bets} />
       </div>
     </div>
   );

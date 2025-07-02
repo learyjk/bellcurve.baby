@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Tables } from "@/database.types";
 import { notFound } from "next/navigation";
 import { BabyPoolClient } from "./client";
+import { getBetsForPool } from "./bet-actions";
 
 export default async function BabyPoolPage({
   params,
@@ -22,6 +23,7 @@ export default async function BabyPoolPage({
 
   const pool = data as Tables<"pools">;
 
+  const bets = await getBetsForPool(pool.id);
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="w-full max-w-4xl mx-auto bg-white border rounded-xl shadow p-8">
@@ -72,7 +74,7 @@ export default async function BabyPoolPage({
             )}
           </div>
         </div>
-        <BabyPoolClient pool={pool} />
+        <BabyPoolClient pool={pool} bets={bets} />
       </div>
     </div>
   );
