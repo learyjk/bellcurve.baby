@@ -5,7 +5,7 @@ import { Tables } from "@/database.types";
 import { GuessSliders } from "@/components/ui/baby/guess-sliders";
 import { Button } from "@/components/ui/button";
 import { submitGuess } from "./actions";
-import { getBetComponentPrice } from "@/lib/helpers/pricing";
+import { getBetPrice } from "@/lib/helpers/pricing";
 
 export function BabyPoolClient({ pool }: { pool: Tables<"pools"> }) {
   const [birthDateDeviation, setBirthDateDeviation] = useState(0);
@@ -39,32 +39,11 @@ export function BabyPoolClient({ pool }: { pool: Tables<"pools"> }) {
     });
   };
 
-  // Pricing constants from the pool
-  const minBetPrice = pool.price_floor ?? 5;
-  const maxBetPrice = pool.price_ceiling ?? 50;
-  const meanWeight = pool.mu_weight ?? 7.6;
-
-  // Each component gets half the price range
-  const minComponentPrice = minBetPrice / 2;
-  const maxComponentPrice = maxBetPrice / 2;
-
-  const datePrice = getBetComponentPrice({
-    guess: birthDateDeviation,
-    mean: 0,
-    bound: 14,
-    minPrice: minComponentPrice,
-    maxPrice: maxComponentPrice,
+  const { totalPrice, datePrice, weightPrice } = getBetPrice({
+    pool,
+    birthDateDeviation,
+    weightGuess,
   });
-
-  const weightPrice = getBetComponentPrice({
-    guess: weightGuess,
-    mean: meanWeight,
-    bound: 2,
-    minPrice: minComponentPrice,
-    maxPrice: maxComponentPrice,
-  });
-
-  const totalPrice = datePrice + weightPrice;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -103,14 +82,6 @@ export function BabyPoolClient({ pool }: { pool: Tables<"pools"> }) {
           {isPending ? "Submitting..." : "Submit My Guess"}
         </Button>
       </div>
-
-      {/* <div className="mt-10">
-        <BabyGuessVisual
-          pool={pool}
-          birthDateDeviation={birthDateDeviation}
-          weightGuess={weightGuess}
-        />
-      </div> */}
     </div>
   );
 }

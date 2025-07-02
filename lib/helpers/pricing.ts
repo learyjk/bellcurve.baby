@@ -1,3 +1,5 @@
+import { Tables } from "@/database.types";
+
 /**
  * Solves for sigma in a Gaussian-like function where the value at a certain distance from the mean is known.
  * g(x) = exp(-0.5 * ((x - mu) / sigma)^2)
@@ -44,4 +46,50 @@ export function getBetComponentPrice(input: BetComponentPriceInput): number {
   const gaussianValue = Math.exp(-0.5 * Math.pow((guess - mean) / sigma, 2));
 
   return minPrice + premium * gaussianValue;
+}
+
+interface BetPriceInput {
+  pool: Tables<"pools">;
+  birthDateDeviation: number;
+  weightGuess: number;
+}
+
+/**
+ * Calculates the total price of a bet by summing the prices of its components.
+ * @param input The input parameters for the bet price calculation.
+ * @returns The total calculated price for the bet.
+ */
+export function getBetPrice(input: BetPriceInput): {
+  totalPrice: number;
+  datePrice: number;
+  weightPrice: number;
+} {
+  const { pool, birthDateDeviation, weightGuess } = input;
+
+  // Pricing constants from the pool
+  const minBetPrice = pool.price_floor ?? 5;
+  const maxBetPrice = pool.price_ceiling ?? 50;
+  const meanWeight = pool.mu_weight ?? 7.6;
+
+  // Each component gets half the price range
+  const minComponentPrice = minBetPrice / 2;
+  const maxComponentPrice = maxBetPrice / 2;
+
+  const datePrice = getBetComponentPrice({
+    guess: birthDateDeviation,
+    mean: 0,
+    bound: 14, // 2 weeks in days
+    minPrice: minComponentPrice,
+    maxPrice: maxComponentPrice,
+  });
+
+  const weightPrice = getBetComponentPrice({
+    guess: weightGuess,
+    mean: meanWeight,
+    bound: 2, // 2 lbs
+    minPrice: minComponentPrice,
+    maxPrice: maxComponentPrice,
+  });
+
+  return { totalPrice: datePrice + weightPrice, datePrice, weightPrice };
 }

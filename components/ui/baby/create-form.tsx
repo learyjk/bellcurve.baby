@@ -3,19 +3,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { CardContent, CardFooter } from "@/components/ui/card";
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { createPool, CreatePoolState } from "@/app/baby/create/actions";
 import { toast } from "sonner";
 import { useEffect } from "react";
-import { PricingStyleSelector } from "@/components/ui/baby/pricing-style-selector";
-import { PricingStyle } from "@/lib/helpers";
 
 export function CreateBabyPoolForm() {
   const initialState: CreatePoolState = { message: null, errors: {} };
   const [state, formAction] = useActionState(createPool, initialState);
-  const [pricingStyle, setPricingStyle] = useState<PricingStyle>("BALANCED");
-  const [minPrice, setMinPrice] = useState(5);
-  const [maxPrice, setMaxPrice] = useState(25);
 
   useEffect(() => {
     if (state.message) {
@@ -62,6 +57,23 @@ export function CreateBabyPoolForm() {
           />
         </div>
 
+        <div>
+          <Label htmlFor="mu_weight">Expected Weight (lbs)</Label>
+          <Input
+            id="mu_weight"
+            name="mu_weight"
+            type="number"
+            step="0.1"
+            defaultValue="7.6"
+            placeholder="e.g. 7.6"
+            required
+          />
+          <p className="text-sm text-gray-500 mt-2">
+            The average or expected birth weight. This will be the peak of the
+            weight price distribution.
+          </p>
+        </div>
+
         {/* Price Range Configuration */}
         <div className="space-y-6 pt-6 border-t border-gray-200">
           <div>
@@ -69,7 +81,7 @@ export function CreateBabyPoolForm() {
               Betting Price Configuration
             </h3>
             <p className="text-sm text-gray-600 mt-1">
-              Set the price range and style for your betting pool
+              Set the price range for your betting pool.
             </p>
           </div>
 
@@ -84,14 +96,14 @@ export function CreateBabyPoolForm() {
                 type="number"
                 min="1"
                 step="0.01"
-                value={minPrice}
-                onChange={(e) => setMinPrice(Number(e.target.value))}
+                defaultValue="5"
                 placeholder="5.00"
                 required
                 className="mt-2"
               />
               <p className="text-sm text-gray-500 mt-2">
-                Price for bets ±14 days from due date
+                The total price for a bet at the edges of the range (e.g., ±14
+                days and ±2 lbs).
               </p>
             </div>
             <div>
@@ -104,25 +116,17 @@ export function CreateBabyPoolForm() {
                 type="number"
                 min="1"
                 step="0.01"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                placeholder="25.00"
+                defaultValue="50"
+                placeholder="50.00"
                 required
                 className="mt-2"
               />
               <p className="text-sm text-gray-500 mt-2">
-                Price for betting on exact due date
+                The total price for a perfect guess (due date and expected
+                weight).
               </p>
             </div>
           </div>
-
-          {/* Pricing Style Selector */}
-          <PricingStyleSelector
-            selectedStyle={pricingStyle}
-            onStyleChange={setPricingStyle}
-            minPrice={minPrice}
-            maxPrice={maxPrice}
-          />
         </div>
       </CardContent>
       <CardFooter className="p-8 pt-0">
