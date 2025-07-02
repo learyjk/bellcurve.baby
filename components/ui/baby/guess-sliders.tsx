@@ -1,8 +1,8 @@
 "use client";
 import { Slider } from "@/components/ui/slider";
-import { getBetPriceFromPool } from "@/lib/data/bets/getBetPriceFromPool";
 import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
 import { Tables } from "@/database.types";
+import { getBetComponentPrice } from "@/lib/helpers/pricing";
 
 export function GuessSliders({
   birthDateDeviation,
@@ -16,46 +16,57 @@ export function GuessSliders({
     birthDateDeviation?: number;
     weightGuess?: number;
   }) => void;
-  pool: Tables<"pools">;
+  pool?: Tables<"pools">;
 }) {
-  // Use the pool's mean weight if available, otherwise default to 7.6
   const meanWeight = pool?.mu_weight ?? 7.6;
   const weightMin = meanWeight - 2;
   const weightMax = meanWeight + 2;
 
-  // Calculate price using pool configuration if available, otherwise use legacy function
-  const price = getBetPriceFromPool({
-    dayOffset: birthDateDeviation,
-    weightLbs: weightGuess,
-    pool,
+  // Pricing constants from the pool
+  const minBetPrice = pool?.price_floor ?? 5;
+  const maxBetPrice = pool?.price_ceiling ?? 50;
+
+  // Each component gets half the price range
+  const minComponentPrice = minBetPrice / 2;
+  const maxComponentPrice = maxBetPrice / 2;
+
+  const datePrice = getBetComponentPrice({
+    guess: birthDateDeviation,
+    mean: 0,
+    bound: 14,
+    minPrice: minComponentPrice,
+    maxPrice: maxComponentPrice,
   });
 
-  // Use the pool's sigma for weight, or default to 0.7
-  const sigmaWeight = pool?.sigma_weight ?? 0.7;
-  // Use the same range for the curve and slider for clarity
-  const weightCurveMin = weightMin;
-  const weightCurveMax = weightMax;
-  const weightCurveSigma = sigmaWeight;
-
-  // Calculate the base price (both at mean)
-  const basePrice = getBetPriceFromPool({
-    dayOffset: 0,
-    weightLbs: meanWeight,
-    pool,
-  });
-  // Date contribution: price(date deviation, mean weight) - base
-  const dateContribution = getBetPriceFromPool({
-    dayOffset: birthDateDeviation,
-    weightLbs: meanWeight,
-    pool,
+  const weightPrice = getBetComponentPrice({
+    guess: weightGuess,
+    mean: meanWeight,
+    bound: 2,
+    minPrice: minComponentPrice,
+    maxPrice: maxComponentPrice,
   });
 
-  // Weight contribution: price(mean date, weight deviation) - base
-  const weightContribution = getBetPriceFromPool({
-    dayOffset: 0,
-    weightLbs: weightGuess,
-    pool,
-  });
+  const dueDate = pool?.due_date ? new Date(`${pool.due_date}T00:00:00`) : null;
+
+  const formatDate = (date: Date | null) => {
+    if (!date) return "";
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
+
+  const minDate = dueDate ? new Date(dueDate.getTime()) : null;
+  if (minDate) minDate.setDate(minDate.getDate() - 14);
+
+  const maxDate = dueDate ? new Date(dueDate.getTime()) : null;
+  if (maxDate) maxDate.setDate(maxDate.getDate() + 14);
+
+  const currentGuessDate = dueDate ? new Date(dueDate.getTime()) : null;
+  if (currentGuessDate)
+    currentGuessDate.setDate(currentGuessDate.getDate() + birthDateDeviation);
+
+  const minDateLabel = formatDate(minDate);
+  const maxDateLabel = formatDate(maxDate);
+  const meanDateLabel = formatDate(dueDate);
+  const currentGuessDateLabel = formatDate(currentGuessDate);
 
   return (
     <>
@@ -63,21 +74,22 @@ export function GuessSliders({
       <div className="flex flex-col md:flex-row gap-8 mt-6">
         {/* Birth Date Guess Slider with Gaussian Curve */}
         <div className="flex-1">
-          <label
-            htmlFor="birth_date_deviation"
-            className="block font-medium mb-4"
-          >
-            Birth Date Guess (days from due date)
-          </label>
           <div className="mb-4 flex justify-center">
             <GaussianCurve
               currentGuess={birthDateDeviation}
+              mean={0}
               min={-14}
               max={14}
-              width={300}
-              height={120}
-              sigma={pool?.sigma_days ?? 5}
+              minPrice={minComponentPrice}
+              maxPrice={maxComponentPrice}
+              title="Birth Date Probability Distribution"
+              minLabel={minDateLabel}
+              meanLabel={meanDateLabel}
+              maxLabel={maxDateLabel}
             />
+          </div>
+          <div className="text-center text-lg font-semibold mb-2">
+            Date Component Price: ${datePrice.toFixed(2)}
           </div>
           <Slider
             id="birth_date_deviation"
@@ -92,34 +104,36 @@ export function GuessSliders({
             }
           />
           <div className="text-xs text-gray-600 flex justify-between">
-            <span>-14</span>
-            <span>0</span>
-            <span>+14</span>
+            <span>{minDateLabel}</span>
+            <span>{meanDateLabel}</span>
+            <span>{maxDateLabel}</span>
           </div>
           <div className="text-sm text-center" id="birth_date_deviation_value">
-            {birthDateDeviation} days
+            {currentGuessDateLabel}
           </div>
           <div className="text-xs text-center mt-2 text-blue-700">
             Date Contribution:{" "}
-            <span className="font-semibold">
-              ${dateContribution.toFixed(2)}
-            </span>
+            <span className="font-semibold">${datePrice.toFixed(2)}</span>
           </div>
         </div>
         {/* Weight Guess Slider with Gaussian Curve */}
         <div className="flex-1">
-          <label htmlFor="weight_guess" className="block font-medium mb-4">
-            Birth Weight Guess (lbs)
-          </label>
           <div className="mb-4 flex justify-center">
             <GaussianCurve
               currentGuess={weightGuess}
-              min={weightCurveMin}
-              max={weightCurveMax}
-              width={300}
-              height={120}
-              sigma={weightCurveSigma}
+              mean={meanWeight}
+              min={weightMin}
+              max={weightMax}
+              minPrice={minComponentPrice}
+              maxPrice={maxComponentPrice}
+              title="Birth Weight Probability Distribution"
+              minLabel={`${weightMin.toFixed(1)} lbs`}
+              maxLabel={`${weightMax.toFixed(1)} lbs`}
+              meanLabel={`${meanWeight.toFixed(1)} lbs`}
             />
+          </div>
+          <div className="text-center text-lg font-semibold mb-2">
+            Weight Component Price: ${weightPrice.toFixed(2)}
           </div>
           <Slider
             id="weight_guess"
@@ -143,18 +157,17 @@ export function GuessSliders({
           </div>
           <div className="text-xs text-center mt-2 text-blue-700">
             Weight Contribution:{" "}
-            <span className="font-semibold">
-              ${weightContribution.toFixed(2)}
-            </span>
+            <span className="font-semibold">${weightPrice.toFixed(2)}</span>
           </div>
         </div>
       </div>
       {/* Display calculated total price */}
       <div className="mt-8 text-center">
-        <span className="font-semibold">Base Price:</span> $
-        {basePrice.toFixed(2)}
+        <span className="font-semibold">Min Price:</span> $
+        {minBetPrice.toFixed(2)}
         <br />
-        <span className="font-semibold">Total Bet Price:</span> ${price}
+        <span className="font-semibold">Max Bet Price:</span> ${" "}
+        {maxBetPrice.toFixed(2)}
       </div>
     </>
   );
