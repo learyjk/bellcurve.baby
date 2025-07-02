@@ -48,70 +48,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "bets_payment_id_fkey"
-            columns: ["payment_id"]
-            isOneToOne: false
-            referencedRelation: "payments"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "bets_pool_id_fkey"
-            columns: ["pool_id"]
-            isOneToOne: false
-            referencedRelation: "pools"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      notes: {
-        Row: {
-          id: number
-          title: string | null
-        }
-        Insert: {
-          id?: number
-          title?: string | null
-        }
-        Update: {
-          id?: number
-          title?: string | null
-        }
-        Relationships: []
-      }
-      payments: {
-        Row: {
-          amount: number
-          created_at: string | null
-          id: string
-          pool_id: string
-          status: string | null
-          stripe_payment_intent_id: string | null
-          stripe_receipt_url: string | null
-          user_id: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string | null
-          id?: string
-          pool_id: string
-          status?: string | null
-          stripe_payment_intent_id?: string | null
-          stripe_receipt_url?: string | null
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string | null
-          id?: string
-          pool_id?: string
-          status?: string | null
-          stripe_payment_intent_id?: string | null
-          stripe_receipt_url?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payments_pool_id_fkey"
             columns: ["pool_id"]
             isOneToOne: false
             referencedRelation: "pools"

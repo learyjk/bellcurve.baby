@@ -4,8 +4,14 @@ import { useState, useTransition } from "react";
 import { Tables } from "@/database.types";
 import { GuessSliders } from "@/components/ui/baby/guess-sliders";
 import { Button } from "@/components/ui/button";
-import { submitGuess } from "./actions";
+import { createCheckoutSession } from "./actions";
 import { getBetPrice } from "@/lib/helpers/pricing";
+import { loadStripe } from "@stripe/stripe-js";
+import { toast } from "sonner";
+
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+);
 
 export function BabyPoolClient({ pool }: { pool: Tables<"pools"> }) {
   const [birthDateDeviation, setBirthDateDeviation] = useState(0);
@@ -24,17 +30,38 @@ export function BabyPoolClient({ pool }: { pool: Tables<"pools"> }) {
     }
   };
 
-  const handleSubmit = () => {
+  const handleBet = async () => {
     startTransition(async () => {
-      const result = await submitGuess({
-        pool,
-        birthDateDeviation,
-        weightGuess,
+      if (!pool.due_date) {
+        toast.error("Error: Due date is not set for this pool.");
+        return;
+      }
+
+      const dueDate = new Date(pool.due_date);
+      const guessDate = new Date(dueDate);
+      guessDate.setDate(guessDate.getDate() + birthDateDeviation);
+
+      const result = await createCheckoutSession({
+        poolId: pool.id,
+        slug: pool.slug,
+        guessDate: guessDate.toISOString(),
+        guessWeight: weightGuess,
+        price: totalPrice,
+        babyName: pool.baby_name || "the baby",
       });
-      if (result?.error) {
-        alert(result.error);
-      } else {
-        alert("Guess submitted successfully!");
+
+      if (result.error) {
+        toast.error(`Error: ${result.error}`);
+        return;
+      }
+
+      if (result.sessionId) {
+        const stripe = await stripePromise;
+        if (stripe) {
+          await stripe.redirectToCheckout({ sessionId: result.sessionId });
+        } else {
+          toast.error("Error: Stripe.js has not loaded yet.");
+        }
       }
     });
   };
@@ -75,11 +102,13 @@ export function BabyPoolClient({ pool }: { pool: Tables<"pools"> }) {
 
       <div className="mt-8 text-center">
         <Button
-          onClick={handleSubmit}
+          onClick={handleBet}
           disabled={isPending}
           className="w-full h-12 text-lg"
         >
-          {isPending ? "Submitting..." : "Submit My Guess"}
+          {isPending
+            ? "Redirecting to payment..."
+            : `Place Bet for $${totalPrice.toFixed(2)}`}
         </Button>
       </div>
     </div>

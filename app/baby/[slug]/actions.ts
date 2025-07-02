@@ -1,14 +1,17 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { Tables, TablesInsert } from "@/database.types";
-import { revalidatePath } from "next/cache";
-import { getBetPrice } from "@/lib/helpers/pricing";
+import Stripe from "stripe";
 
-export async function submitGuess(data: {
-  pool: Tables<"pools">;
-  birthDateDeviation: number;
-  weightGuess: number;
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+export async function createCheckoutSession(data: {
+  poolId: string;
+  slug: string;
+  guessDate: string;
+  guessWeight: number;
+  price: number;
+  babyName: string;
 }) {
   const supabase = await createClient();
 
@@ -17,45 +20,49 @@ export async function submitGuess(data: {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "You must be logged in to submit a guess." };
+    return { error: "You must be logged in to place a bet." };
   }
 
-  if (!data.pool.due_date) {
-    return { error: "This pool does not have a due date set." };
+  try {
+    const formattedDate = new Date(data.guessDate).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    const formattedWeight = `${data.guessWeight.toFixed(1)} lbs`;
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `Bet on ${data.babyName}`,
+              description: `Your guess: ${formattedDate} at ${formattedWeight}`,
+            },
+            unit_amount: Math.round(data.price * 100),
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/baby/${data.slug}?payment=success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/baby/${data.slug}?payment=cancelled`,
+      metadata: {
+        poolId: data.poolId,
+        slug: data.slug,
+        userId: user.id,
+        guessDate: data.guessDate,
+        guessWeight: data.guessWeight.toString(),
+        price: data.price.toString(),
+      },
+    });
+
+    return { sessionId: session.id };
+  } catch (error) {
+    console.error("Error creating Stripe checkout session:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return { error: `Could not create checkout session: ${message}` };
   }
-
-  const dueDate = new Date(data.pool.due_date);
-  const guessedBirthDate = new Date(dueDate);
-  guessedBirthDate.setDate(
-    guessedBirthDate.getDate() + data.birthDateDeviation
-  );
-
-  const { totalPrice } = getBetPrice({
-    pool: data.pool,
-    birthDateDeviation: data.birthDateDeviation,
-    weightGuess: data.weightGuess,
-  });
-
-  const betData: TablesInsert<"bets"> = {
-    pool_id: data.pool.id,
-    user_id: user.id,
-    guessed_birth_date: guessedBirthDate.toISOString(),
-    guessed_weight: data.weightGuess,
-    calculated_price: totalPrice,
-    payment_status: "unpaid",
-    payment_id: "5576e000-ccac-421e-b397-f098df0f80d6",
-  };
-
-  console.log("Submitting bet data:", betData);
-
-  const { error } = await supabase.from("bets").insert(betData);
-
-  if (error) {
-    console.error(error);
-    return { error: "There was an error submitting your guess." };
-  }
-
-  revalidatePath(`/baby/${data.pool.slug}`);
-
-  return { success: true };
 }
