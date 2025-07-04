@@ -7,13 +7,14 @@ import { Tables } from "@/database.types";
 export default async function ViewGuessesPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
   const supabase = await createClient();
   const { data: pool, error: poolError } = await supabase
     .from("pools")
     .select("*")
-    .eq("slug", params.slug)
+    .eq("slug", slug)
     .single();
 
   if (poolError || !pool) notFound();
