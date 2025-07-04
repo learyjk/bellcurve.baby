@@ -41,10 +41,11 @@ export async function createPool(
     };
   }
 
-  // Validate pricing
-  if (!price_floor || !price_ceiling || !sigma_days) {
+  // Validate pricing (only if price_floor and price_ceiling are provided)
+  // Remove requirement for sigma_days (pricing style)
+  if (!price_floor || !price_ceiling) {
     return {
-      message: "Price floor, price ceiling, and pricing style are required.",
+      message: "Price floor and price ceiling are required.",
       errors: {},
     };
   }
