@@ -1,18 +1,15 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition } from "react";
 import { Tables } from "@/database.types";
 import { GuessSliders } from "@/components/ui/baby/guess-sliders";
 import { Button } from "@/components/ui/button";
-import { createCheckoutSession } from "./actions";
 import { DataTable } from "@/app/baby/data-table";
 import { betColumns } from "./bet-columns";
-import { getBetsForPool } from "./bet-actions";
 import { getBetPrice } from "@/lib/helpers/pricing";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
-// Bets table is server-side, so we fetch via API route or prop. For demo, fetch client-side.
-// You may want to move this to server component for SEO/SSR.
+import { createCheckoutSession } from "@/lib/actions/baby/createCheckoutSession";
 
 export function BabyPoolClient({
   pool,

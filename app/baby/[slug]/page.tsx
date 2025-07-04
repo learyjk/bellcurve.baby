@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Tables } from "@/database.types";
 import { notFound } from "next/navigation";
 import { BabyPoolClient } from "./client";
-import { getBetsForPool } from "./bet-actions";
+import { getBetsForPool } from "@/lib/data/bets/getBetsForPool";
 
 export default async function BabyPoolPage({
   params,
