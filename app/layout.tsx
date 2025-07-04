@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Toaster } from "@/components/ui/sonner";
+import OneTapGoogle from "@/components/one-tap-google";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -39,6 +40,7 @@ export default function RootLayout({
           {children}
           <Toaster />
         </ThemeProvider>
+        <OneTapGoogle />
       </body>
     </html>
   );

@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal } from "lucide-react"
+import { ColumnDef } from "@tanstack/react-table";
+import { MoreHorizontal } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,11 +11,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import Link from "next/link"
-import { Tables } from "@/database.types"
+} from "@/components/ui/dropdown-menu";
+import Link from "next/link";
+import { Tables } from "@/database.types";
 
-export const columns: ColumnDef<Tables<'pools'>>[] = [
+export const columns: ColumnDef<Tables<"pools">>[] = [
   {
     accessorKey: "baby_name",
     header: "Baby Name",
@@ -24,14 +24,14 @@ export const columns: ColumnDef<Tables<'pools'>>[] = [
     accessorKey: "due_date",
     header: "Due Date",
     cell: ({ row }) => {
-        const date = row.getValue("due_date") as string;
-        return <div>{new Date(date).toLocaleDateString()}</div>
-    }
+      const date = row.getValue("due_date") as string;
+      return <div>{new Date(date).toLocaleDateString()}</div>;
+    },
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      const baby = row.original
+      const baby = row.original;
 
       return (
         <DropdownMenu>
@@ -44,13 +44,15 @@ export const columns: ColumnDef<Tables<'pools'>>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-                <Link href={`/baby/${baby.slug}`}>View Pool</Link>
+              <Link href={`/baby/${baby.slug}`}>View Pool</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View Guesses</DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href={`/baby/${baby.slug}/guesses`}>View Guesses</Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      )
+      );
     },
   },
-]
+];

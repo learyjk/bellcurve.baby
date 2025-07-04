@@ -214,9 +214,6 @@ export function GaussianCurve({
             ${userPrice.toFixed(2)}
           </span>
         </div>
-        <div className="text-xs mt-1">
-          Peak at {mean} days = ${maxPrice.toFixed(2)}
-        </div>
       </div>
     </div>
   );

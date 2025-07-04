@@ -1,3 +1,4 @@
+"use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { Tables } from "@/database.types";
 

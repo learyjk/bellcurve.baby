@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { Tables } from "@/database.types";
 import { GuessSliders } from "@/components/ui/baby/guess-sliders";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/app/baby/data-table";
-import { betColumns } from "./bet-columns";
+import { betColumns } from "./columns";
 import { getBetPrice } from "@/lib/helpers/pricing";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
@@ -18,6 +19,19 @@ export function BabyPoolClient({
   pool: Tables<"pools">;
   bets: Tables<"bets">[];
 }) {
+  const [nickname, setNickname] = useState<string>("");
+  useEffect(() => {
+    async function fetchUserName() {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user && user.user_metadata?.name) {
+        setNickname(user.user_metadata.name);
+      }
+    }
+    fetchUserName();
+  }, []);
   const stripePromise = loadStripe(
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
   );
@@ -55,6 +69,7 @@ export function BabyPoolClient({
         guessWeight: weightGuess,
         price: totalPrice,
         babyName: pool.baby_name || "the baby",
+        nickname,
       });
 
       if (result.error) {
@@ -80,7 +95,7 @@ export function BabyPoolClient({
   });
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div>
       <div className="mb-8">
         <GuessSliders
           birthDateDeviation={birthDateDeviation}

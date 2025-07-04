@@ -2,7 +2,6 @@
 import { Slider } from "@/components/ui/slider";
 import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
 import { Tables } from "@/database.types";
-import { getBetComponentPrice } from "@/lib/helpers/pricing";
 
 export function GuessSliders({
   birthDateDeviation,
@@ -29,22 +28,6 @@ export function GuessSliders({
   // Each component gets half the price range
   const minComponentPrice = minBetPrice / 2;
   const maxComponentPrice = maxBetPrice / 2;
-
-  const datePrice = getBetComponentPrice({
-    guess: birthDateDeviation,
-    mean: 0,
-    bound: 14,
-    minPrice: minComponentPrice,
-    maxPrice: maxComponentPrice,
-  });
-
-  const weightPrice = getBetComponentPrice({
-    guess: weightGuess,
-    mean: meanWeight,
-    bound: 2,
-    minPrice: minComponentPrice,
-    maxPrice: maxComponentPrice,
-  });
 
   const dueDate = pool?.due_date ? new Date(`${pool.due_date}T00:00:00`) : null;
 
@@ -88,9 +71,6 @@ export function GuessSliders({
               maxLabel={maxDateLabel}
             />
           </div>
-          <div className="text-center text-lg font-semibold mb-2">
-            Date Component Price: ${datePrice.toFixed(2)}
-          </div>
           <Slider
             id="birth_date_deviation"
             name="birth_date_deviation"
@@ -111,10 +91,6 @@ export function GuessSliders({
           <div className="text-sm text-center" id="birth_date_deviation_value">
             {currentGuessDateLabel}
           </div>
-          <div className="text-xs text-center mt-2 text-blue-700">
-            Date Contribution:{" "}
-            <span className="font-semibold">${datePrice.toFixed(2)}</span>
-          </div>
         </div>
         {/* Weight Guess Slider with Gaussian Curve */}
         <div className="flex-1">
@@ -131,9 +107,6 @@ export function GuessSliders({
               maxLabel={`${weightMax.toFixed(1)} lbs`}
               meanLabel={`${meanWeight.toFixed(1)} lbs`}
             />
-          </div>
-          <div className="text-center text-lg font-semibold mb-2">
-            Weight Component Price: ${weightPrice.toFixed(2)}
           </div>
           <Slider
             id="weight_guess"
@@ -155,19 +128,7 @@ export function GuessSliders({
           <div className="text-sm text-center" id="weight_guess_value">
             {weightGuess} lbs
           </div>
-          <div className="text-xs text-center mt-2 text-blue-700">
-            Weight Contribution:{" "}
-            <span className="font-semibold">${weightPrice.toFixed(2)}</span>
-          </div>
         </div>
-      </div>
-      {/* Display calculated total price */}
-      <div className="mt-8 text-center">
-        <span className="font-semibold">Min Price:</span> $
-        {minBetPrice.toFixed(2)}
-        <br />
-        <span className="font-semibold">Max Bet Price:</span> ${" "}
-        {maxBetPrice.toFixed(2)}
       </div>
     </>
   );

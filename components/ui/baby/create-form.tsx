@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { useActionState } from "react";
-import { createPool, CreatePoolState } from "@/app/baby/create/actions";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { createPool, CreatePoolState } from "@/lib/actions/create/createPool";
 
 export function CreateBabyPoolForm() {
   const initialState: CreatePoolState = { message: null, errors: {} };
