@@ -34,6 +34,12 @@ export function SignUpForm({
     setIsLoading(true);
     setError(null);
 
+    if (!name.trim()) {
+      setError("Display name is required");
+      setIsLoading(false);
+      return;
+    }
+
     if (password !== repeatPassword) {
       setError("Passwords do not match");
       setIsLoading(false);
@@ -41,6 +47,7 @@ export function SignUpForm({
     }
 
     try {
+      // Server-side: set display name in user_metadata ("data" is used for user_metadata in Supabase)
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -48,6 +55,7 @@ export function SignUpForm({
           emailRedirectTo: `${window.location.origin}/protected`,
           data: {
             name,
+            display_name: name,
           },
         },
       });
@@ -79,6 +87,7 @@ export function SignUpForm({
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  minLength={1}
                 />
               </div>
               <div className="grid gap-2">
