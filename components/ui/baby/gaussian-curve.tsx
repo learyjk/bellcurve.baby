@@ -10,6 +10,7 @@ interface GaussianCurveProps {
   max: number;
   minPrice: number;
   maxPrice: number;
+  sigma?: number;
   width?: number;
   height?: number;
   className?: string;
@@ -26,6 +27,7 @@ export function GaussianCurve({
   max,
   minPrice,
   maxPrice,
+  sigma,
   width = 300,
   height = 120,
   className = "",
@@ -47,11 +49,12 @@ export function GaussianCurve({
         bound: Math.max(Math.abs(min - mean), Math.abs(max - mean)),
         minPrice,
         maxPrice,
+        ...(sigma !== undefined ? { sigma } : {}),
       });
       points.push({ x, y });
     }
     return points;
-  }, [min, max, mean, minPrice, maxPrice]);
+  }, [min, max, mean, minPrice, maxPrice, sigma]);
 
   const userPrice = getBetComponentPrice({
     guess: currentGuess,
@@ -59,6 +62,7 @@ export function GaussianCurve({
     bound: Math.max(Math.abs(min - mean), Math.abs(max - mean)),
     minPrice,
     maxPrice,
+    ...(sigma !== undefined ? { sigma } : {}),
   });
 
   const curvePath = useMemo(() => {

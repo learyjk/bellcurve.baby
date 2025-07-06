@@ -1,5 +1,6 @@
 "use server";
 import { TablesInsert } from "@/database.types";
+import { pricingModelSigmas, PricingModel } from "@/lib/helpers/pricingModels";
 import { createClient } from "@/lib/supabase/server";
 
 export type CreatePoolState = {
@@ -16,7 +17,7 @@ export async function createPool(
   const slug = formData.get("slug") as string;
   const price_floor = parseFloat(formData.get("price_floor") as string);
   const price_ceiling = parseFloat(formData.get("price_ceiling") as string);
-  const sigma_days = parseFloat(formData.get("sigma_days") as string);
+  const pricingModel = formData.get("pricingModel") as PricingModel | undefined;
 
   const supabase = await createClient();
 
@@ -64,6 +65,10 @@ export async function createPool(
     };
   }
 
+  // Set sigma values based on pricingModel
+  const { dateSigma: sigma_days, weightSigma: sigma_weight } =
+    pricingModelSigmas[pricingModel ?? "standard"];
+
   const poolData: TablesInsert<"pools"> = {
     baby_name,
     due_date,
@@ -72,9 +77,8 @@ export async function createPool(
     price_floor,
     price_ceiling,
     sigma_days,
-    // Set reasonable defaults for weight distribution
     mu_weight: 7.6, // Average baby weight in lbs
-    sigma_weight: 0.75, // Standard deviation for weight
+    sigma_weight,
   };
   const { error } = await supabase.from("pools").insert(poolData);
 
