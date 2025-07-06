@@ -21,6 +21,7 @@ interface BetComponentPriceInput {
   bound: number;
   minPrice: number;
   maxPrice: number;
+  sigma?: number;
   cutoff?: number;
 }
 
@@ -32,12 +33,12 @@ interface BetComponentPriceInput {
  * @returns The calculated price for the component.
  */
 export function getBetComponentPrice(input: BetComponentPriceInput): number {
-  const { guess, mean, bound, minPrice, maxPrice, cutoff = 0.01 } = input;
+  const { guess, mean, bound, minPrice, maxPrice, sigma, cutoff = 0.01 } = input;
 
-  const sigma = calculateSigma(bound, cutoff);
+  const effectiveSigma = sigma !== undefined ? sigma : calculateSigma(bound, cutoff);
 
-  const expExtreme = Math.exp(-0.5 * Math.pow(bound / sigma, 2));
-  const expGuess = Math.exp(-0.5 * Math.pow((guess - mean) / sigma, 2));
+  const expExtreme = Math.exp(-0.5 * Math.pow(bound / effectiveSigma, 2));
+  const expGuess = Math.exp(-0.5 * Math.pow((guess - mean) / effectiveSigma, 2));
 
   const normalizedGaussian = (expGuess - expExtreme) / (1 - expExtreme);
 
@@ -50,6 +51,7 @@ interface BetPriceInput {
   pool: Tables<"pools">;
   birthDateDeviation: number;
   weightGuess: number;
+  pricingModel?: 'aggressive' | 'standard' | 'chill';
 }
 
 /**
@@ -63,7 +65,7 @@ export function getBetPrice(input: BetPriceInput): {
   datePrice: number;
   weightPrice: number;
 } {
-  const { pool, birthDateDeviation, weightGuess } = input;
+  const { pool, birthDateDeviation, weightGuess, pricingModel = 'standard' } = input;
 
   const minBetPrice = pool.price_floor ?? 5;
   const maxBetPrice = pool.price_ceiling ?? 50;
@@ -72,12 +74,32 @@ export function getBetPrice(input: BetPriceInput): {
   const minComponentPrice = minBetPrice / 2;
   const maxComponentPrice = maxBetPrice / 2;
 
+  let dateSigma: number;
+  let weightSigma: number;
+
+  switch (pricingModel) {
+    case 'aggressive':
+      dateSigma = 3;
+      weightSigma = 0.4;
+      break;
+    case 'chill':
+      dateSigma = 7;
+      weightSigma = 1.0;
+      break;
+    case 'standard':
+    default:
+      dateSigma = 5;
+      weightSigma = 0.75;
+      break;
+  }
+
   const datePrice = getBetComponentPrice({
     guess: birthDateDeviation,
     mean: 0,
     bound: 14,
     minPrice: minComponentPrice,
     maxPrice: maxComponentPrice,
+    sigma: dateSigma,
   });
 
   const weightPrice = getBetComponentPrice({
@@ -86,6 +108,7 @@ export function getBetPrice(input: BetPriceInput): {
     bound: 2,
     minPrice: minComponentPrice,
     maxPrice: maxComponentPrice,
+    sigma: weightSigma,
   });
 
   return {
