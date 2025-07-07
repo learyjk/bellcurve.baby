@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Tables } from "@/database.types";
 import { notFound } from "next/navigation";
-import { BabyPoolClient } from "./client";
+import { BabyPoolClient } from "@/components/ui/baby/BabyPoolClient";
 import { getBetsForPool } from "@/lib/data/bets/getBetsForPool";
 
 export default async function BabyPoolPage({
@@ -19,7 +19,7 @@ export default async function BabyPoolPage({
     .single();
 
   if (error || !data) {
-    notFound();
+    return notFound();
   }
 
   const pool = data as Tables<"pools">;

@@ -6,7 +6,7 @@ import { Tables } from "@/database.types";
 import { GuessSliders } from "@/components/ui/baby/guess-sliders";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/app/baby/data-table";
-import { betColumns } from "./columns";
+import { betColumns } from "@/app/baby/[slug]/columns";
 import { getBetPrice } from "@/lib/helpers/pricing";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
@@ -26,8 +26,8 @@ export function BabyPoolClient({
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (user && user.user_metadata?.name) {
-        setNickname(user.user_metadata.name);
+      if (user && user.user_metadata?.display_name) {
+        setNickname(user.user_metadata.display_name);
       }
     }
     fetchUserName();
