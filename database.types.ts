@@ -21,7 +21,7 @@ export type Database = {
           guessed_birth_date: string
           guessed_weight: number
           id: string
-          nickname: string | null
+          name: string | null
           payment_id: string | null
           payment_status: string | null
           pool_id: string
@@ -33,7 +33,7 @@ export type Database = {
           guessed_birth_date: string
           guessed_weight: number
           id?: string
-          nickname?: string | null
+          name?: string | null
           payment_id?: string | null
           payment_status?: string | null
           pool_id: string
@@ -45,7 +45,7 @@ export type Database = {
           guessed_birth_date?: string
           guessed_weight?: number
           id?: string
-          nickname?: string | null
+          name?: string | null
           payment_id?: string | null
           payment_status?: string | null
           pool_id?: string

@@ -7,7 +7,7 @@ import BetScatterPlot, {
 } from "@/components/baby/bet-scatter-plot";
 
 type RankedBet = {
-  nickname: string;
+  name: string;
   guessed_birth_date: string;
   guessed_weight: number;
   distance: number;
@@ -19,7 +19,7 @@ export function LiveRankingsTable({
   actualBirthWeight,
 }: {
   bets: Array<{
-    nickname: string;
+    name: string;
     guessed_birth_date: string;
     guessed_weight: number;
   }>;
@@ -46,7 +46,7 @@ export function LiveRankingsTable({
           Math.pow(dateDiffDays, 2) + Math.pow(weightDiff, 2)
         );
         return {
-          nickname: bet.nickname || "Anonymous",
+          name: bet.name || "Anonymous",
           guessed_birth_date: bet.guessed_birth_date,
           guessed_weight: bet.guessed_weight,
           distance,
@@ -56,7 +56,7 @@ export function LiveRankingsTable({
   }, [bets, actualBirthDate, actualBirthWeight]);
 
   const columns: ColumnDef<RankedBet>[] = [
-    { accessorKey: "nickname", header: "Nickname" },
+    { accessorKey: "name", header: "Name" },
     {
       accessorKey: "guessed_birth_date",
       header: "Guessed Date",
@@ -85,7 +85,7 @@ export function LiveRankingsTable({
         <BetScatterPlot
           guesses={
             ranked.map((r) => ({
-              nickname: r.nickname,
+              name: r.name,
               guessed_birth_date: r.guessed_birth_date,
               guessed_weight: r.guessed_weight,
               distance: r.distance,

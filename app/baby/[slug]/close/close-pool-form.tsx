@@ -27,7 +27,7 @@ export default function ClosePoolForm({
   }, [state]);
 
   const safeBets = bets.map((bet) => ({
-    nickname: bet.nickname || "Anonymous",
+    name: bet.name || "Anonymous",
     guessed_birth_date: bet.guessed_birth_date,
     guessed_weight: bet.guessed_weight,
   }));

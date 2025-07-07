@@ -11,7 +11,7 @@ import {
 } from "recharts";
 
 export interface Guess {
-  nickname: string;
+  name: string;
   guessed_birth_date: string;
   guessed_weight: number;
   distance: number;
@@ -38,7 +38,7 @@ const BetScatterPlot: React.FC<BetScatterPlotProps> = ({ guesses, actual }) => {
     return {
       x: guessDate,
       y: guess.guessed_weight,
-      nickname: guess.nickname,
+      name: guess.name,
       rank: index + 1,
       distance: guess.distance,
       displayDate: guess.guessed_birth_date,
@@ -82,7 +82,7 @@ const BetScatterPlot: React.FC<BetScatterPlotProps> = ({ guesses, actual }) => {
   }
   const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
-      const { nickname, displayDate, displayWeight, rank } = payload[0].payload;
+      const { name, displayDate, displayWeight, rank } = payload[0].payload;
       return (
         <div
           style={{
@@ -92,7 +92,7 @@ const BetScatterPlot: React.FC<BetScatterPlotProps> = ({ guesses, actual }) => {
           }}
         >
           <div>
-            <strong>{nickname}</strong> (Rank #{rank})
+            <strong>{name}</strong> (Rank #{rank})
           </div>
           <div>Date: {new Date(displayDate).toLocaleDateString()}</div>
           <div>Weight: {displayWeight} lbs</div>

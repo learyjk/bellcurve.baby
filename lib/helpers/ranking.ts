@@ -1,5 +1,5 @@
 export interface Guess {
-  nickname: string;
+  name: string;
   guessDate: string;
   guessWeight: number;
   bet_id: string;
@@ -14,7 +14,7 @@ export function rankBetsByAccuracy(
   guesses: Guess[],
   actual: ActualOutcome
 ): {
-  nickname: string;
+  name: string;
   guessDate: string;
   guessWeight: number;
   distance: number;
@@ -35,7 +35,7 @@ export function rankBetsByAccuracy(
       );
 
       return {
-        nickname: guess.nickname,
+        name: guess.name,
         guessDate: guess.guessDate,
         guessWeight: guess.guessWeight,
         distance: distance,

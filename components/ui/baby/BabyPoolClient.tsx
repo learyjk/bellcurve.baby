@@ -19,7 +19,7 @@ export function BabyPoolClient({
   pool: Tables<"pools">;
   bets: Tables<"bets">[];
 }) {
-  const [nickname, setNickname] = useState<string>("");
+  const [name, setName] = useState<string>("");
   useEffect(() => {
     async function fetchUserName() {
       const supabase = createClient();
@@ -27,7 +27,7 @@ export function BabyPoolClient({
         data: { user },
       } = await supabase.auth.getUser();
       if (user && user.user_metadata?.display_name) {
-        setNickname(user.user_metadata.display_name);
+        setName(user.user_metadata.display_name);
       }
     }
     fetchUserName();
@@ -38,6 +38,7 @@ export function BabyPoolClient({
   const [birthDateDeviation, setBirthDateDeviation] = useState(0);
   const [weightGuess, setWeightGuess] = useState(pool.mu_weight ?? 7.6);
   const [isPending, startTransition] = useTransition();
+  const [loadingStep, setLoadingStep] = useState<string | null>(null);
 
   const handleGuessChange = (values: {
     birthDateDeviation?: number;
@@ -53,8 +54,10 @@ export function BabyPoolClient({
 
   const handleBet = async () => {
     startTransition(async () => {
+      setLoadingStep("Creating checkout session...");
       if (!pool.due_date) {
         toast.error("Error: Due date is not set for this pool.");
+        setLoadingStep(null);
         return;
       }
 
@@ -69,21 +72,27 @@ export function BabyPoolClient({
         guessWeight: weightGuess,
         price: totalPrice,
         babyName: pool.baby_name || "the baby",
-        nickname,
+        name,
       });
 
       if (result.error) {
         toast.error(`Error: ${result.error}`);
+        setLoadingStep(null);
         return;
       }
 
+      setLoadingStep("Loading payment gateway...");
       if (result.sessionId) {
         const stripe = await stripePromise;
         if (stripe) {
+          setLoadingStep("Redirecting to Stripe...");
           await stripe.redirectToCheckout({ sessionId: result.sessionId });
         } else {
           toast.error("Error: Stripe.js has not loaded yet.");
+          setLoadingStep(null);
         }
+      } else {
+        setLoadingStep(null);
       }
     });
   };
@@ -126,17 +135,49 @@ export function BabyPoolClient({
         <Button
           onClick={handleBet}
           disabled={isPending}
-          className="w-full h-12 text-lg"
+          className="w-full h-12 text-lg flex items-center justify-center"
         >
-          {isPending
-            ? "Redirecting to payment..."
-            : `Place Bet for $${totalPrice.toFixed(2)}`}
+          {isPending ? (
+            <>
+              <svg
+                className="animate-spin mr-2 h-5 w-5 text-blue-600 inline-block"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8z"
+                ></path>
+              </svg>
+              {loadingStep || "Processing..."}
+            </>
+          ) : (
+            `Place Bet for $${totalPrice.toFixed(2)}`
+          )}
         </Button>
       </div>
 
       <div className="mt-12">
-        <h2 className="text-xl font-bold mb-4 text-center">Previous Bets</h2>
-        <DataTable columns={betColumns} data={bets} />
+        <h2 className="text-xl font-bold mb-4 text-center">
+          Previous Donations
+        </h2>
+        {bets.length === 0 ? (
+          <div className="text-center text-gray-500 py-8 text-lg">
+            No results - be the first!
+          </div>
+        ) : (
+          <DataTable columns={betColumns} data={bets} />
+        )}
       </div>
     </div>
   );

@@ -56,7 +56,7 @@ export async function closePool(
   }
 
   const guesses = bets.map((bet) => ({
-    nickname: bet.nickname || "",
+    name: bet.name || "",
     guessDate: bet.guessed_birth_date,
     guessWeight: bet.guessed_weight,
     bet_id: bet.id,

@@ -2,7 +2,6 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import HeroSectionSimpleCentred from "@/components/blocks/hero-sections/simple-centred";
 
 import HowItWorks from "@/components/blocks/hero-sections/how_it_works_component";
-import GuessScatterPlotDemo from "@/components/ui/baby/guess-scatter-plot-demo";
 
 export default function Home() {
   return (

@@ -13,7 +13,7 @@ export async function createCheckoutSession(data: {
   guessWeight: number;
   price: number;
   babyName: string;
-  nickname?: string;
+  name?: string;
 }) {
   const supabase = await createClient();
 
@@ -58,7 +58,7 @@ export async function createCheckoutSession(data: {
         guessDate: data.guessDate,
         guessWeight: data.guessWeight.toString(),
         price: data.price.toString(),
-        nickname: data.nickname || user.user_metadata?.name || "",
+        name: data.name || user.user_metadata?.name || "",
       },
     });
 
