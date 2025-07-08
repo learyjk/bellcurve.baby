@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    const { poolId, userId, guessDate, guessWeight, price } =
+    const { poolId, userId, guessDate, guessWeight, price, name } =
       session.metadata || {};
 
     if (!poolId || !userId || !guessDate || !guessWeight || !price) {
@@ -76,6 +76,7 @@ export async function POST(req: NextRequest) {
         guessed_weight: Number(guessWeight),
         calculated_price: Number(price),
         payment_status: "paid",
+        name: name || null,
       });
 
       console.log(

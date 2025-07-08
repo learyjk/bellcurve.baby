@@ -29,6 +29,10 @@ export function GuessSliders({
   const minComponentPrice = minBetPrice / 2;
   const maxComponentPrice = maxBetPrice / 2;
 
+  // Sigma values from the pool (fallback to defaults if missing)
+  const dateSigma = pool?.sigma_days ?? 4;
+  const weightSigma = pool?.sigma_weight ?? 0.6;
+
   const dueDate = pool?.due_date ? new Date(`${pool.due_date}T00:00:00`) : null;
 
   const formatDate = (date: Date | null) => {
@@ -69,6 +73,7 @@ export function GuessSliders({
               minLabel={minDateLabel}
               meanLabel={meanDateLabel}
               maxLabel={maxDateLabel}
+              sigma={dateSigma}
             />
           </div>
           <Slider
@@ -106,6 +111,7 @@ export function GuessSliders({
               minLabel={`${weightMin.toFixed(1)} lbs`}
               maxLabel={`${weightMax.toFixed(1)} lbs`}
               meanLabel={`${meanWeight.toFixed(1)} lbs`}
+              sigma={weightSigma}
             />
           </div>
           <Slider

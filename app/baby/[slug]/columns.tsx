@@ -4,9 +4,9 @@ import { Tables } from "@/database.types";
 
 export const betColumns: ColumnDef<Tables<"bets">>[] = [
   {
-    accessorKey: "nickname",
-    header: "Nickname",
-    cell: ({ row }) => row.getValue("nickname") || "Anonymous",
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ row }) => row.getValue("name") || "Anonymous",
   },
   {
     accessorKey: "guessed_birth_date",

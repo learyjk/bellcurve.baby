@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import {
   ColumnDef,
@@ -81,7 +82,12 @@ export function DataTable<TData, TValue>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                <Link
+                  href="/baby/create"
+                  className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                >
+                  Create your first baby pool
+                </Link>
               </TableCell>
             </TableRow>
           )}

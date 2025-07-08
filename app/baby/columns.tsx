@@ -46,9 +46,12 @@ export const columns: ColumnDef<Tables<"pools">>[] = [
             <DropdownMenuItem asChild>
               <Link href={`/baby/${baby.slug}`}>View Pool</Link>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Link href={`/baby/${baby.slug}/guesses`}>View Guesses</Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <Link href={`/baby/${baby.slug}/close`}>Close Pool</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

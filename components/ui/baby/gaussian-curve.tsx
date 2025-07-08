@@ -10,6 +10,7 @@ interface GaussianCurveProps {
   max: number;
   minPrice: number;
   maxPrice: number;
+  sigma?: number;
   width?: number;
   height?: number;
   className?: string;
@@ -17,6 +18,7 @@ interface GaussianCurveProps {
   minLabel?: string;
   meanLabel?: string;
   maxLabel?: string;
+  showGrid?: boolean;
 }
 
 export function GaussianCurve({
@@ -26,13 +28,15 @@ export function GaussianCurve({
   max,
   minPrice,
   maxPrice,
+  sigma,
   width = 300,
-  height = 120,
+  height = 140,
   className = "",
   title,
   minLabel,
   meanLabel,
   maxLabel,
+  showGrid = true,
 }: GaussianCurveProps) {
   const yAxisLabelWidth = 40; // Space for Y-axis labels
 
@@ -47,11 +51,12 @@ export function GaussianCurve({
         bound: Math.max(Math.abs(min - mean), Math.abs(max - mean)),
         minPrice,
         maxPrice,
+        ...(sigma !== undefined ? { sigma } : {}),
       });
       points.push({ x, y });
     }
     return points;
-  }, [min, max, mean, minPrice, maxPrice]);
+  }, [min, max, mean, minPrice, maxPrice, sigma]);
 
   const userPrice = getBetComponentPrice({
     guess: currentGuess,
@@ -59,14 +64,21 @@ export function GaussianCurve({
     bound: Math.max(Math.abs(min - mean), Math.abs(max - mean)),
     minPrice,
     maxPrice,
+    ...(sigma !== undefined ? { sigma } : {}),
   });
+
+  // Centralize the bottom offset for all elements that align to the graph base
+  const graphBottomOffset = 16; // 10 (original) + 6 (extra nudge)
 
   const curvePath = useMemo(() => {
     if (curveData.length === 0) return "";
 
     const xScale = (x: number) => ((x - min) / (max - min)) * width;
+    // Use the shared graphBottomOffset
     const yScale = (y: number) =>
-      height - ((y - minPrice) / (maxPrice - minPrice)) * height * 0.8 - 10;
+      height -
+      ((y - minPrice) / (maxPrice - minPrice)) * height * 0.8 -
+      graphBottomOffset;
 
     let path = `M ${xScale(curveData[0].x)} ${yScale(curveData[0].y)}`;
 
@@ -76,13 +88,23 @@ export function GaussianCurve({
     }
 
     return path;
-  }, [curveData, min, max, width, height, minPrice, maxPrice]);
+  }, [
+    curveData,
+    min,
+    max,
+    width,
+    height,
+    minPrice,
+    maxPrice,
+    graphBottomOffset,
+  ]);
 
   const userGuessX = ((currentGuess - min) / (max - min)) * width;
+  // Use the shared graphBottomOffset
   const userGuessY =
     height -
     ((userPrice - minPrice) / (maxPrice - minPrice)) * height * 0.8 -
-    10;
+    graphBottomOffset;
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
@@ -96,7 +118,7 @@ export function GaussianCurve({
         {/* Y-axis labels */}
         <text
           x={yAxisLabelWidth - 4}
-          y={height - 10}
+          y={height - graphBottomOffset}
           fontSize="10"
           fill="#666"
           textAnchor="end"
@@ -114,38 +136,54 @@ export function GaussianCurve({
         </text>
 
         <g transform={`translate(${yAxisLabelWidth}, 0)`}>
-          {/* Grid lines */}
-          <defs>
-            <pattern
-              id="grid"
-              width="20"
-              height="20"
-              patternUnits="userSpaceOnUse"
-            >
-              <path
-                d="M 20 0 L 0 0 0 20"
-                fill="none"
-                stroke="#e5e5e5"
-                strokeWidth="0.5"
-              />
-            </pattern>
-          </defs>
-          <rect width={width} height="100%" fill="url(#grid)" />
+          {/* Grid lines (optional) */}
+          {showGrid && (
+            <>
+              <defs>
+                <pattern
+                  id="grid"
+                  width="20"
+                  height="20"
+                  patternUnits="userSpaceOnUse"
+                >
+                  <path
+                    d="M 20 0 L 0 0 0 20"
+                    fill="none"
+                    stroke="#e5e5e5"
+                    strokeWidth="0.5"
+                  />
+                </pattern>
+              </defs>
+              <rect width={width} height="100%" fill="url(#grid)" />
+            </>
+          )}
 
           {/* X-axis labels */}
-          <text x={0} y={height} fontSize="10" fill="#666" textAnchor="start">
+          <text
+            x={0}
+            y={height - 4}
+            fontSize="10"
+            fill="#666"
+            textAnchor="start"
+          >
             {minLabel ?? min}
           </text>
           <text
             x={width / 2}
-            y={height}
+            y={height - 4}
             fontSize="10"
             fill="#666"
             textAnchor="middle"
           >
             {meanLabel ?? mean}
           </text>
-          <text x={width} y={height} fontSize="10" fill="#666" textAnchor="end">
+          <text
+            x={width}
+            y={height - 4}
+            fontSize="10"
+            fill="#666"
+            textAnchor="end"
+          >
             {maxLabel ?? max}
           </text>
 
@@ -160,9 +198,9 @@ export function GaussianCurve({
 
           {/* Fill area under curve */}
           <path
-            d={`${curvePath} L ${userGuessX} ${height - 10} L ${userGuessX} ${
-              height - 10
-            } Z`}
+            d={`${curvePath} L ${userGuessX} ${
+              height - graphBottomOffset
+            } L ${userGuessX} ${height - graphBottomOffset} Z`}
             fill="#3b82f6"
             fillOpacity="0.1"
           />
@@ -174,7 +212,7 @@ export function GaussianCurve({
               x1={userGuessX}
               y1={userGuessY}
               x2={userGuessX}
-              y2={height - 10}
+              y2={height - graphBottomOffset}
               stroke="#ef4444"
               strokeWidth="2"
               strokeDasharray="4,2"
