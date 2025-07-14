@@ -159,7 +159,7 @@ const BetScatterPlot: React.FC<BetScatterPlotProps> = ({ guesses, actual }) => {
             <ActualShape {...(props as { cx: number; cy: number })} />
           )}
         />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip content={<CustomTooltip />} isAnimationActive={false} />
       </ScatterChart>
     </ResponsiveContainer>
   );
