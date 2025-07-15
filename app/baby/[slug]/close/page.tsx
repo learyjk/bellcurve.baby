@@ -7,9 +7,9 @@ import { getBetsForPool } from "@/lib/data/bets/getBetsForPool";
 export default async function ClosePoolPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const { slug } = params;
+  const { slug } = await params;
   const supabase = await createClient();
   const {
     data: { user },
