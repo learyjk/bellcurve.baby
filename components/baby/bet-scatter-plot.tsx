@@ -52,6 +52,12 @@ const BetScatterPlot: React.FC<BetScatterPlotProps> = ({ guesses, actual }) => {
   };
 
   // Custom shape for guesses, highlight top 3
+  interface CustomScatterShapeProps {
+    cx: number;
+    cy: number;
+    payload: (typeof data)[number];
+    index?: number; // Recharts passes index at runtime
+  }
  const CustomScatterShape = ({ cx, cy, payload }: CustomScatterShapeProps) => {
   if (payload.rank === 1) {
     // Gold (winner)
