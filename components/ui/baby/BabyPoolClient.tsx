@@ -109,8 +109,8 @@ export function BabyPoolClient({
   const { totalPrice, datePrice, weightPrice } = getBetPrice({
     pool,
     birthDateDeviation,
-    // For pricing, convert ounces to decimal lbs
-    weightGuess: weightGuessOunces / 16,
+    // For pricing, use ounces directly
+    weightGuess: weightGuessOunces,
   });
 
   return (

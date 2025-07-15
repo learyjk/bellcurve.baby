@@ -68,51 +68,50 @@ export type BetPriceInput = {
 
 /**
  * Calculates the total price of a bet by summing the prices of its components.
- * Each component is calculated using a normalized Gaussian.
- * @param input The input parameters for the bet price calculation.
- * @returns The total calculated price for the bet.
  */
-export function getBetPrice(input: BetPriceInput): {
-  totalPrice: number;
-  datePrice: number;
-  weightPrice: number;
-} {
-  const {
-    pool,
-    birthDateDeviation,
-    weightGuess,
-    pricingModel = "standard",
-  } = input;
+export function getBetPrice(input: BetPriceInput) {
+  const { pool, birthDateDeviation, weightGuess } = input;
 
-  const minBetPrice = pool.price_floor ?? 5;
-  const maxBetPrice = pool.price_ceiling ?? 50;
-  const meanWeight = pool.mu_weight ?? 7.6;
+  // Ensure pool properties have fallbacks
+  let mu_weight = pool.mu_weight ?? 121.6; // 7.6 lbs in oz
+  const price_floor = pool.price_floor ?? 5;
+  const price_ceiling = pool.price_ceiling ?? 50;
+  const sigma_days = pool.sigma_days ?? 4;
+  let sigma_weight = pool.sigma_weight ?? 0.6; // in lbs
 
-  const minComponentPrice = minBetPrice / 2;
-  const maxComponentPrice = maxBetPrice / 2;
+  // If mu_weight is in lbs, convert to oz
+  if (mu_weight < 30) {
+    mu_weight = mu_weight * 16;
+  }
 
-  const { dateSigma, weightSigma } = pricingModelSigmas[pricingModel];
+  // Convert sigma_weight from lbs to oz
+  sigma_weight = sigma_weight * 16;
+
+  const minComponentPrice = price_floor / 2;
+  const maxComponentPrice = price_ceiling / 2;
 
   const datePrice = getBetComponentPrice({
     guess: birthDateDeviation,
     mean: 0,
-    bound: 14,
+    bound: 14, // 2 weeks
     minPrice: minComponentPrice,
     maxPrice: maxComponentPrice,
-    sigma: dateSigma,
+    sigma: sigma_days,
   });
 
   const weightPrice = getBetComponentPrice({
-    guess: weightGuess,
-    mean: meanWeight,
-    bound: 2,
+    guess: weightGuess, // already in ounces
+    mean: mu_weight, // already in ounces
+    bound: 32, // 2 lbs in ounces
     minPrice: minComponentPrice,
     maxPrice: maxComponentPrice,
-    sigma: weightSigma,
+    sigma: sigma_weight, // already in ounces
   });
 
+  const totalPrice = datePrice + weightPrice;
+
   return {
-    totalPrice: datePrice + weightPrice,
+    totalPrice,
     datePrice,
     weightPrice,
   };

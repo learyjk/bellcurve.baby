@@ -25,7 +25,6 @@ export function GuessSliders({
   }
   const meanWeightLbs = Math.floor(meanWeightOz / 16);
   const meanWeightRemOz = Math.round(meanWeightOz % 16);
-  const meanWeight = meanWeightOz / 16;
   const weightMinOz = Math.floor(meanWeightOz - 32); // +/- 2 lbs
   const weightMaxOz = Math.ceil(meanWeightOz + 32);
   const weightMinLbs = Math.floor(weightMinOz / 16);
@@ -118,17 +117,17 @@ export function GuessSliders({
         <div className="flex-1">
           <div className="mb-4 flex justify-center">
             <GaussianCurve
-              currentGuess={weightGuessOunces / 16}
-              mean={meanWeight}
-              min={weightMinOz / 16}
-              max={weightMaxOz / 16}
+              currentGuess={weightGuessOunces}
+              mean={meanWeightOz}
+              min={weightMinOz}
+              max={weightMaxOz}
               minPrice={minComponentPrice}
               maxPrice={maxComponentPrice}
               title="Birth Weight Probability Distribution"
               minLabel={`${weightMinLbs} lbs ${weightMinRemOz} oz`}
               maxLabel={`${weightMaxLbs} lbs ${weightMaxRemOz} oz`}
               meanLabel={`${meanWeightLbs} lbs ${meanWeightRemOz} oz`}
-              sigma={weightSigma}
+              sigma={weightSigma * 16} // convert sigma from lbs to oz
             />
           </div>
           <Slider
