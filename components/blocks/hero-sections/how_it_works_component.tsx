@@ -23,7 +23,7 @@ export default function HowItWorks() {
             </p>
             <p>
               But if you guess way out in left field—like the baby will be born
-              on Christmas or weigh 12 pounds—your guess gets cheaper because
+              3 weeks late or weigh 12 pounds—your guess gets cheaper because
               you&apos;re taking a bigger risk.
             </p>
             <p>
