@@ -2,12 +2,12 @@
 import { TablesInsert } from "@/database.types";
 import { pricingModelSigmas, PricingModel } from "@/lib/helpers/pricingModels";
 import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export type CreatePoolState = {
   message: string | null;
   errors?: Record<string, string[]>;
-  success?: boolean;
-  slug?: string;
 };
 
 export async function createPool(
@@ -38,7 +38,6 @@ export async function createPool(
     return {
       message: "You must be logged in to create a pool.",
       errors: {},
-      success: false,
     };
   }
   const user_id = user.id;
@@ -47,7 +46,6 @@ export async function createPool(
     return {
       message: "All fields are required.",
       errors: {},
-      success: false,
     };
   }
 
@@ -57,7 +55,6 @@ export async function createPool(
     return {
       message: "Price floor and price ceiling are required.",
       errors: {},
-      success: false,
     };
   }
 
@@ -65,7 +62,6 @@ export async function createPool(
     return {
       message: "Maximum price must be greater than minimum price.",
       errors: {},
-      success: false,
     };
   }
 
@@ -73,7 +69,6 @@ export async function createPool(
     return {
       message: "Prices must be at least $0.01.",
       errors: {},
-      success: false,
     };
   }
 
@@ -83,7 +78,7 @@ export async function createPool(
 
   const poolData: TablesInsert<"pools"> = {
     baby_name,
-    due_date,
+    mu_due_date: due_date,
     slug,
     user_id,
     price_floor,
@@ -92,7 +87,7 @@ export async function createPool(
     mu_weight: mu_weight_ounces, // store as ounces
     sigma_weight,
   };
-  const { error } = await supabase
+  const { data: newPool, error } = await supabase
     .from("pools")
     .insert(poolData)
     .select()
@@ -102,14 +97,16 @@ export async function createPool(
     return {
       message: error.message,
       errors: {},
-      success: false,
     };
+  }
+
+  if (newPool) {
+    revalidatePath(`/baby/${newPool.slug}`);
+    redirect(`/baby/${newPool.slug}`);
   }
 
   return {
     message: null,
     errors: {},
-    success: true,
-    slug,
   };
 }

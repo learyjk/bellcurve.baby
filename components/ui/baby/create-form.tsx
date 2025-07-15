@@ -6,7 +6,6 @@ import { CardContent, CardFooter } from "@/components/ui/card";
 import { useActionState } from "react";
 import { toast } from "sonner";
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
 import clsx from "clsx";
 // Helper to format slug
 function formatSlug(str: string) {
@@ -149,10 +148,8 @@ import { createPool, CreatePoolState } from "@/lib/actions/create/createPool";
 import { pricingModelSigmas } from "@/lib/helpers/pricingModels";
 
 export function CreateBabyPoolForm() {
-  const router = useRouter();
   const initialState: CreatePoolState = { message: null, errors: {} };
   const [state, formAction] = useActionState(createPool, initialState);
-  const [submitted, setSubmitted] = useState(false);
   const [pricingModel, setPricingModel] =
     useState<keyof typeof pricingModelSigmas>("standard");
   // Example values for preview
@@ -161,30 +158,10 @@ export function CreateBabyPoolForm() {
   const [muDate] = useState(0); // 0 deviation from due date (in days)
 
   useEffect(() => {
-    if (!submitted) return;
-    if (state.success && state.slug) {
-      toast.success("Pool created successfully!");
-      // Redirect to the new pool page after a short delay for the toast
-      setTimeout(() => {
-        router.push(`/baby/${state.slug}`);
-      }, 800);
-    } else if (state.message) {
+    if (state?.message) {
       toast.error(state.message);
     }
-    setSubmitted(false); // reset after handling
-  }, [state, submitted, router]);
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    // We are using useActionState, so we don't need to prevent default.
-    // event.preventDefault();
-    setSubmitted(true);
-    // Create a FormData object from the form
-    const formData = new FormData(event.currentTarget);
-    // The formAction will be called automatically by the form's onSubmit
-    // but we can call it manually if we need to.
-    // In this case, we let the form handle it.
-    // formAction(formData);
-  }
+  }, [state]);
 
   const [minPrice, setMinPrice] = useState(5);
   const [maxPrice, setMaxPrice] = useState(50);
@@ -262,16 +239,7 @@ export function CreateBabyPoolForm() {
   };
 
   return (
-    <form
-      action={formAction}
-      onSubmit={(e) => {
-        // We need to get the form data and pass it to the action.
-        // However, because we are using a native form element,
-        // we can just let the browser handle it.
-        // The `handleSubmit` function is now mostly for setting the `submitted` state.
-        setSubmitted(true);
-      }}
-    >
+    <form action={formAction}>
       <CardContent className="p-8">
         <div className="space-y-6">
           <div>

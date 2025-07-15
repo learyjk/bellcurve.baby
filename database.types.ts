@@ -67,10 +67,10 @@ export type Database = {
           actual_birth_weight: number | null
           baby_name: string | null
           created_at: string | null
-          due_date: string | null
           id: string
           is_locked: boolean | null
-          mu_weight: number | null
+          mu_due_date: string | null
+          mu_weight: number
           price_ceiling: number | null
           price_floor: number | null
           sigma_days: number | null
@@ -83,10 +83,10 @@ export type Database = {
           actual_birth_weight?: number | null
           baby_name?: string | null
           created_at?: string | null
-          due_date?: string | null
           id?: string
           is_locked?: boolean | null
-          mu_weight?: number | null
+          mu_due_date?: string | null
+          mu_weight?: number
           price_ceiling?: number | null
           price_floor?: number | null
           sigma_days?: number | null
@@ -99,10 +99,10 @@ export type Database = {
           actual_birth_weight?: number | null
           baby_name?: string | null
           created_at?: string | null
-          due_date?: string | null
           id?: string
           is_locked?: boolean | null
-          mu_weight?: number | null
+          mu_due_date?: string | null
+          mu_weight?: number
           price_ceiling?: number | null
           price_floor?: number | null
           sigma_days?: number | null
