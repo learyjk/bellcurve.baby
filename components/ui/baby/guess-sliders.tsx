@@ -25,8 +25,8 @@ export function GuessSliders({
   }
   const meanWeightLbs = Math.floor(meanWeightOz / 16);
   const meanWeightRemOz = Math.round(meanWeightOz % 16);
-  const weightMinOz = Math.floor(meanWeightOz - 32); // +/- 2 lbs
-  const weightMaxOz = Math.ceil(meanWeightOz + 32);
+  const weightMinOz = Math.floor(meanWeightOz - 48); // +/- 3 lbs
+  const weightMaxOz = Math.ceil(meanWeightOz + 48);
   const weightMinLbs = Math.floor(weightMinOz / 16);
   const weightMinRemOz = Math.round(weightMinOz % 16);
   const weightMaxLbs = Math.floor(weightMaxOz / 16);
@@ -57,10 +57,10 @@ export function GuessSliders({
   };
 
   const minDate = dueDate ? new Date(dueDate.getTime()) : null;
-  if (minDate) minDate.setDate(minDate.getDate() - 14);
+  if (minDate) minDate.setDate(minDate.getDate() - 21);
 
   const maxDate = dueDate ? new Date(dueDate.getTime()) : null;
-  if (maxDate) maxDate.setDate(maxDate.getDate() + 14);
+  if (maxDate) maxDate.setDate(maxDate.getDate() + 21);
 
   const currentGuessDate = dueDate ? new Date(dueDate.getTime()) : null;
   if (currentGuessDate)
@@ -81,8 +81,8 @@ export function GuessSliders({
             <GaussianCurve
               currentGuess={birthDateDeviation}
               mean={0}
-              min={-14}
-              max={14}
+              min={-21}
+              max={21}
               minPrice={minComponentPrice}
               maxPrice={maxComponentPrice}
               title="Birth Date Probability Distribution"
@@ -96,8 +96,8 @@ export function GuessSliders({
             id="birth_date_deviation"
             name="birth_date_deviation"
             defaultValue={[birthDateDeviation]}
-            min={-14}
-            max={14}
+            min={-21}
+            max={21}
             step={1}
             className="w-full"
             onValueChange={(val) =>
