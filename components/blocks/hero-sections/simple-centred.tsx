@@ -41,7 +41,7 @@ export default function HeroSectionSimpleCentred() {
           {/* End Title */}
           <div className="mx-auto mt-5 max-w-3xl text-center">
             <p className="text-muted-foreground text-xl">
-              Join us in a delightful guessing game to celebrate the arrival of
+              Join us in a delightful probalistic guessing game to celebrate the arrival of
               our little one! Share your guesses and let&apos;s make this a
               memorable occasion together.
             </p>
