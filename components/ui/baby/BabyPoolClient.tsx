@@ -36,19 +36,30 @@ export function BabyPoolClient({
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
   );
   const [birthDateDeviation, setBirthDateDeviation] = useState(0);
-  const [weightGuess, setWeightGuess] = useState(pool.mu_weight ?? 7.6);
+  // Split initial weight into lbs/oz
+  const initialWeight = pool.mu_weight ?? 7.6;
+  const initialLbs = Math.floor(initialWeight);
+  const initialOz = Math.round((initialWeight - initialLbs) * 16);
+  const [weightGuessLbs, setWeightGuessLbs] = useState(initialLbs);
+  const [weightGuessOz, setWeightGuessOz] = useState(initialOz);
+  // Always keep ounces version for backend
+  const weightGuessOunces = weightGuessLbs * 16 + weightGuessOz;
   const [isPending, startTransition] = useTransition();
   const [loadingStep, setLoadingStep] = useState<string | null>(null);
 
   const handleGuessChange = (values: {
     birthDateDeviation?: number;
-    weightGuess?: number;
+    weightGuessLbs?: number;
+    weightGuessOz?: number;
   }) => {
     if (values.birthDateDeviation !== undefined) {
       setBirthDateDeviation(values.birthDateDeviation);
     }
-    if (values.weightGuess !== undefined) {
-      setWeightGuess(values.weightGuess);
+    if (values.weightGuessLbs !== undefined) {
+      setWeightGuessLbs(values.weightGuessLbs);
+    }
+    if (values.weightGuessOz !== undefined) {
+      setWeightGuessOz(values.weightGuessOz);
     }
   };
 
@@ -69,7 +80,7 @@ export function BabyPoolClient({
         poolId: pool.id,
         slug: pool.slug,
         guessDate: guessDate.toISOString(),
-        guessWeight: weightGuess,
+        guessWeight: weightGuessOunces,
         price: totalPrice,
         babyName: pool.baby_name || "the baby",
         name,
@@ -100,7 +111,8 @@ export function BabyPoolClient({
   const { totalPrice, datePrice, weightPrice } = getBetPrice({
     pool,
     birthDateDeviation,
-    weightGuess,
+    // For pricing, convert ounces to decimal lbs
+    weightGuess: weightGuessOunces / 16,
   });
 
   return (
@@ -108,7 +120,8 @@ export function BabyPoolClient({
       <div className="mb-8">
         <GuessSliders
           birthDateDeviation={birthDateDeviation}
-          weightGuess={weightGuess}
+          weightGuessLbs={weightGuessLbs}
+          weightGuessOz={weightGuessOz}
           onValueChange={handleGuessChange}
           pool={pool}
         />

@@ -5,21 +5,24 @@ import { Tables } from "@/database.types";
 
 export function GuessSliders({
   birthDateDeviation,
-  weightGuess,
+  weightGuessLbs,
+  weightGuessOz,
   onValueChange,
   pool,
 }: {
   birthDateDeviation: number;
-  weightGuess: number;
+  weightGuessLbs: number;
+  weightGuessOz: number;
   onValueChange: (values: {
     birthDateDeviation?: number;
-    weightGuess?: number;
+    weightGuessLbs?: number;
+    weightGuessOz?: number;
   }) => void;
   pool?: Tables<"pools">;
 }) {
   const meanWeight = pool?.mu_weight ?? 7.6;
-  const weightMin = meanWeight - 2;
-  const weightMax = meanWeight + 2;
+  const weightMinLbs = Math.floor(meanWeight - 2);
+  const weightMaxLbs = Math.ceil(meanWeight + 2);
 
   // Pricing constants from the pool
   const minBetPrice = pool?.price_floor ?? 5;
@@ -97,42 +100,75 @@ export function GuessSliders({
             {currentGuessDateLabel}
           </div>
         </div>
-        {/* Weight Guess Slider with Gaussian Curve */}
+        {/* Weight Guess Inputs for lbs and oz */}
         <div className="flex-1">
           <div className="mb-4 flex justify-center">
             <GaussianCurve
-              currentGuess={weightGuess}
+              currentGuess={weightGuessLbs + weightGuessOz / 16}
               mean={meanWeight}
-              min={weightMin}
-              max={weightMax}
+              min={weightMinLbs}
+              max={weightMaxLbs}
               minPrice={minComponentPrice}
               maxPrice={maxComponentPrice}
               title="Birth Weight Probability Distribution"
-              minLabel={`${weightMin.toFixed(1)} lbs`}
-              maxLabel={`${weightMax.toFixed(1)} lbs`}
+              minLabel={`${weightMinLbs} lbs`}
+              maxLabel={`${weightMaxLbs} lbs`}
               meanLabel={`${meanWeight.toFixed(1)} lbs`}
               sigma={weightSigma}
             />
           </div>
-          <Slider
-            id="weight_guess"
-            name="weight_guess"
-            defaultValue={[weightGuess]}
-            min={weightMin}
-            max={weightMax}
-            step={0.1}
-            className="w-full"
-            onValueChange={(val) => onValueChange({ weightGuess: val[0] })}
-          />
-          <div className="relative w-full flex justify-between text-xs text-gray-600 mt-1">
-            <span>{weightMin}</span>
-            <span className="absolute left-1/2 -translate-x-1/2 text-blue-700 font-semibold">
-              {meanWeight}
-            </span>
-            <span>{weightMax}</span>
+          <div className="flex gap-4 items-center justify-center">
+            <div>
+              <label
+                htmlFor="weight_guess_lbs"
+                className="block text-xs text-gray-600 mb-1"
+              >
+                Pounds (lbs)
+              </label>
+              <input
+                id="weight_guess_lbs"
+                type="number"
+                min={weightMinLbs}
+                max={weightMaxLbs}
+                value={weightGuessLbs}
+                onChange={(e) =>
+                  onValueChange({
+                    weightGuessLbs: Math.max(
+                      weightMinLbs,
+                      Math.min(weightMaxLbs, Number(e.target.value))
+                    ),
+                  })
+                }
+                className="w-16 px-2 py-1 border rounded text-center"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="weight_guess_oz"
+                className="block text-xs text-gray-600 mb-1"
+              >
+                Ounces (oz)
+              </label>
+              <input
+                id="weight_guess_oz"
+                type="number"
+                min={0}
+                max={15}
+                value={weightGuessOz}
+                onChange={(e) =>
+                  onValueChange({
+                    weightGuessOz: Math.max(
+                      0,
+                      Math.min(15, Number(e.target.value))
+                    ),
+                  })
+                }
+                className="w-16 px-2 py-1 border rounded text-center"
+              />
+            </div>
           </div>
-          <div className="text-sm text-center" id="weight_guess_value">
-            {weightGuess} lbs
+          <div className="text-sm text-center mt-2" id="weight_guess_value">
+            {weightGuessLbs} lbs {weightGuessOz} oz
           </div>
         </div>
       </div>

@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 export type CreatePoolState = {
   message: string | null;
   errors?: Record<string, string[]>;
+  success?: boolean;
+  slug?: string;
 };
 
 export async function createPool(
@@ -18,6 +20,11 @@ export async function createPool(
   const price_floor = parseFloat(formData.get("price_floor") as string);
   const price_ceiling = parseFloat(formData.get("price_ceiling") as string);
   const pricingModel = formData.get("pricingModel") as PricingModel | undefined;
+  // Get expected weight in ounces
+  const mu_weight_ounces = parseInt(
+    formData.get("mu_weight_ounces") as string,
+    10
+  );
 
   const supabase = await createClient();
 
@@ -31,6 +38,7 @@ export async function createPool(
     return {
       message: "You must be logged in to create a pool.",
       errors: {},
+      success: false,
     };
   }
   const user_id = user.id;
@@ -39,6 +47,7 @@ export async function createPool(
     return {
       message: "All fields are required.",
       errors: {},
+      success: false,
     };
   }
 
@@ -48,6 +57,7 @@ export async function createPool(
     return {
       message: "Price floor and price ceiling are required.",
       errors: {},
+      success: false,
     };
   }
 
@@ -55,6 +65,7 @@ export async function createPool(
     return {
       message: "Maximum price must be greater than minimum price.",
       errors: {},
+      success: false,
     };
   }
 
@@ -62,6 +73,7 @@ export async function createPool(
     return {
       message: "Prices must be at least $0.01.",
       errors: {},
+      success: false,
     };
   }
 
@@ -77,20 +89,27 @@ export async function createPool(
     price_floor,
     price_ceiling,
     sigma_days,
-    mu_weight: 7.6, // Average baby weight in lbs
+    mu_weight: mu_weight_ounces, // store as ounces
     sigma_weight,
   };
-  const { error } = await supabase.from("pools").insert(poolData);
+  const { error } = await supabase
+    .from("pools")
+    .insert(poolData)
+    .select()
+    .single();
 
   if (error) {
     return {
       message: error.message,
       errors: {},
+      success: false,
     };
   }
 
   return {
     message: null,
     errors: {},
+    success: true,
+    slug,
   };
 }
