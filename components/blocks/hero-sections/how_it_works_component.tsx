@@ -29,17 +29,13 @@ export default function HowItWorks() {
             <p>
               We cap the prices so nobody goes broke and nobody gets to play for
               free. It&apos;s like surge pricing, but for baby predictions, and
-              with actual math behind it instead of just corporate greed.
+              with actual math behind it instead of just corporate capitalism.
             </p>
             <p>
               Before the bets go live, the creators pick one of these models:
             </p>
             <div className="p-4 rounded-lg border">
               <ul className="space-y-2">
-                <li>
-                  <strong>Aggressive:</strong> Only the obvious guesses cost
-                  real money. Everything else is practically free.
-                </li>
                 <li>
                   <strong>Standard:</strong> Balanced. Close guesses cost more,
                   wild guesses cost less.
@@ -92,11 +88,7 @@ export default function HowItWorks() {
             <div className="p-4 rounded-lg border">
               <ul className="space-y-2">
                 <li>
-                  <strong>Aggressive</strong> (σ = 0.5): Tight distribution,
-                  sharp price drops
-                </li>
-                <li>
-                  <strong>Standard</strong> (σ = 1.0): Normal distribution,
+                  <strong>Standard</strong> (σ = 1.0): Standard distribution,
                   balanced curve
                 </li>
                 <li>
@@ -106,14 +98,14 @@ export default function HowItWorks() {
               </ul>
             </div>
             <p>
-              We bound the domain to ±2 weeks for dates and ±2 lbs for weight,
+              We bound the domain to ±3 weeks for dates and ±3 lbs for weight,
               so the min-max normalization keeps everything predictable. The
-              highest price always lands on the mode (your target), and the
+              highest price always lands on the expected value (your target), and the
               lowest price always lands at the domain boundaries.
             </p>
             <p>
               It&apos;s elegant, predictable, and prevents any weird edge cases
-              where someone pays $0.01 to guess the baby will be born in 2086.
+              where someone pays $0.01 to guess the baby will be born in 10 years.
             </p>
           </div>
         </TabsContent>
