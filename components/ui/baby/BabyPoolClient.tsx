@@ -12,6 +12,10 @@ import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
 import { createCheckoutSession } from "@/lib/actions/baby/createCheckoutSession";
 
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+);
+
 export function BabyPoolClient({
   pool,
   bets,
@@ -32,36 +36,41 @@ export function BabyPoolClient({
     }
     fetchUserName();
   }, []);
-  const stripePromise = loadStripe(
-    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-  );
+
   const [birthDateDeviation, setBirthDateDeviation] = useState(0);
-  const [weightGuess, setWeightGuess] = useState(pool.mu_weight ?? 7.6);
+
+  // mu_weight is in ounces, e.g. 121.6 for 7.6 lbs
+  const initialWeightInOz = pool.mu_weight ?? 121.6;
+
+  const [weightGuessOunces, setWeightGuessOunces] = useState(initialWeightInOz);
+
+  // Always keep ounces version for backend
   const [isPending, startTransition] = useTransition();
   const [loadingStep, setLoadingStep] = useState<string | null>(null);
 
   const handleGuessChange = (values: {
     birthDateDeviation?: number;
-    weightGuess?: number;
+    weightGuessOunces?: number;
   }) => {
     if (values.birthDateDeviation !== undefined) {
       setBirthDateDeviation(values.birthDateDeviation);
     }
-    if (values.weightGuess !== undefined) {
-      setWeightGuess(values.weightGuess);
+    if (values.weightGuessOunces !== undefined) {
+      setWeightGuessOunces(values.weightGuessOunces);
     }
   };
 
   const handleBet = async () => {
     startTransition(async () => {
       setLoadingStep("Creating checkout session...");
-      if (!pool.due_date) {
+      if (!pool.mu_due_date) {
         toast.error("Error: Due date is not set for this pool.");
         setLoadingStep(null);
         return;
       }
 
-      const dueDate = new Date(pool.due_date);
+      const [year, month, day] = pool.mu_due_date.split("-").map(Number);
+      const dueDate = new Date(year, month - 1, day);
       const guessDate = new Date(dueDate);
       guessDate.setDate(guessDate.getDate() + birthDateDeviation);
 
@@ -69,7 +78,7 @@ export function BabyPoolClient({
         poolId: pool.id,
         slug: pool.slug,
         guessDate: guessDate.toISOString(),
-        guessWeight: weightGuess,
+        guessWeight: weightGuessOunces,
         price: totalPrice,
         babyName: pool.baby_name || "the baby",
         name,
@@ -100,15 +109,32 @@ export function BabyPoolClient({
   const { totalPrice, datePrice, weightPrice } = getBetPrice({
     pool,
     birthDateDeviation,
-    weightGuess,
+    // For pricing, convert ounces to decimal lbs
+    weightGuess: weightGuessOunces / 16,
   });
 
   return (
     <div>
+      <div className="text-center mb-4">
+        <h2 className="text-2xl font-bold">
+          Bet on {pool.baby_name || "the Baby"}&apos;s Arrival!
+        </h2>
+        <p className="text-muted-foreground">
+          Expected due date:{" "}
+          {pool.mu_due_date
+            ? (() => {
+                const [year, month, day] = (pool.mu_due_date as string)
+                  .split("-")
+                  .map(Number);
+                return new Date(year, month - 1, day).toLocaleDateString();
+              })()
+            : "Not set"}
+        </p>
+      </div>
       <div className="mb-8">
         <GuessSliders
           birthDateDeviation={birthDateDeviation}
-          weightGuess={weightGuess}
+          weightGuessOunces={weightGuessOunces}
           onValueChange={handleGuessChange}
           pool={pool}
         />

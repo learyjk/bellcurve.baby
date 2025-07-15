@@ -36,14 +36,33 @@ export function LiveRankingsTable({
     )
       return [];
     const actualDate = new Date(actualBirthDate).getTime();
+    const actualWeight = Number(actualBirthWeight);
+    // Get min/max for normalization
+    const dateValues = bets.map((bet) =>
+      new Date(bet.guessed_birth_date).getTime()
+    );
+    dateValues.push(actualDate);
+    const minDate = Math.min(...dateValues);
+    const maxDate = Math.max(...dateValues);
+    const weightValues = bets.map((bet) => bet.guessed_weight);
+    weightValues.push(actualWeight);
+    const minWeight = Math.min(...weightValues);
+    const maxWeight = Math.max(...weightValues);
+    // Avoid division by zero
+    const dateRange = maxDate - minDate || 1;
+    const weightRange = maxWeight - minWeight || 1;
+    // Normalize actual values
+    const actualDateNorm = (actualDate - minDate) / dateRange;
+    const actualWeightNorm = (actualWeight - minWeight) / weightRange;
     return bets
       .map((bet) => {
         const guessDateValue = new Date(bet.guessed_birth_date).getTime();
-        const dateDiffDays =
-          (guessDateValue - actualDate) / (1000 * 60 * 60 * 24);
-        const weightDiff = bet.guessed_weight - Number(actualBirthWeight);
+        const guessDateNorm = (guessDateValue - minDate) / dateRange;
+        const guessWeightNorm = (bet.guessed_weight - minWeight) / weightRange;
+        const dateDiffNorm = guessDateNorm - actualDateNorm;
+        const weightDiffNorm = guessWeightNorm - actualWeightNorm;
         const distance = Math.sqrt(
-          Math.pow(dateDiffDays, 2) + Math.pow(weightDiff, 2)
+          Math.pow(dateDiffNorm, 2) + Math.pow(weightDiffNorm, 2)
         );
         return {
           name: bet.name || "Anonymous",

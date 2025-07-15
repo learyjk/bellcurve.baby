@@ -5,21 +5,36 @@ import { Tables } from "@/database.types";
 
 export function GuessSliders({
   birthDateDeviation,
-  weightGuess,
+  weightGuessOunces,
   onValueChange,
   pool,
 }: {
   birthDateDeviation: number;
-  weightGuess: number;
+  weightGuessOunces: number;
   onValueChange: (values: {
     birthDateDeviation?: number;
-    weightGuess?: number;
+    weightGuessOunces?: number;
   }) => void;
   pool?: Tables<"pools">;
 }) {
-  const meanWeight = pool?.mu_weight ?? 7.6;
-  const weightMin = meanWeight - 2;
-  const weightMax = meanWeight + 2;
+  // If backend provides meanWeight in ounces, convert to lbs/oz
+  let meanWeightOz = pool?.mu_weight ?? 121.6; // fallback to 7.6 lbs in oz
+  if (meanWeightOz < 30) {
+    // If value is suspiciously low, assume it's in lbs, convert to oz
+    meanWeightOz = meanWeightOz * 16;
+  }
+  const meanWeightLbs = Math.floor(meanWeightOz / 16);
+  const meanWeightRemOz = Math.round(meanWeightOz % 16);
+  const meanWeight = meanWeightOz / 16;
+  const weightMinOz = Math.floor(meanWeightOz - 32); // +/- 2 lbs
+  const weightMaxOz = Math.ceil(meanWeightOz + 32);
+  const weightMinLbs = Math.floor(weightMinOz / 16);
+  const weightMinRemOz = Math.round(weightMinOz % 16);
+  const weightMaxLbs = Math.floor(weightMaxOz / 16);
+  const weightMaxRemOz = Math.round(weightMaxOz % 16);
+
+  const currentWeightLbs = Math.floor(weightGuessOunces / 16);
+  const currentWeightOz = Math.round(weightGuessOunces % 16);
 
   // Pricing constants from the pool
   const minBetPrice = pool?.price_floor ?? 5;
@@ -33,7 +48,9 @@ export function GuessSliders({
   const dateSigma = pool?.sigma_days ?? 4;
   const weightSigma = pool?.sigma_weight ?? 0.6;
 
-  const dueDate = pool?.due_date ? new Date(`${pool.due_date}T00:00:00`) : null;
+  const dueDate = pool?.mu_due_date
+    ? new Date(`${pool.mu_due_date}T00:00:00`)
+    : null;
 
   const formatDate = (date: Date | null) => {
     if (!date) return "";
@@ -97,42 +114,42 @@ export function GuessSliders({
             {currentGuessDateLabel}
           </div>
         </div>
-        {/* Weight Guess Slider with Gaussian Curve */}
+        {/* Weight Guess Slider */}
         <div className="flex-1">
           <div className="mb-4 flex justify-center">
             <GaussianCurve
-              currentGuess={weightGuess}
+              currentGuess={weightGuessOunces / 16}
               mean={meanWeight}
-              min={weightMin}
-              max={weightMax}
+              min={weightMinOz / 16}
+              max={weightMaxOz / 16}
               minPrice={minComponentPrice}
               maxPrice={maxComponentPrice}
               title="Birth Weight Probability Distribution"
-              minLabel={`${weightMin.toFixed(1)} lbs`}
-              maxLabel={`${weightMax.toFixed(1)} lbs`}
-              meanLabel={`${meanWeight.toFixed(1)} lbs`}
+              minLabel={`${weightMinLbs} lbs ${weightMinRemOz} oz`}
+              maxLabel={`${weightMaxLbs} lbs ${weightMaxRemOz} oz`}
+              meanLabel={`${meanWeightLbs} lbs ${meanWeightRemOz} oz`}
               sigma={weightSigma}
             />
           </div>
           <Slider
-            id="weight_guess"
-            name="weight_guess"
-            defaultValue={[weightGuess]}
-            min={weightMin}
-            max={weightMax}
-            step={0.1}
+            id="weight_guess_ounces"
+            name="weight_guess_ounces"
+            defaultValue={[weightGuessOunces]}
+            min={weightMinOz}
+            max={weightMaxOz}
+            step={1}
             className="w-full"
-            onValueChange={(val) => onValueChange({ weightGuess: val[0] })}
+            onValueChange={(val) =>
+              onValueChange({ weightGuessOunces: val[0] })
+            }
           />
-          <div className="relative w-full flex justify-between text-xs text-gray-600 mt-1">
-            <span>{weightMin}</span>
-            <span className="absolute left-1/2 -translate-x-1/2 text-blue-700 font-semibold">
-              {meanWeight}
-            </span>
-            <span>{weightMax}</span>
+          <div className="text-xs text-gray-600 flex justify-between">
+            <span>{`${weightMinLbs} lbs ${weightMinRemOz} oz`}</span>
+            <span>{`${meanWeightLbs} lbs ${meanWeightRemOz} oz`}</span>
+            <span>{`${weightMaxLbs} lbs ${weightMaxRemOz} oz`}</span>
           </div>
-          <div className="text-sm text-center" id="weight_guess_value">
-            {weightGuess} lbs
+          <div className="text-sm text-center mt-2" id="weight_guess_value">
+            {currentWeightLbs} lbs {currentWeightOz} oz
           </div>
         </div>
       </div>

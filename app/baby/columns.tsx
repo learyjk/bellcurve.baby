@@ -21,11 +21,12 @@ export const columns: ColumnDef<Tables<"pools">>[] = [
     header: "Baby Name",
   },
   {
-    accessorKey: "due_date",
+    accessorKey: "mu_due_date",
     header: "Due Date",
     cell: ({ row }) => {
-      const date = row.getValue("due_date") as string;
-      return <div>{new Date(date).toLocaleDateString()}</div>;
+      const date = row.getValue("mu_due_date") as string;
+      const [year, month, day] = date.split("-").map(Number);
+      return <div>{new Date(year, month - 1, day).toLocaleDateString()}</div>;
     },
   },
   {
