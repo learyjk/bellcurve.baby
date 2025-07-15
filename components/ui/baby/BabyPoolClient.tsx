@@ -69,7 +69,8 @@ export function BabyPoolClient({
         return;
       }
 
-      const dueDate = new Date(pool.mu_due_date);
+      const [year, month, day] = pool.mu_due_date.split("-").map(Number);
+      const dueDate = new Date(year, month - 1, day);
       const guessDate = new Date(dueDate);
       guessDate.setDate(guessDate.getDate() + birthDateDeviation);
 
@@ -121,7 +122,12 @@ export function BabyPoolClient({
         <p className="text-muted-foreground">
           Expected due date:{" "}
           {pool.mu_due_date
-            ? new Date(pool.mu_due_date).toLocaleDateString()
+            ? (() => {
+                const [year, month, day] = (pool.mu_due_date as string)
+                  .split("-")
+                  .map(Number);
+                return new Date(year, month - 1, day).toLocaleDateString();
+              })()
             : "Not set"}
         </p>
       </div>
