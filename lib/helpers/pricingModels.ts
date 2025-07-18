@@ -6,7 +6,7 @@ export const pricingModelSigmas: Record<
   PricingModel,
   { dateSigma: number; weightSigma: number }
 > = {
-  aggressive: { dateSigma: 3, weightSigma: 0.4 },
-  standard: { dateSigma: 5, weightSigma: 0.75 },
-  chill: { dateSigma: 7, weightSigma: 1.0 },
+  aggressive: { dateSigma: 7, weightSigma: 0.75 },
+  standard: { dateSigma: 9, weightSigma: 1.25 },
+  chill: { dateSigma: 11, weightSigma: 1.5 },
 };
