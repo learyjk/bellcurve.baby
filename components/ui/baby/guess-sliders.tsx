@@ -2,6 +2,7 @@
 import { Slider } from "@/components/ui/slider";
 import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
 import { Tables } from "@/database.types";
+import { DATE_DEVIATION_DAYS, WEIGHT_DEVIATION_OUNCES } from "@/lib/constants";
 
 export function GuessSliders({
   birthDateDeviation,
@@ -25,8 +26,8 @@ export function GuessSliders({
   }
   const meanWeightLbs = Math.floor(meanWeightOz / 16);
   const meanWeightRemOz = Math.round(meanWeightOz % 16);
-  const weightMinOz = Math.floor(meanWeightOz - 48); // +/- 3 lbs
-  const weightMaxOz = Math.ceil(meanWeightOz + 48);
+  const weightMinOz = Math.floor(meanWeightOz - WEIGHT_DEVIATION_OUNCES);
+  const weightMaxOz = Math.ceil(meanWeightOz + WEIGHT_DEVIATION_OUNCES);
   const weightMinLbs = Math.floor(weightMinOz / 16);
   const weightMinRemOz = Math.round(weightMinOz % 16);
   const weightMaxLbs = Math.floor(weightMaxOz / 16);
@@ -57,10 +58,10 @@ export function GuessSliders({
   };
 
   const minDate = dueDate ? new Date(dueDate.getTime()) : null;
-  if (minDate) minDate.setDate(minDate.getDate() - 21);
+  if (minDate) minDate.setDate(minDate.getDate() - DATE_DEVIATION_DAYS);
 
   const maxDate = dueDate ? new Date(dueDate.getTime()) : null;
-  if (maxDate) maxDate.setDate(maxDate.getDate() + 21);
+  if (maxDate) maxDate.setDate(maxDate.getDate() + DATE_DEVIATION_DAYS);
 
   const currentGuessDate = dueDate ? new Date(dueDate.getTime()) : null;
   if (currentGuessDate)
@@ -81,8 +82,8 @@ export function GuessSliders({
             <GaussianCurve
               currentGuess={birthDateDeviation}
               mean={0}
-              min={-21}
-              max={21}
+              min={-DATE_DEVIATION_DAYS}
+              max={DATE_DEVIATION_DAYS}
               minPrice={minComponentPrice}
               maxPrice={maxComponentPrice}
               title="Birth Date Probability Distribution"
@@ -96,8 +97,8 @@ export function GuessSliders({
             id="birth_date_deviation"
             name="birth_date_deviation"
             defaultValue={[birthDateDeviation]}
-            min={-21}
-            max={21}
+            min={-DATE_DEVIATION_DAYS}
+            max={DATE_DEVIATION_DAYS}
             step={1}
             className="w-full"
             onValueChange={(val) =>

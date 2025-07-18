@@ -1,5 +1,6 @@
 import { Tables } from "@/database.types";
 import { pricingModelSigmas } from "@/lib/helpers/pricingModels";
+import { DATE_DEVIATION_DAYS, WEIGHT_DEVIATION_OUNCES } from "@/lib/constants";
 
 /**
  * Solves for sigma in a Gaussian-like function where the value at a certain distance from the mean is known.
@@ -93,7 +94,7 @@ export function getBetPrice(input: BetPriceInput) {
   const datePrice = getBetComponentPrice({
     guess: birthDateDeviation,
     mean: 0,
-    bound: 14, // 2 weeks
+    bound: DATE_DEVIATION_DAYS,
     minPrice: minComponentPrice,
     maxPrice: maxComponentPrice,
     sigma: sigma_days,
@@ -102,7 +103,7 @@ export function getBetPrice(input: BetPriceInput) {
   const weightPrice = getBetComponentPrice({
     guess: weightGuess, // already in ounces
     mean: mu_weight, // already in ounces
-    bound: 32, // 2 lbs in ounces
+    bound: WEIGHT_DEVIATION_OUNCES,
     minPrice: minComponentPrice,
     maxPrice: maxComponentPrice,
     sigma: sigma_weight, // already in ounces

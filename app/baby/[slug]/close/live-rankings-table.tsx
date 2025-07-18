@@ -87,7 +87,12 @@ export function LiveRankingsTable({
     {
       accessorKey: "guessed_weight",
       header: "Guessed Weight (lbs)",
-      cell: ({ row }) => Number(row.getValue("guessed_weight")).toFixed(1),
+      cell: ({ row }) => {
+        const weightInOunces = row.getValue("guessed_weight") as number;
+        const pounds = Math.floor(weightInOunces / 16);
+        const ounces = Math.round(weightInOunces % 16);
+        return `${pounds} lbs ${ounces} oz`;
+      },
     },
     {
       accessorKey: "distance",

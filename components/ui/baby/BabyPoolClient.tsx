@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useEffect, useActionState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Tables } from "@/database.types";
 import { GuessSliders } from "@/components/ui/baby/guess-sliders";
@@ -10,7 +10,11 @@ import { betColumns } from "@/app/baby/[slug]/columns";
 import { getBetPrice } from "@/lib/helpers/pricing";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
-import { createCheckoutSession } from "@/lib/actions/baby/createCheckoutSession";
+import {
+  createCheckoutSession,
+  CreateCheckoutSessionState,
+} from "@/lib/actions/baby/createCheckoutSession";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -44,10 +48,6 @@ export function BabyPoolClient({
 
   const [weightGuessOunces, setWeightGuessOunces] = useState(initialWeightInOz);
 
-  // Always keep ounces version for backend
-  const [isPending, startTransition] = useTransition();
-  const [loadingStep, setLoadingStep] = useState<string | null>(null);
-
   const handleGuessChange = (values: {
     birthDateDeviation?: number;
     weightGuessOunces?: number;
@@ -60,49 +60,48 @@ export function BabyPoolClient({
     }
   };
 
-  const handleBet = async () => {
-    startTransition(async () => {
-      setLoadingStep("Creating checkout session...");
-      if (!pool.mu_due_date) {
-        toast.error("Error: Due date is not set for this pool.");
-        setLoadingStep(null);
-        return;
-      }
+  const initialState: CreateCheckoutSessionState = {};
+  const [state, formAction, isPending] = useActionState(
+    createCheckoutSession,
+    initialState
+  );
 
-      const [year, month, day] = pool.mu_due_date.split("-").map(Number);
-      const dueDate = new Date(year, month - 1, day);
-      const guessDate = new Date(dueDate);
-      guessDate.setDate(guessDate.getDate() + birthDateDeviation);
-
-      const result = await createCheckoutSession({
-        poolId: pool.id,
-        slug: pool.slug,
-        guessDate: guessDate.toISOString(),
-        guessWeight: weightGuessOunces,
-        price: totalPrice,
-        babyName: pool.baby_name || "the baby",
-        name,
-      });
-
-      if (result.error) {
-        toast.error(`Error: ${result.error}`);
-        setLoadingStep(null);
-        return;
-      }
-
-      setLoadingStep("Loading payment gateway...");
-      if (result.sessionId) {
+  useEffect(() => {
+    if (state.error) {
+      toast.error(state.error);
+    }
+    if (state.sessionId) {
+      const handleRedirect = async () => {
         const stripe = await stripePromise;
         if (stripe) {
-          setLoadingStep("Redirecting to Stripe...");
-          await stripe.redirectToCheckout({ sessionId: result.sessionId });
+          await stripe.redirectToCheckout({ sessionId: state.sessionId! });
         } else {
-          toast.error("Error: Stripe.js has not loaded yet.");
-          setLoadingStep(null);
+          toast.error("Stripe.js has not loaded yet.");
         }
-      } else {
-        setLoadingStep(null);
-      }
+      };
+      handleRedirect();
+    }
+  }, [state]);
+
+  const handleBet = () => {
+    if (!pool.mu_due_date) {
+      toast.error("Error: Due date is not set for this pool.");
+      return;
+    }
+
+    const [year, month, day] = pool.mu_due_date.split("-").map(Number);
+    const dueDate = new Date(year, month - 1, day);
+    const guessDate = new Date(dueDate);
+    guessDate.setDate(guessDate.getDate() + birthDateDeviation);
+
+    formAction({
+      poolId: pool.id,
+      slug: pool.slug,
+      guessDate: guessDate.toISOString(),
+      guessWeight: weightGuessOunces,
+      price: totalPrice,
+      babyName: pool.baby_name || "the baby",
+      name,
     });
   };
 
@@ -165,27 +164,8 @@ export function BabyPoolClient({
         >
           {isPending ? (
             <>
-              <svg
-                className="animate-spin mr-2 h-5 w-5 text-blue-600 inline-block"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8z"
-                ></path>
-              </svg>
-              {loadingStep || "Processing..."}
+              <LoadingSpinner />
+              Processing...
             </>
           ) : (
             `Place Bet for $${totalPrice.toFixed(2)}`

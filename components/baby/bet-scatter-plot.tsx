@@ -10,6 +10,14 @@ import {
   ReferenceLine,
 } from "recharts";
 
+// Helper to format weight from total ounces to lbs and oz
+const formatWeight = (totalOunces: number) => {
+  if (totalOunces === null || totalOunces === undefined) return "";
+  const pounds = Math.floor(totalOunces / 16);
+  const ounces = Math.round(totalOunces % 16);
+  return `${pounds} lbs ${ounces} oz`;
+};
+
 export interface Guess {
   name: string;
   guessed_birth_date: string;
@@ -95,7 +103,7 @@ const BetScatterPlot: React.FC<BetScatterPlotProps> = ({ guesses, actual }) => {
             <strong>{name}</strong> (Rank #{rank})
           </div>
           <div>Date: {new Date(displayDate).toLocaleDateString()}</div>
-          <div>Weight: {displayWeight} lbs</div>
+          <div>Weight: {formatWeight(displayWeight)}</div>
         </div>
       );
     }
@@ -134,8 +142,9 @@ const BetScatterPlot: React.FC<BetScatterPlotProps> = ({ guesses, actual }) => {
           type="number"
           dataKey="y"
           domain={["auto", "auto"]}
+          tickFormatter={(tick) => `${Math.floor(tick / 16)} lbs`}
           label={{
-            value: "Birth Weight (lbs)",
+            value: "Birth Weight",
             angle: -90,
             position: "insideLeft",
             offset: 10,
