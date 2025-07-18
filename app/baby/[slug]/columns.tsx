@@ -18,10 +18,15 @@ export const betColumns: ColumnDef<Tables<"bets">>[] = [
   },
   {
     accessorKey: "guessed_weight",
-    header: "Guessed Weight (lbs)",
+    header: "Guessed Weight",
     cell: ({ row }) => {
-      const weight = row.getValue("guessed_weight");
-      return Number(weight).toFixed(1);
+      const weightInOunces = row.getValue("guessed_weight") as number;
+      if (weightInOunces === null || typeof weightInOunces === "undefined") {
+        return "-";
+      }
+      const pounds = Math.floor(weightInOunces / 16);
+      const ounces = Math.round(weightInOunces % 16);
+      return `${pounds} lbs ${ounces} oz`;
     },
   },
   {

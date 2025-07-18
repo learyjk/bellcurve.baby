@@ -18,13 +18,17 @@ export default function ClosePoolForm({
   const initialState: ClosePoolState = { message: null };
   const [state, formAction] = useActionState(closePool, initialState);
   const [actualBirthDate, setActualBirthDate] = useState("");
-  const [actualBirthWeight, setActualBirthWeight] = useState<string>("");
+  const [lbs, setLbs] = useState<number | undefined>();
+  const [oz, setOz] = useState<number | undefined>();
 
   useEffect(() => {
     if (state.message) {
       toast.error(state.message);
     }
   }, [state]);
+
+  const actualBirthWeightInOunces =
+    lbs !== undefined && oz !== undefined ? lbs * 16 + oz : undefined;
 
   const safeBets = bets.map((bet) => ({
     name: bet.name || "Anonymous",
@@ -47,26 +51,40 @@ export default function ClosePoolForm({
           />
         </div>
         <div>
-          <Label htmlFor="actual_birth_weight">Actual Birth Weight (lbs)</Label>
-          <Input
-            type="number"
-            id="actual_birth_weight"
-            name="actual_birth_weight"
-            step="0.01"
-            required
-            value={actualBirthWeight}
-            onChange={(e) => setActualBirthWeight(e.target.value)}
-          />
+          <Label>Actual Birth Weight</Label>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              id="actual_birth_weight_lbs"
+              name="actual_birth_weight_lbs"
+              placeholder="lbs"
+              className="w-24"
+              value={lbs ?? ""}
+              onChange={(e) => setLbs(Number(e.target.value))}
+            />
+            <Input
+              type="number"
+              id="actual_birth_weight_oz"
+              name="actual_birth_weight_oz"
+              placeholder="oz"
+              className="w-24"
+              value={oz ?? ""}
+              onChange={(e) => setOz(Number(e.target.value))}
+            />
+          </div>
         </div>
+        <input
+          type="hidden"
+          name="actual_birth_weight_ounces"
+          value={actualBirthWeightInOunces ?? ""}
+        />
         <input type="hidden" name="pool_id" value={pool.id} />
         <Button type="submit">Close Pool</Button>
       </form>
       <LiveRankingsTable
         bets={safeBets}
         actualBirthDate={actualBirthDate}
-        actualBirthWeight={
-          actualBirthWeight === "" ? undefined : Number(actualBirthWeight)
-        }
+        actualBirthWeight={actualBirthWeightInOunces}
       />
     </>
   );

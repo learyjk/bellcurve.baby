@@ -7,154 +7,23 @@ import { useActionState } from "react";
 import { toast } from "sonner";
 import { useEffect, useState, useRef } from "react";
 import clsx from "clsx";
-// Helper to format slug
-function formatSlug(str: string) {
-  return str
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-// Helper to generate better slug suggestions
-function generateSlugSuggestions(base: string, babyName: string) {
-  // 50 good words for before/after the name
-  const words = [
-    "baby",
-    "guess",
-    "pool",
-    "bet",
-    "sweep",
-    "game",
-    "challenge",
-    "contest",
-    "picks",
-    "party",
-    "fun",
-    "squad",
-    "crew",
-    "club",
-    "mania",
-    "bash",
-    "fest",
-    "vibes",
-    "watch",
-    "arrival",
-    "bundle",
-    "joy",
-    "bloom",
-    "bloomers",
-    "sprout",
-    "cutie",
-    "cuties",
-    "love",
-    "joyride",
-    "time",
-    "moment",
-    "magic",
-    "future",
-    "winner",
-    "champ",
-    "legend",
-    "star",
-    "dreams",
-    "wishes",
-    "hope",
-    "miracle",
-    "guessers",
-    "squadron",
-    "family",
-    "friends",
-    "circle",
-    "journey",
-    "adventure",
-    "welcome",
-    "celebration",
-  ];
-  // Remove hyphens and spaces from name
-  const name = (babyName || "baby").toLowerCase().replace(/[^a-z0-9]/g, "");
-  if (!name) return [];
-  // Always include baby[name] and [name]guess
-  const suggestions = [
-    `baby${name}`,
-    `${name}guess`,
-    `${name}pool`,
-    `${name}bet`,
-    `${name}family`,
-    `${name}game`,
-    `${name}club`,
-    `${name}challenge`,
-    `${name}party`,
-    `${name}mania`,
-    `${name}crew`,
-    `${name}friends`,
-    `${name}circle`,
-    `${name}adventure`,
-    `${name}arrival`,
-    `${name}bloom`,
-    `${name}star`,
-    `${name}winner`,
-    `${name}champ`,
-    `${name}miracle`,
-    `${name}joy`,
-    `${name}future`,
-    `${name}moment`,
-    `${name}magic`,
-    `${name}hope`,
-    `${name}legend`,
-    `${name}dreams`,
-    `${name}wishes`,
-    `${name}cutie`,
-    `${name}sprout`,
-    `${name}bloomers`,
-    `${name}watch`,
-    `${name}vibes`,
-    `${name}squad`,
-    `${name}squadron`,
-    `${name}picks`,
-    `${name}joyride`,
-    `${name}time`,
-    `${name}welcome`,
-    `${name}celebration`,
-    `${name}bash`,
-    `${name}fest`,
-    `${name}bundle`,
-    `${name}cuties`,
-    `${name}love`,
-    `${name}friends`,
-    `${name}club`,
-    `${name}pool`,
-    `${name}bet`,
-    `${name}guessers`,
-  ];
-  // Add a few random combos from the word list
-  for (let i = 0; i < 8; i++) {
-    const word = words[Math.floor(Math.random() * words.length)];
-    suggestions.push(`${name}${word}`);
-    suggestions.push(`${word}${name}`);
-  }
-  // Remove duplicates and any empty, then return only 4 suggestions
-  const unique = suggestions.filter((s, i, arr) => s && arr.indexOf(s) === i);
-  // Shuffle for variety
-  for (let i = unique.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [unique[i], unique[j]] = [unique[j], unique[i]];
-  }
-  return unique.slice(0, 4);
-}
+import { formatSlug, generateSlugSuggestions } from "@/lib/helpers/slug";
 import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
 import { createPool, CreatePoolState } from "@/lib/actions/create/createPool";
 import { pricingModelSigmas } from "@/lib/helpers/pricingModels";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export function CreateBabyPoolForm() {
   const initialState: CreatePoolState = { message: null, errors: {} };
-  const [state, formAction] = useActionState(createPool, initialState);
+  const [state, formAction, isPending] = useActionState(
+    createPool,
+    initialState
+  );
   const [pricingModel, setPricingModel] =
     useState<keyof typeof pricingModelSigmas>("standard");
   // Example values for preview
   // Controlled state for mean values
-  const [muWeight, setMuWeight] = useState(7.6);
+  const [muWeight, setMuWeight] = useState(7.4);
   const [muDate] = useState(0); // 0 deviation from due date (in days)
 
   useEffect(() => {
@@ -563,8 +432,20 @@ export function CreateBabyPoolForm() {
         <input type="hidden" name="slug" value={slug} />
       </CardContent>
       <CardFooter className="p-8 pt-0">
-        <Button type="submit" className="w-full h-12 text-lg">
-          Create Pool
+        <Button
+          type="submit"
+          className="w-full h-12 text-lg"
+          disabled={isPending}
+          aria-disabled={isPending}
+        >
+          {isPending ? (
+            <>
+              <LoadingSpinner />
+              Creating Pool...
+            </>
+          ) : (
+            "Create Pool"
+          )}
         </Button>
       </CardFooter>
     </form>

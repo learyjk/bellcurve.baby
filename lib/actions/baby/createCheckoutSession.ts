@@ -1,20 +1,27 @@
 "use server";
-//hi
 
 import { createClient } from "@/lib/supabase/server";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-export async function createCheckoutSession(data: {
-  poolId: string;
-  slug: string;
-  guessDate: string;
-  guessWeight: number;
-  price: number;
-  babyName: string;
-  name?: string;
-}) {
+export type CreateCheckoutSessionState = {
+  sessionId?: string;
+  error?: string;
+};
+
+export async function createCheckoutSession(
+  prevState: CreateCheckoutSessionState,
+  data: {
+    poolId: string;
+    slug: string;
+    guessDate: string;
+    guessWeight: number;
+    price: number;
+    babyName: string;
+    name?: string;
+  }
+): Promise<CreateCheckoutSessionState> {
   const supabase = await createClient();
 
   const {
@@ -31,7 +38,9 @@ export async function createCheckoutSession(data: {
       month: "long",
       day: "numeric",
     });
-    const formattedWeight = `${data.guessWeight.toFixed(1)} lbs`;
+    const lbs = Math.floor(data.guessWeight / 16);
+    const oz = Math.round(data.guessWeight % 16);
+    const formattedWeight = `${lbs} lbs ${oz} oz`;
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

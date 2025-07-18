@@ -2,6 +2,7 @@
 import { Slider } from "@/components/ui/slider";
 import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
 import { Tables } from "@/database.types";
+import { DATE_DEVIATION_DAYS, WEIGHT_DEVIATION_OUNCES } from "@/lib/constants";
 
 export function GuessSliders({
   birthDateDeviation,
@@ -25,9 +26,8 @@ export function GuessSliders({
   }
   const meanWeightLbs = Math.floor(meanWeightOz / 16);
   const meanWeightRemOz = Math.round(meanWeightOz % 16);
-  const meanWeight = meanWeightOz / 16;
-  const weightMinOz = Math.floor(meanWeightOz - 32); // +/- 2 lbs
-  const weightMaxOz = Math.ceil(meanWeightOz + 32);
+  const weightMinOz = Math.floor(meanWeightOz - WEIGHT_DEVIATION_OUNCES);
+  const weightMaxOz = Math.ceil(meanWeightOz + WEIGHT_DEVIATION_OUNCES);
   const weightMinLbs = Math.floor(weightMinOz / 16);
   const weightMinRemOz = Math.round(weightMinOz % 16);
   const weightMaxLbs = Math.floor(weightMaxOz / 16);
@@ -58,10 +58,10 @@ export function GuessSliders({
   };
 
   const minDate = dueDate ? new Date(dueDate.getTime()) : null;
-  if (minDate) minDate.setDate(minDate.getDate() - 14);
+  if (minDate) minDate.setDate(minDate.getDate() - DATE_DEVIATION_DAYS);
 
   const maxDate = dueDate ? new Date(dueDate.getTime()) : null;
-  if (maxDate) maxDate.setDate(maxDate.getDate() + 14);
+  if (maxDate) maxDate.setDate(maxDate.getDate() + DATE_DEVIATION_DAYS);
 
   const currentGuessDate = dueDate ? new Date(dueDate.getTime()) : null;
   if (currentGuessDate)
@@ -82,8 +82,8 @@ export function GuessSliders({
             <GaussianCurve
               currentGuess={birthDateDeviation}
               mean={0}
-              min={-14}
-              max={14}
+              min={-DATE_DEVIATION_DAYS}
+              max={DATE_DEVIATION_DAYS}
               minPrice={minComponentPrice}
               maxPrice={maxComponentPrice}
               title="Birth Date Probability Distribution"
@@ -97,8 +97,8 @@ export function GuessSliders({
             id="birth_date_deviation"
             name="birth_date_deviation"
             defaultValue={[birthDateDeviation]}
-            min={-14}
-            max={14}
+            min={-DATE_DEVIATION_DAYS}
+            max={DATE_DEVIATION_DAYS}
             step={1}
             className="w-full"
             onValueChange={(val) =>
@@ -118,17 +118,17 @@ export function GuessSliders({
         <div className="flex-1">
           <div className="mb-4 flex justify-center">
             <GaussianCurve
-              currentGuess={weightGuessOunces / 16}
-              mean={meanWeight}
-              min={weightMinOz / 16}
-              max={weightMaxOz / 16}
+              currentGuess={weightGuessOunces}
+              mean={meanWeightOz}
+              min={weightMinOz}
+              max={weightMaxOz}
               minPrice={minComponentPrice}
               maxPrice={maxComponentPrice}
               title="Birth Weight Probability Distribution"
               minLabel={`${weightMinLbs} lbs ${weightMinRemOz} oz`}
               maxLabel={`${weightMaxLbs} lbs ${weightMaxRemOz} oz`}
               meanLabel={`${meanWeightLbs} lbs ${meanWeightRemOz} oz`}
-              sigma={weightSigma}
+              sigma={weightSigma * 16} // convert sigma from lbs to oz
             />
           </div>
           <Slider
