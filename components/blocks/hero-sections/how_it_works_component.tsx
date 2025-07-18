@@ -23,13 +23,13 @@ export default function HowItWorks() {
             </p>
             <p>
               But if you guess way out in left field—like the baby will be born
-              on Christmas or weigh 12 pounds—your guess gets cheaper because
+              3 weeks late or weigh 12 pounds—your guess gets cheaper because
               you&apos;re taking a bigger risk.
             </p>
             <p>
               We cap the prices so nobody goes broke and nobody gets to play for
               free. It&apos;s like surge pricing, but for baby predictions, and
-              with actual math behind it instead of just corporate greed.
+              with actual math behind it instead of just corporate capitalism.
             </p>
             <p>
               Before the bets go live, the creators pick one of these models:
@@ -96,7 +96,7 @@ export default function HowItWorks() {
                   sharp price drops
                 </li>
                 <li>
-                  <strong>Standard</strong> (σ = 1.0): Normal distribution,
+                  <strong>Standard</strong> (σ = 1.0): Standard distribution,
                   balanced curve
                 </li>
                 <li>
@@ -106,14 +106,15 @@ export default function HowItWorks() {
               </ul>
             </div>
             <p>
-              We bound the domain to ±2 weeks for dates and ±2 lbs for weight,
+              We bound the domain to ±3 weeks for dates and ±3 lbs for weight,
               so the min-max normalization keeps everything predictable. The
-              highest price always lands on the mode (your target), and the
-              lowest price always lands at the domain boundaries.
+              highest price always lands on the expected value (your target),
+              and the lowest price always lands at the domain boundaries.
             </p>
             <p>
               It&apos;s elegant, predictable, and prevents any weird edge cases
-              where someone pays $0.01 to guess the baby will be born in 2086.
+              where someone pays $0.01 to guess the baby will be born in 10
+              years.
             </p>
           </div>
         </TabsContent>
