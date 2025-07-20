@@ -1,4 +1,4 @@
-// Pricing model sigma presets for use throughout the app
+// Pricing model sigma presets for use throughout the app.
 
 export type PricingModel = "aggressive" | "standard" | "chill";
 
