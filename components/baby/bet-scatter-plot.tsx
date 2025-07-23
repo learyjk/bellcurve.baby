@@ -67,20 +67,46 @@ const BetScatterPlot: React.FC<BetScatterPlotProps> = ({ guesses, actual }) => {
     index?: number; // Recharts passes index at runtime
   }
   const CustomScatterShape = ({ cx, cy, payload }: CustomScatterShapeProps) => {
-    let fillColor = "#555";
-    if (payload.rank === 1) fillColor = "#FFD700"; // gold
-    else if (payload.rank === 2) fillColor = "#C0C0C0"; // silver
-    else if (payload.rank === 3) fillColor = "#CD7F32"; // bronze
-    return (
-      <circle
-        cx={cx}
-        cy={cy}
-        r={6}
-        fill={fillColor}
-        stroke="#222"
-        strokeWidth={1.5}
-      />
-    );
+    if (payload.rank === 1) {
+      // Gold (winner)
+      return (
+        <circle
+          cx={cx}
+          cy={cy}
+          r={6}
+          fill="#FFD700"
+          stroke="#222"
+          strokeWidth={1.5}
+        />
+      );
+    } else if (payload.rank === 2) {
+      // Silver
+      return (
+        <circle
+          cx={cx}
+          cy={cy}
+          r={6}
+          fill="#C0C0C0"
+          stroke="#222"
+          strokeWidth={1.5}
+        />
+      );
+    } else if (payload.rank === 3) {
+      // Bronze
+      return (
+        <circle
+          cx={cx}
+          cy={cy}
+          r={6}
+          fill="#CD7F32"
+          stroke="#222"
+          strokeWidth={1.5}
+        />
+      );
+    } else {
+      // Less prominent: smaller, gray, no outline
+      return <circle cx={cx} cy={cy} r={4} fill="#bbb" stroke="none" />;
+    }
   };
 
   // Custom tooltip for displaying guess details
