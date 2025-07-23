@@ -98,6 +98,8 @@ export function LoginForm({
                   variant="outline"
                   className="w-full flex items-center justify-center gap-2"
                   onClick={async () => {
+                    console.log("Signing in with Google...");
+                    console.log(location.origin);
                     const supabase = createClient();
                     await supabase.auth.signInWithOAuth({
                       provider: "google",
