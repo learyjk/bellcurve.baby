@@ -30,12 +30,15 @@ export interface ActualOutcome {
   actualWeight: number;
 }
 
-interface BetScatterPlotProps {
+interface GuessScatterPlotProps {
   guesses: Guess[];
   actual: ActualOutcome;
 }
 
-const BetScatterPlot: React.FC<BetScatterPlotProps> = ({ guesses, actual }) => {
+const GuessScatterPlot: React.FC<GuessScatterPlotProps> = ({
+  guesses,
+  actual,
+}) => {
   const actualDate = new Date(actual.actualBirthDate).getTime();
 
   // Sort guesses by distance to actual
@@ -200,4 +203,4 @@ const BetScatterPlot: React.FC<BetScatterPlotProps> = ({ guesses, actual }) => {
   );
 };
 
-export default BetScatterPlot;
+export default GuessScatterPlot;

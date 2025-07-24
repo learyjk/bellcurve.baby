@@ -2,7 +2,7 @@ export const words = [
   "baby",
   "guess",
   "pool",
-  "bet",
+  "guess",
   "sweep",
   "game",
   "challenge",
@@ -67,7 +67,7 @@ export function generateSlugSuggestions(base: string, babyName: string) {
     `baby${name}`,
     `${name}guess`,
     `${name}pool`,
-    `${name}bet`,
+    `${name}guess`,
     `${name}family`,
     `${name}game`,
     `${name}club`,
@@ -112,7 +112,6 @@ export function generateSlugSuggestions(base: string, babyName: string) {
     `${name}friends`,
     `${name}club`,
     `${name}pool`,
-    `${name}bet`,
     `${name}guessers`,
   ];
   for (let i = 0; i < 8; i++) {

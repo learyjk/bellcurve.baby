@@ -1,5 +1,5 @@
-import * as React from "react"
-import Link from "next/link"
+import * as React from "react";
+import Link from "next/link";
 // import { CircleCheckIcon, CircleHelpIcon, CircleIcon } from "lucide-react"
 
 import {
@@ -10,8 +10,8 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   // navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu"
-import { AuthButton } from "@/components/auth-button"
+} from "@/components/ui/navigation-menu";
+import { AuthButton } from "@/components/auth-button";
 
 export async function Navbar() {
   return (
@@ -29,10 +29,10 @@ export async function Navbar() {
                       href="/"
                     >
                       <div className="mt-4 mb-2 text-lg font-medium">
-                        baby-bets
+                        bellcurve.baby
                       </div>
                       <p className="text-muted-foreground text-sm leading-tight">
-                        Beautifully designed betting app built with Supabase & Next.js.
+                        A Guessing Game for Expecting Parents and Friends
                       </p>
                     </Link>
                   </NavigationMenuLink>
@@ -87,7 +87,7 @@ export async function Navbar() {
         <AuthButton />
       </div>
     </nav>
-  )
+  );
 }
 
 function ListItem({
@@ -99,7 +99,10 @@ function ListItem({
   return (
     <li {...props}>
       <NavigationMenuLink asChild>
-        <Link href={href} className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+        <Link
+          href={href}
+          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+        >
           <div className="text-sm font-medium leading-none">{title}</div>
           <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
             {children}
@@ -107,5 +110,5 @@ function ListItem({
         </Link>
       </NavigationMenuLink>
     </li>
-  )
+  );
 }

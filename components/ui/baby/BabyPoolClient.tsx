@@ -6,8 +6,8 @@ import { Tables } from "@/database.types";
 import { GuessSliders } from "@/components/ui/baby/guess-sliders";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/app/baby/data-table";
-import { betColumns } from "@/app/baby/[slug]/columns";
-import { getBetPrice } from "@/lib/helpers/pricing";
+import { guessColumns } from "@/app/baby/[slug]/columns";
+import { getGuessPrice } from "@/lib/helpers/pricing";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
 import {
@@ -23,10 +23,10 @@ const stripePromise = loadStripe(
 
 export function BabyPoolClient({
   pool,
-  bets,
+  guesses,
 }: {
   pool: Tables<"pools">;
-  bets: Tables<"bets">[];
+  guesses: Tables<"guesses">[];
 }) {
   const [name, setName] = useState<string>("");
   useEffect(() => {
@@ -84,18 +84,17 @@ export function BabyPoolClient({
     }
   }, [state]);
 
-  const handleBet = () => {
+  // Helper to validate and build payload for formAction
+  const getGuessPayload = () => {
     if (!pool.mu_due_date) {
       toast.error("Error: Due date is not set for this pool.");
-      return;
+      return null;
     }
-
     const [year, month, day] = pool.mu_due_date.split("-").map(Number);
     const dueDate = new Date(year, month - 1, day);
     const guessDate = new Date(dueDate);
     guessDate.setDate(guessDate.getDate() + birthDateDeviation);
-
-    formAction({
+    return {
       poolId: pool.id,
       slug: pool.slug,
       guessDate: guessDate.toISOString(),
@@ -103,10 +102,10 @@ export function BabyPoolClient({
       price: totalPrice,
       babyName: pool.baby_name || "the baby",
       name,
-    });
+    };
   };
 
-  const { totalPrice, datePrice, weightPrice } = getBetPrice({
+  const { totalPrice, datePrice, weightPrice } = getGuessPrice({
     pool,
     birthDateDeviation,
     // For pricing, use ounces directly
@@ -117,7 +116,7 @@ export function BabyPoolClient({
     <div>
       <div className="text-center mb-4">
         <h2 className="text-2xl font-bold">
-          Bet on {pool.baby_name || "the Baby"}&apos;s Arrival!
+          Make you guess for {pool.baby_name || "the Baby"}&apos;s Arrival!
         </h2>
         <p className="text-muted-foreground">
           Expected due date:{" "}
@@ -152,59 +151,65 @@ export function BabyPoolClient({
           </div>
         )}
       </div>
-      <div className="mb-8">
-        <GuessSliders
-          birthDateDeviation={birthDateDeviation}
-          weightGuessOunces={weightGuessOunces}
-          onValueChange={handleGuessChange}
-          pool={pool}
-        />
-      </div>
-      <div className="mb-8">
-        <div className="p-6 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl text-center border border-blue-200 shadow">
-          <div className="text-lg font-semibold text-gray-700 mb-2">
-            Total Bet Price
-          </div>
-          <div className="text-3xl font-bold text-blue-600 mb-2">
-            ${totalPrice.toFixed(2)}
-          </div>
-          <div className="flex justify-center space-x-4 text-sm text-gray-600">
-            <span>Date price: ${datePrice.toFixed(2)}</span>
-            <span>Weight price: ${weightPrice.toFixed(2)}</span>
-          </div>
-          <div className="text-sm text-gray-600">
-            Based on your current guess
+      <form
+        className="mb-0"
+        action={async () => {
+          const payload = getGuessPayload();
+          if (payload) await formAction(payload);
+        }}
+      >
+        <div className="mb-8">
+          <GuessSliders
+            birthDateDeviation={birthDateDeviation}
+            weightGuessOunces={weightGuessOunces}
+            onValueChange={handleGuessChange}
+            pool={pool}
+          />
+        </div>
+        <div className="mb-8">
+          <div className="p-6 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl text-center border border-blue-200 shadow">
+            <div className="text-lg font-semibold text-gray-700 mb-2">
+              Total Guess Price
+            </div>
+            <div className="text-3xl font-bold text-blue-600 mb-2">
+              ${totalPrice.toFixed(2)}
+            </div>
+            <div className="flex justify-center space-x-4 text-sm text-gray-600">
+              <span>Date price: ${datePrice.toFixed(2)}</span>
+              <span>Weight price: ${weightPrice.toFixed(2)}</span>
+            </div>
+            <div className="text-sm text-gray-600">
+              Based on your current guess
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className="mt-8 text-center">
-        <Button
-          onClick={handleBet}
-          disabled={isPending}
-          className="w-full h-12 text-lg flex items-center justify-center"
-        >
-          {isPending ? (
-            <>
-              <LoadingSpinner />
-              Processing...
-            </>
-          ) : (
-            `Place Bet for $${totalPrice.toFixed(2)}`
-          )}
-        </Button>
-      </div>
-
+        <div className="mt-8 text-center">
+          <Button
+            type="submit"
+            disabled={isPending}
+            className="w-full h-12 text-lg flex items-center justify-center"
+          >
+            {isPending ? (
+              <>
+                <LoadingSpinner />
+                Processing...
+              </>
+            ) : (
+              `Place Guess for $${totalPrice.toFixed(2)}`
+            )}
+          </Button>
+        </div>
+      </form>
       <div className="mt-12">
         <h2 className="text-xl font-bold mb-4 text-center">
           Previous Donations
         </h2>
-        {bets.length === 0 ? (
+        {guesses.length === 0 ? (
           <div className="text-center text-gray-500 py-8 text-lg">
             No results - be the first!
           </div>
         ) : (
-          <DataTable columns={betColumns} data={bets} />
+          <DataTable columns={guessColumns} data={guesses} />
         )}
       </div>
     </div>

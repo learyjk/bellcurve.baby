@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { getBetComponentPrice } from "@/lib/helpers/pricing";
+import { getGuessComponentPrice } from "@/lib/helpers/pricing";
 
 interface GaussianCurveProps {
   currentGuess: number;
@@ -45,7 +45,7 @@ export function GaussianCurve({
     const steps = 100;
     for (let i = 0; i <= steps; i++) {
       const x = min + (i / steps) * (max - min);
-      const y = getBetComponentPrice({
+      const y = getGuessComponentPrice({
         guess: x,
         mean,
         bound: Math.max(Math.abs(min - mean), Math.abs(max - mean)),
@@ -58,7 +58,7 @@ export function GaussianCurve({
     return points;
   }, [min, max, mean, minPrice, maxPrice, sigma]);
 
-  const userPrice = getBetComponentPrice({
+  const userPrice = getGuessComponentPrice({
     guess: currentGuess,
     mean,
     bound: Math.max(Math.abs(min - mean), Math.abs(max - mean)),

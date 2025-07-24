@@ -2,7 +2,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Tables } from "@/database.types";
 
-export const betColumns: ColumnDef<Tables<"bets">>[] = [
+export const guessColumns: ColumnDef<Tables<"guesses">>[] = [
   {
     accessorKey: "name",
     header: "Name",
@@ -31,7 +31,7 @@ export const betColumns: ColumnDef<Tables<"bets">>[] = [
   },
   {
     accessorKey: "calculated_price",
-    header: "Bet Price ($)",
+    header: "Guess Price ($)",
     cell: ({ row }) => {
       const price = row.getValue("calculated_price");
       return Number(price).toFixed(2);

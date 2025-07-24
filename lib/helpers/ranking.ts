@@ -2,7 +2,7 @@ export interface Guess {
   name: string;
   guessDate: string;
   guessWeight: number;
-  bet_id: string;
+  guess_id: string;
 }
 
 export interface ActualOutcome {
@@ -10,7 +10,7 @@ export interface ActualOutcome {
   actualWeight: number;
 }
 
-export function rankBetsByAccuracy(
+export function rankGuessesByAccuracy(
   guesses: Guess[],
   actual: ActualOutcome
 ): {
@@ -18,7 +18,7 @@ export function rankBetsByAccuracy(
   guessDate: string;
   guessWeight: number;
   distance: number;
-  bet_id: string;
+  guess_id: string;
 }[] {
   const actualDate = new Date(actual.actualBirthDate).getTime();
 
@@ -39,7 +39,7 @@ export function rankBetsByAccuracy(
         guessDate: guess.guessDate,
         guessWeight: guess.guessWeight,
         distance: distance,
-        bet_id: guess.bet_id,
+        guess_id: guess.guess_id,
       };
     })
     .sort((a, b) => a.distance - b.distance);

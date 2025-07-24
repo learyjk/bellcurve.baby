@@ -10,10 +10,10 @@ import { LiveRankingsTable } from "./live-rankings-table";
 
 export default function ClosePoolForm({
   pool,
-  bets,
+  guesses,
 }: {
   pool: Tables<"pools">;
-  bets: Tables<"bets">[];
+  guesses: Tables<"guesses">[];
 }) {
   const initialState: ClosePoolState = { message: null };
   const [state, formAction] = useActionState(closePool, initialState);
@@ -30,10 +30,10 @@ export default function ClosePoolForm({
   const actualBirthWeightInOunces =
     lbs !== undefined && oz !== undefined ? lbs * 16 + oz : undefined;
 
-  const safeBets = bets.map((bet) => ({
-    name: bet.name || "Anonymous",
-    guessed_birth_date: bet.guessed_birth_date,
-    guessed_weight: bet.guessed_weight,
+  const safeGuesses = guesses.map((guess) => ({
+    name: guess.name || "Anonymous",
+    guessed_birth_date: guess.guessed_birth_date,
+    guessed_weight: guess.guessed_weight,
   }));
 
   return (
@@ -82,7 +82,7 @@ export default function ClosePoolForm({
         <Button type="submit">Close Pool</Button>
       </form>
       <LiveRankingsTable
-        bets={safeBets}
+        guesses={safeGuesses}
         actualBirthDate={actualBirthDate}
         actualBirthWeight={actualBirthWeightInOunces}
       />

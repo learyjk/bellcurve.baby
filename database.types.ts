@@ -14,7 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      bets: {
+      guesses: {
         Row: {
           calculated_price: number
           created_at: string | null
@@ -120,25 +120,25 @@ export type Database = {
       }
       rankings: {
         Row: {
-          bet_id: string
           created_at: string | null
           distance: number
+          guess_id: string
           id: string
           pool_id: string
           rank: number
         }
         Insert: {
-          bet_id: string
           created_at?: string | null
           distance: number
+          guess_id: string
           id?: string
           pool_id: string
           rank: number
         }
         Update: {
-          bet_id?: string
           created_at?: string | null
           distance?: number
+          guess_id?: string
           id?: string
           pool_id?: string
           rank?: number
@@ -146,9 +146,9 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "rankings_bet_id_fkey"
-            columns: ["bet_id"]
+            columns: ["guess_id"]
             isOneToOne: false
-            referencedRelation: "bets"
+            referencedRelation: "guesses"
             referencedColumns: ["id"]
           },
           {

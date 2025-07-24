@@ -17,7 +17,7 @@ export function calculateSigma(bound: number, cutoff: number = 0.01): number {
   return bound / Math.sqrt(-2 * Math.log(cutoff));
 }
 
-type BetComponentPriceInput = {
+type GuessComponentPriceInput = {
   guess: number;
   mean: number;
   bound: number;
@@ -28,13 +28,15 @@ type BetComponentPriceInput = {
 };
 
 /**
- * Calculates the price of a single component of a bet (e.g., date or weight)
+ * Calculates the price of a single component of a guess (e.g., date or weight)
  * based on a normalized Gaussian distribution.
  * Ensures that the minPrice occurs exactly at the specified bound.
  * @param input The input parameters for the price calculation.
  * @returns The calculated price for the component.
  */
-export function getBetComponentPrice(input: BetComponentPriceInput): number {
+export function getGuessComponentPrice(
+  input: GuessComponentPriceInput
+): number {
   const {
     guess,
     mean,
@@ -60,7 +62,7 @@ export function getBetComponentPrice(input: BetComponentPriceInput): number {
   return price;
 }
 
-export type BetPriceInput = {
+export type GuessPriceInput = {
   pool: Tables<"pools">;
   birthDateDeviation: number;
   weightGuess: number;
@@ -68,9 +70,9 @@ export type BetPriceInput = {
 };
 
 /**
- * Calculates the total price of a bet by summing the prices of its components.
+ * Calculates the total price of a guess by summing the prices of its components.
  */
-export function getBetPrice(input: BetPriceInput) {
+export function getGuessPrice(input: GuessPriceInput) {
   const { pool, birthDateDeviation, weightGuess } = input;
 
   // Ensure pool properties have fallbacks
@@ -91,7 +93,7 @@ export function getBetPrice(input: BetPriceInput) {
   const minComponentPrice = price_floor / 2;
   const maxComponentPrice = price_ceiling / 2;
 
-  const datePrice = getBetComponentPrice({
+  const datePrice = getGuessComponentPrice({
     guess: birthDateDeviation,
     mean: 0,
     bound: DATE_DEVIATION_DAYS,
@@ -100,7 +102,7 @@ export function getBetPrice(input: BetPriceInput) {
     sigma: sigma_days,
   });
 
-  const weightPrice = getBetComponentPrice({
+  const weightPrice = getGuessComponentPrice({
     guess: weightGuess, // already in ounces
     mean: mu_weight, // already in ounces
     bound: WEIGHT_DEVIATION_OUNCES,
