@@ -4,6 +4,7 @@ import { pricingModelSigmas, PricingModel } from "@/lib/helpers/pricingModels";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { v4 as uuidv4 } from "uuid";
 
 export type CreatePoolState = {
   message: string | null;
@@ -25,8 +26,34 @@ export async function createPool(
     formData.get("mu_weight_ounces") as string,
     10
   );
-
+  const description = formData.get("description") as string | null;
+  const imageFile = formData.get("image") as File | null;
   const supabase = await createClient();
+
+  let image_url: string | null = null;
+  if (imageFile && imageFile.size > 0) {
+    // Upload image to Supabase Storage
+    const fileExt = imageFile.name.split(".").pop();
+    const fileName = `${slug}-${uuidv4()}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage
+      .from("pool-images")
+      .upload(fileName, imageFile, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: imageFile.type,
+      });
+    if (uploadError) {
+      return {
+        message: `Image upload failed: ${uploadError.message}`,
+        errors: {},
+      };
+    }
+    // Get public URL
+    const { data: publicUrlData } = supabase.storage
+      .from("pool-images")
+      .getPublicUrl(fileName);
+    image_url = publicUrlData?.publicUrl || null;
+  }
 
   // Get user_id from Supabase session
   const {
@@ -86,6 +113,8 @@ export async function createPool(
     sigma_days,
     mu_weight: mu_weight_ounces, // store as ounces
     sigma_weight,
+    description: description || null,
+    image_url,
   };
   const { data: newPool, error } = await supabase
     .from("pools")

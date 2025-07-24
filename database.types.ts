@@ -67,7 +67,9 @@ export type Database = {
           actual_birth_weight: number | null
           baby_name: string | null
           created_at: string | null
+          description: string | null
           id: string
+          image_url: string | null
           is_locked: boolean | null
           mu_due_date: string | null
           mu_weight: number
@@ -83,7 +85,9 @@ export type Database = {
           actual_birth_weight?: number | null
           baby_name?: string | null
           created_at?: string | null
+          description?: string | null
           id?: string
+          image_url?: string | null
           is_locked?: boolean | null
           mu_due_date?: string | null
           mu_weight?: number
@@ -99,7 +103,9 @@ export type Database = {
           actual_birth_weight?: number | null
           baby_name?: string | null
           created_at?: string | null
+          description?: string | null
           id?: string
+          image_url?: string | null
           is_locked?: boolean | null
           mu_due_date?: string | null
           mu_weight?: number

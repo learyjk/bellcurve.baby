@@ -5,47 +5,67 @@ import { Label } from "@/components/ui/label";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { useActionState } from "react";
 import { toast } from "sonner";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import clsx from "clsx";
 import { formatSlug, generateSlugSuggestions } from "@/lib/helpers/slug";
 import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
 import { createPool, CreatePoolState } from "@/lib/actions/create/createPool";
 import { pricingModelSigmas } from "@/lib/helpers/pricingModels";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import Image from "next/image";
 
 export function CreateBabyPoolForm() {
+  // --- State ---
+  // Form fields
+  const [babyName, setBabyName] = useState("");
+  const [slug, setSlug] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [description, setDescription] = useState("");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  // Pricing
+  const [minPrice, setMinPrice] = useState(5);
+  const [maxPrice, setMaxPrice] = useState(50);
+  const [pricingModel, setPricingModel] =
+    useState<keyof typeof pricingModelSigmas>("standard");
+  // Weight/date
+  const [muWeight, setMuWeight] = useState(7.4);
+  const [muDate] = useState(0); // 0 deviation from due date (in days)
+
+  // Slug validation
+  const [slugAvailable, setSlugAvailable] = useState<null | boolean>(null);
+  const [slugChecking, setSlugChecking] = useState(false);
+  const [slugSuggestions, setSlugSuggestions] = useState<string[]>([]);
+  const [slugError, setSlugError] = useState("");
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  // --- Handlers ---
+  // Image upload handler
+  const onImageChange = useCallback((file: File | null) => {
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => setImagePreview(e.target?.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
+    }
+  }, []);
+
+  // --- Actions ---
   const initialState: CreatePoolState = { message: null, errors: {} };
   const [state, formAction, isPending] = useActionState(
     createPool,
     initialState
   );
-  const [pricingModel, setPricingModel] =
-    useState<keyof typeof pricingModelSigmas>("standard");
-  // Example values for preview
-  // Controlled state for mean values
-  const [muWeight, setMuWeight] = useState(7.4);
-  const [muDate] = useState(0); // 0 deviation from due date (in days)
 
+  // --- Effects ---
+  // Toast error on state.message
   useEffect(() => {
     if (state?.message) {
       toast.error(state.message);
     }
   }, [state]);
 
-  const [minPrice, setMinPrice] = useState(5);
-  const [maxPrice, setMaxPrice] = useState(50);
-
-  // Slug state and validation
-  const [slug, setSlug] = useState("");
-  const [slugAvailable, setSlugAvailable] = useState<null | boolean>(null);
-  const [slugChecking, setSlugChecking] = useState(false);
-  const [slugSuggestions, setSlugSuggestions] = useState<string[]>([]);
-  const [slugError, setSlugError] = useState("");
-  const [babyName, setBabyName] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Check slug availability (debounced)
+  // Debounced slug check
   useEffect(() => {
     if (!slug) {
       setSlugAvailable(null);
@@ -57,7 +77,6 @@ export function CreateBabyPoolForm() {
     setSlugError("");
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
-      // Call API route to check slug
       try {
         const res = await fetch(
           `/api/baby/check-slug?slug=${encodeURIComponent(slug)}`
@@ -70,9 +89,7 @@ export function CreateBabyPoolForm() {
         } else {
           setSlugAvailable(false);
           setSlugError("Slug is already taken. Please choose another.");
-          // Generate suggestions and check each for uniqueness
           const rawSuggestions = generateSlugSuggestions(slug, babyName);
-          // Check each suggestion in parallel
           const checks = await Promise.all(
             rawSuggestions.map(async (s) => {
               const res = await fetch(
@@ -82,7 +99,6 @@ export function CreateBabyPoolForm() {
               return data.available ? s : null;
             })
           );
-          // Only show available suggestions, up to 4
           setSlugSuggestions(
             checks.filter((s): s is string => Boolean(s)).slice(0, 4)
           );
@@ -97,6 +113,7 @@ export function CreateBabyPoolForm() {
     }, 400);
   }, [slug, babyName, dueDate]);
 
+  // --- Helpers ---
   const formatWeightLabel = (weight: number) => {
     if (weight < 0) weight = 0;
     const lbs = Math.floor(weight);
@@ -178,6 +195,91 @@ export function CreateBabyPoolForm() {
                 ))}
               </div>
             )}
+          </div>
+          {/* Image Upload Drop Zone */}
+          <div>
+            <Label htmlFor="image_upload">Pool Image</Label>
+            <div
+              className={clsx(
+                "border-2 border-dashed rounded-md p-4 mt-2 flex flex-col items-center justify-center cursor-pointer transition",
+                imagePreview
+                  ? "border-green-400"
+                  : "border-gray-300 hover:border-blue-400"
+              )}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith("image/")) {
+                  onImageChange(file);
+                }
+              }}
+              onClick={() => {
+                document.getElementById("image_upload")?.click();
+              }}
+              style={{ minHeight: 120 }}
+            >
+              {imagePreview ? (
+                <Image
+                  src={imagePreview}
+                  alt="Preview"
+                  className="max-h-32 mb-2 rounded"
+                  style={{ objectFit: "cover" }}
+                />
+              ) : (
+                <span className="text-gray-500">
+                  Drag & drop an image here, or click to select
+                </span>
+              )}
+              <Button
+                type="button"
+                className="mt-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  document.getElementById("image_upload")?.click();
+                }}
+              >
+                Choose Image
+              </Button>
+              <input
+                id="image_upload"
+                name="image"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  if (file && file.type.startsWith("image/")) {
+                    onImageChange(file);
+                  }
+                }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Optional. Recommended size: square, under 4MB.
+            </p>
+          </div>
+
+          {/* Description Textarea */}
+          <div>
+            <Label htmlFor="description">Pool Description</Label>
+            <textarea
+              id="description"
+              name="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Write something about this baby pool..."
+              rows={4}
+              className="w-full mt-2 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              maxLength={500}
+            />
+            <div className="text-xs text-gray-400 mt-1">
+              {description.length}/500 characters
+            </div>
           </div>
           <div className="flex gap-8">
             <div className="flex-1">
