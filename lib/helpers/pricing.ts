@@ -29,7 +29,7 @@ type GuessComponentPriceInput = {
 
 /**
  * Calculates the price of a single component of a guess (e.g., date or weight)
- * based on a normalized Gaussian distribution.
+ * based on normalized Gaussian distribution.
  * Ensures that the minPrice occurs exactly at the specified bound.
  * @param input The input parameters for the price calculation.
  * @returns The calculated price for the component.
