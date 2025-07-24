@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import ClosePoolForm from "./close-pool-form";
 import { getPoolBySlug } from "@/lib/data/pool/getPoolBySlug";
-import { getBetsForPool } from "@/lib/data/bets/getBetsForPool";
+import { getGuessesForPool } from "@/lib/data/guesses/getGuessesForPool";
 
 export default async function ClosePoolPage({
   params,
@@ -26,14 +26,14 @@ export default async function ClosePoolPage({
     return notFound();
   }
 
-  const bets = await getBetsForPool(pool.id);
+  const guesses = await getGuessesForPool(pool.id);
 
   return (
     <div className="flex-1 w-full flex flex-col gap-20 items-center">
       <div className="animate-in flex-1 flex flex-col gap-20 max-w-4xl px-3">
         <main className="flex-1 flex flex-col gap-6">
           <h2 className="font-bold text-4xl mb-4">Close Pool</h2>
-          <ClosePoolForm pool={pool} bets={bets} />
+          <ClosePoolForm pool={pool} guesses={guesses} />
         </main>
       </div>
     </div>

@@ -29,7 +29,7 @@ export async function createCheckoutSession(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "You must be logged in to place a bet." };
+    return { error: "You must be logged in to make a guess." };
   }
 
   try {
@@ -49,7 +49,7 @@ export async function createCheckoutSession(
           price_data: {
             currency: "usd",
             product_data: {
-              name: `Bet on ${data.babyName}`,
+              name: `Guess on ${data.babyName}`,
               description: `Your guess: ${formattedDate} at ${formattedWeight}`,
             },
             unit_amount: Math.round(data.price * 100),

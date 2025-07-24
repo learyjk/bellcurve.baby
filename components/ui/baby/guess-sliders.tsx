@@ -37,12 +37,12 @@ export function GuessSliders({
   const currentWeightOz = Math.round(weightGuessOunces % 16);
 
   // Pricing constants from the pool
-  const minBetPrice = pool?.price_floor ?? 5;
-  const maxBetPrice = pool?.price_ceiling ?? 50;
+  const minGuessPrice = pool?.price_floor ?? 5;
+  const maxGuessPrice = pool?.price_ceiling ?? 50;
 
   // Each component gets half the price range
-  const minComponentPrice = minBetPrice / 2;
-  const maxComponentPrice = maxBetPrice / 2;
+  const minComponentPrice = minGuessPrice / 2;
+  const maxComponentPrice = maxGuessPrice / 2;
 
   // Sigma values from the pool (fallback to defaults if missing)
   const dateSigma = pool?.sigma_days ?? 4;

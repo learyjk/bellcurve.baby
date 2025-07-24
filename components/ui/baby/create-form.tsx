@@ -367,17 +367,17 @@ export function CreateBabyPoolForm() {
           <div className="space-y-6 pt-6 border-t border-gray-200">
             <div>
               <h3 className="text-xl font-semibold">
-                Betting Price Configuration
+                Guess Price Configuration
               </h3>
               <p className="text-sm text-gray-600 mt-1">
-                Set the price range for your betting pool.
+                Set the price range for your guessing pool.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="price_floor" className="text-base font-medium">
-                  Minimum Bet Price ($)
+                  Minimum Guess Price ($)
                 </Label>
                 <p className="text-sm text-gray-500 mt-2">
                   The price at the edges of the statistical range.
@@ -402,7 +402,7 @@ export function CreateBabyPoolForm() {
                   htmlFor="price_ceiling"
                   className="text-base font-medium"
                 >
-                  Maximum Bet Price ($)
+                  Maximum Guess Price ($)
                 </Label>
                 <p className="text-sm text-gray-500 mt-2">
                   The price for guessing the most statistically likely outcome.
@@ -434,16 +434,6 @@ export function CreateBabyPoolForm() {
                 <input
                   type="radio"
                   name="pricingModel"
-                  value="aggressive"
-                  checked={pricingModel === "aggressive"}
-                  onChange={() => setPricingModel("aggressive")}
-                />
-                <span className="ml-1">Aggressive</span>
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="pricingModel"
                   value="standard"
                   checked={pricingModel === "standard"}
                   onChange={() => setPricingModel("standard")}
@@ -461,6 +451,10 @@ export function CreateBabyPoolForm() {
                 <span className="ml-1">Chill</span>
               </label>
             </div>
+            {/* Preview */}
+            <h2 className="text-lg font-semibold mb-2">
+              Pricing Model Preview
+            </h2>
             <div className="flex flex-col md:flex-row gap-8">
               <div className="flex-1">
                 {/* Calculate absolute date labels for the date graph */}

@@ -4,7 +4,7 @@ export default function HowItWorks() {
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       <h1 className="text-3xl font-bold mb-8">
-        Baby Betting Pool: How It Works
+        Baby Guessing Pool: How It Works
       </h1>
       <Tabs defaultValue="layman" className="w-full">
         <TabsList className="mb-6">
@@ -32,7 +32,7 @@ export default function HowItWorks() {
               with actual math behind it instead of just corporate capitalism.
             </p>
             <p>
-              Before the bets go live, the creators pick one of these models:
+              Before the guesses go live, the creators pick one of these models:
             </p>
             <div className="p-4 rounded-lg border">
               <ul className="space-y-2">

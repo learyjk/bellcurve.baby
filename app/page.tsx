@@ -12,7 +12,7 @@ export default function Home() {
         <HowItWorks />
         <Image
           src="/price_surface.gif"
-          alt="Baby Bets Logo"
+          alt="Bell Curve Logo"
           width={500}
           height={500}
           className="mx-auto"

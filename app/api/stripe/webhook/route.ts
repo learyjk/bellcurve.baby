@@ -8,18 +8,18 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
-type BetInsert = Database["public"]["Tables"]["bets"]["Insert"];
+type GuessInsert = Database["public"]["Tables"]["guesses"]["Insert"];
 
-async function createBet(bet: BetInsert) {
+async function createGuess(guess: GuessInsert) {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("bets")
-    .insert(bet)
+    .from("guesses")
+    .insert(guess)
     .select()
     .single();
 
   if (error) {
-    console.error("Error creating bet from webhook:", error);
+    console.error("Error creating guess from webhook:", error);
     throw new Error(error.message);
   }
 
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      await createBet({
+      await createGuess({
         pool_id: poolId,
         user_id: userId,
         guessed_birth_date: guessDate,
@@ -80,12 +80,12 @@ export async function POST(req: NextRequest) {
       });
 
       console.log(
-        `Successfully created bet for user ${userId} and pool ${poolId}.`
+        `Successfully created guess for user ${userId} and pool ${poolId}.`
       );
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
-      console.error("Failed to create bet from webhook", message);
-      return new NextResponse("Webhook Error: Could not create bet", {
+      console.error("Failed to create guess from webhook", message);
+      return new NextResponse("Webhook Error: Could not create guess", {
         status: 500,
       });
     }

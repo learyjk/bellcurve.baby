@@ -2,8 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { getBetsForPool } from "@/lib/data/bets/getBetsForPool";
-import { rankBetsByAccuracy } from "@/lib/helpers/ranking";
+import { getGuessesForPool } from "@/lib/data/guesses/getGuessesForPool";
+import { rankGuessesByAccuracy } from "@/lib/helpers/ranking";
 
 export type ClosePoolState = {
   message: string | null;
@@ -49,29 +49,29 @@ export async function closePool(
     return { message: "Pool not found or user not authorized" };
   }
 
-  const bets = await getBetsForPool(values.pool_id);
+  const guesses = await getGuessesForPool(values.pool_id);
 
-  if (!bets) {
-    return { message: "No bets found for this pool" };
+  if (!guesses) {
+    return { message: "No guesses found for this pool" };
   }
 
-  const guesses = bets.map((bet) => ({
-    name: bet.name || "",
-    guessDate: bet.guessed_birth_date,
-    guessWeight: bet.guessed_weight,
-    bet_id: bet.id,
+  const formattedGuesses = guesses.map((guess) => ({
+    name: guess.name || "",
+    guessDate: guess.guessed_birth_date,
+    guessWeight: guess.guessed_weight,
+    guess_id: guess.id,
   }));
 
-  const rankedBets = rankBetsByAccuracy(guesses, {
+  const rankedGuesses = rankGuessesByAccuracy(formattedGuesses, {
     actualBirthDate: values.actual_birth_date,
     actualWeight: values.actual_birth_weight,
   });
 
-  const rankingsToInsert = rankedBets.map((bet, index) => ({
+  const rankingsToInsert = rankedGuesses.map((guess, index) => ({
     pool_id: values.pool_id,
-    bet_id: bet.bet_id,
+    guess_id: guess.guess_id,
     rank: index + 1,
-    distance: bet.distance,
+    distance: guess.distance,
   }));
 
   const { error: rankingsError } = await supabase

@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 import { DataTable } from "@/app/baby/data-table";
 import { ColumnDef } from "@tanstack/react-table";
-import BetScatterPlot, {
+import GuessScatterPlot, {
   Guess as BetGuess,
   ActualOutcome as BetActualOutcome,
-} from "@/components/baby/bet-scatter-plot";
+} from "@/components/baby/guess-scatter-plot";
 
-type RankedBet = {
+type RankedGuess = {
   name: string;
   guessed_birth_date: string;
   guessed_weight: number;
@@ -14,11 +14,11 @@ type RankedBet = {
 };
 
 export function LiveRankingsTable({
-  bets,
+  guesses,
   actualBirthDate,
   actualBirthWeight,
 }: {
-  bets: Array<{
+  guesses: Array<{
     name: string;
     guessed_birth_date: string;
     guessed_weight: number;
@@ -27,7 +27,7 @@ export function LiveRankingsTable({
   actualBirthWeight?: number;
 }) {
   // Client-side ranking logic
-  const ranked: RankedBet[] = useMemo(() => {
+  const ranked: RankedGuess[] = useMemo(() => {
     if (
       !actualBirthDate ||
       actualBirthWeight === undefined ||
@@ -38,13 +38,13 @@ export function LiveRankingsTable({
     const actualDate = new Date(actualBirthDate).getTime();
     const actualWeight = Number(actualBirthWeight);
     // Get min/max for normalization
-    const dateValues = bets.map((bet) =>
-      new Date(bet.guessed_birth_date).getTime()
+    const dateValues = guesses.map((guess) =>
+      new Date(guess.guessed_birth_date).getTime()
     );
     dateValues.push(actualDate);
     const minDate = Math.min(...dateValues);
     const maxDate = Math.max(...dateValues);
-    const weightValues = bets.map((bet) => bet.guessed_weight);
+    const weightValues = guesses.map((guess) => guess.guessed_weight);
     weightValues.push(actualWeight);
     const minWeight = Math.min(...weightValues);
     const maxWeight = Math.max(...weightValues);
@@ -54,27 +54,28 @@ export function LiveRankingsTable({
     // Normalize actual values
     const actualDateNorm = (actualDate - minDate) / dateRange;
     const actualWeightNorm = (actualWeight - minWeight) / weightRange;
-    return bets
-      .map((bet) => {
-        const guessDateValue = new Date(bet.guessed_birth_date).getTime();
+    return guesses
+      .map((guess) => {
+        const guessDateValue = new Date(guess.guessed_birth_date).getTime();
         const guessDateNorm = (guessDateValue - minDate) / dateRange;
-        const guessWeightNorm = (bet.guessed_weight - minWeight) / weightRange;
+        const guessWeightNorm =
+          (guess.guessed_weight - minWeight) / weightRange;
         const dateDiffNorm = guessDateNorm - actualDateNorm;
         const weightDiffNorm = guessWeightNorm - actualWeightNorm;
         const distance = Math.sqrt(
           Math.pow(dateDiffNorm, 2) + Math.pow(weightDiffNorm, 2)
         );
         return {
-          name: bet.name || "Anonymous",
-          guessed_birth_date: bet.guessed_birth_date,
-          guessed_weight: bet.guessed_weight,
+          name: guess.name || "Anonymous",
+          guessed_birth_date: guess.guessed_birth_date,
+          guessed_weight: guess.guessed_weight,
           distance,
         };
       })
       .sort((a, b) => a.distance - b.distance);
-  }, [bets, actualBirthDate, actualBirthWeight]);
+  }, [guesses, actualBirthDate, actualBirthWeight]);
 
-  const columns: ColumnDef<RankedBet>[] = [
+  const columns: ColumnDef<RankedGuess>[] = [
     { accessorKey: "name", header: "Name" },
     {
       accessorKey: "guessed_birth_date",
@@ -106,7 +107,7 @@ export function LiveRankingsTable({
       <h3 className="font-bold text-2xl mb-2">Live Rankings</h3>
       <DataTable columns={columns} data={ranked} />
       <div className="mt-8">
-        <BetScatterPlot
+        <GuessScatterPlot
           guesses={
             ranked.map((r) => ({
               name: r.name,
