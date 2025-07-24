@@ -19,6 +19,17 @@ export const columns: ColumnDef<Tables<"pools">>[] = [
   {
     accessorKey: "baby_name",
     header: "Baby Name",
+    cell: ({ row }) => {
+      const baby = row.original;
+      return (
+        <Link
+          href={`/baby/${baby.slug}`}
+          className="font-medium hover:underline"
+        >
+          {baby.baby_name || "Unnamed Baby"}
+        </Link>
+      );
+    },
   },
   {
     accessorKey: "mu_due_date",
@@ -46,9 +57,6 @@ export const columns: ColumnDef<Tables<"pools">>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
               <Link href={`/baby/${baby.slug}`}>View Pool</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link href={`/baby/${baby.slug}/guesses`}>View Guesses</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>

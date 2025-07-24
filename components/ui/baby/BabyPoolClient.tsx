@@ -15,6 +15,7 @@ import {
   CreateCheckoutSessionState,
 } from "@/lib/actions/baby/createCheckoutSession";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import Image from "next/image";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -129,6 +130,27 @@ export function BabyPoolClient({
               })()
             : "Not set"}
         </p>
+        {/* Descrition */}
+        {pool.description && (
+          <p className="text-muted-foreground mt-2">{pool.description}</p>
+        )}
+        {/* Image */}
+        {pool.image_url && (
+          <div className="flex justify-center my-4">
+            <div className="relative w-[200px] h-[200px] rounded shadow border overflow-hidden">
+              <Image
+                src={pool.image_url}
+                alt={
+                  pool.baby_name ? `${pool.baby_name} pool` : "Baby pool image"
+                }
+                fill
+                className="object-cover"
+                sizes="200px"
+                priority
+              />
+            </div>
+          </div>
+        )}
       </div>
       <div className="mb-8">
         <GuessSliders
