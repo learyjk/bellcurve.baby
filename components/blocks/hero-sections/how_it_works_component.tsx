@@ -6,6 +6,9 @@ export default function HowItWorks() {
       <h1 className="text-3xl font-bold mb-8">
         Baby Guessing Pool: How It Works
       </h1>
+      <h2 className="text-lg text-muted-foreground font-medium mb-8">
+        Probabilistic pricing: The more likely your guess, the more it costs
+      </h2>
       <Tabs defaultValue="layman" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="layman">For the layman</TabsTrigger>
@@ -29,17 +32,13 @@ export default function HowItWorks() {
             <p>
               We cap the prices so nobody goes broke and nobody gets to play for
               free. It&apos;s like surge pricing, but for baby predictions, and
-              with actual math behind it instead of just corporate capitalism.
+              with well-meaning donations to the parents instead of corporate greed. 
             </p>
             <p>
               Before the guesses go live, the creators pick one of these models:
             </p>
             <div className="p-4 rounded-lg border">
               <ul className="space-y-2">
-                <li>
-                  <strong>Aggressive:</strong> Only the obvious guesses cost
-                  real money. Everything else is practically free.
-                </li>
                 <li>
                   <strong>Standard:</strong> Balanced. Close guesses cost more,
                   wild guesses cost less.
@@ -59,7 +58,7 @@ export default function HowItWorks() {
         </TabsContent>
         <TabsContent value="nerds">
           <div className="space-y-4">
-            <p>You know who you are. Welcome! Game recognize game.</p>
+            <p>You know who you are. Game recognize game.</p>
             <p>
               We&apos;re using a Gaussian distribution centered on the expected
               value (due date or birth weight) to model the probability of each
@@ -92,15 +91,11 @@ export default function HowItWorks() {
             <div className="p-4 rounded-lg border">
               <ul className="space-y-2">
                 <li>
-                  <strong>Aggressive</strong> (σ = 0.5): Tight distribution,
-                  sharp price drops
-                </li>
-                <li>
-                  <strong>Standard</strong> (σ = 1.0): Standard distribution,
+                  <strong>Standard</strong> (σ = x%): Standard distribution,
                   balanced curve
                 </li>
                 <li>
-                  <strong>Chill</strong> (σ = 2.0): Wide distribution, gentler
+                  <strong>Chill</strong> (σ = x%): Wide distribution, gentler
                   price gradients
                 </li>
               </ul>
