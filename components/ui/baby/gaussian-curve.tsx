@@ -40,30 +40,41 @@ export function GaussianCurve({
 }: GaussianCurveProps) {
   const yAxisLabelWidth = 40; // Space for Y-axis labels
 
+  // Defensive: ensure min < max and minPrice < maxPrice to avoid NaN in scales
+  const safeMin = Number.isFinite(min) ? min : 0;
+  let safeMax = Number.isFinite(max) ? max : safeMin + 1;
+  if (safeMax <= safeMin) safeMax = safeMin + 1;
+
+  const safeMinPrice = Number.isFinite(minPrice) ? minPrice : 0;
+  let safeMaxPrice = Number.isFinite(maxPrice) ? maxPrice : safeMinPrice + 1;
+  if (safeMaxPrice <= safeMinPrice) safeMaxPrice = safeMinPrice + 1;
+
+  const bound = Math.max(Math.abs(safeMin - mean), Math.abs(safeMax - mean));
+
   const curveData = useMemo(() => {
-    const points = [];
+    const points: { x: number; y: number }[] = [];
     const steps = 100;
     for (let i = 0; i <= steps; i++) {
-      const x = min + (i / steps) * (max - min);
+      const x = safeMin + (i / steps) * (safeMax - safeMin);
       const y = getGuessComponentPrice({
         guess: x,
         mean,
-        bound: Math.max(Math.abs(min - mean), Math.abs(max - mean)),
-        minPrice,
-        maxPrice,
+        bound,
+        minPrice: safeMinPrice,
+        maxPrice: safeMaxPrice,
         ...(sigma !== undefined ? { sigma } : {}),
       });
       points.push({ x, y });
     }
     return points;
-  }, [min, max, mean, minPrice, maxPrice, sigma]);
+  }, [safeMin, safeMax, mean, safeMinPrice, safeMaxPrice, sigma, bound]);
 
   const userPrice = getGuessComponentPrice({
     guess: currentGuess,
     mean,
-    bound: Math.max(Math.abs(min - mean), Math.abs(max - mean)),
-    minPrice,
-    maxPrice,
+    bound,
+    minPrice: safeMinPrice,
+    maxPrice: safeMaxPrice,
     ...(sigma !== undefined ? { sigma } : {}),
   });
 
@@ -73,12 +84,13 @@ export function GaussianCurve({
   const curvePath = useMemo(() => {
     if (curveData.length === 0) return "";
 
-    const xScale = (x: number) => ((x - min) / (max - min)) * width;
+    const denomX = safeMax - safeMin || 1;
+    const denomY = safeMaxPrice - safeMinPrice || 1;
+
+    const xScale = (x: number) => ((x - safeMin) / denomX) * width;
     // Use the shared graphBottomOffset
     const yScale = (y: number) =>
-      height -
-      ((y - minPrice) / (maxPrice - minPrice)) * height * 0.8 -
-      graphBottomOffset;
+      height - ((y - safeMinPrice) / denomY) * height * 0.8 - graphBottomOffset;
 
     let path = `M ${xScale(curveData[0].x)} ${yScale(curveData[0].y)}`;
 
@@ -90,21 +102,25 @@ export function GaussianCurve({
     return path;
   }, [
     curveData,
-    min,
-    max,
+    safeMin,
+    safeMax,
     width,
     height,
-    minPrice,
-    maxPrice,
+    safeMinPrice,
+    safeMaxPrice,
     graphBottomOffset,
   ]);
-
-  const userGuessX = ((currentGuess - min) / (max - min)) * width;
+  const denomX = safeMax - safeMin || 1;
+  const denomY = safeMaxPrice - safeMinPrice || 1;
+  const userGuessX = Number.isFinite(currentGuess)
+    ? ((currentGuess - safeMin) / denomX) * width
+    : 0;
   // Use the shared graphBottomOffset
-  const userGuessY =
-    height -
-    ((userPrice - minPrice) / (maxPrice - minPrice)) * height * 0.8 -
-    graphBottomOffset;
+  const userGuessY = Number.isFinite(userPrice)
+    ? height -
+      ((userPrice - safeMinPrice) / denomY) * height * 0.8 -
+      graphBottomOffset
+    : height - graphBottomOffset;
 
   return (
     <div className={`flex flex-col font-mono ${className}`}>
@@ -126,7 +142,7 @@ export function GaussianCurve({
           textAnchor="end"
           fontFamily="JetBrains Mono, monospace"
         >
-          ${minPrice.toFixed(2)}
+          ${safeMinPrice.toFixed(2)}
         </text>
         <text
           x={yAxisLabelWidth - 4}
@@ -136,7 +152,7 @@ export function GaussianCurve({
           textAnchor="end"
           fontFamily="JetBrains Mono, monospace"
         >
-          ${maxPrice.toFixed(2)}
+          ${safeMaxPrice.toFixed(2)}
         </text>
 
         <g transform={`translate(${yAxisLabelWidth}, 0)`}>
@@ -171,7 +187,7 @@ export function GaussianCurve({
             textAnchor="start"
             fontFamily="JetBrains Mono, monospace"
           >
-            {minLabel ?? min}
+            {minLabel ?? safeMin}
           </text>
           <text
             x={width / 2}
@@ -191,7 +207,7 @@ export function GaussianCurve({
             textAnchor="end"
             fontFamily="JetBrains Mono, monospace"
           >
-            {maxLabel ?? max}
+            {maxLabel ?? safeMax}
           </text>
 
           {/* Gaussian curve */}

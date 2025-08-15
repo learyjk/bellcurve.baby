@@ -124,9 +124,12 @@ export function BabyPoolClient({
       {/* Left Column - Content Area */}
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold mb-4">
-            Make you guess for {pool.baby_name || "the Baby"}&apos;s Arrival!
+          <h2 className="text-4xl text-pretty font-semibold tracking-tight mb-1">
+            Guess and donate on {pool.baby_name || "the Baby"}&apos;s Arrival!
           </h2>
+          <p className="text-muted-foreground text-sm mb-6">
+            Organized by {pool.organized_by}
+          </p>
           {/* Image */}
           {pool.image_url && (
             <div className="relative w-32 mb-4 max-w-32 bg-white p-2 shadow-lg transform rotate-6 overflow-hidden">
@@ -146,7 +149,7 @@ export function BabyPoolClient({
               </div>
             </div>
           )}
-          <p className="text-muted-foreground">
+          {/* <p className="text-muted-foreground">
             Expected due date:{" "}
             {pool.mu_due_date
               ? (() => {
@@ -156,7 +159,7 @@ export function BabyPoolClient({
                   return new Date(year, month - 1, day).toLocaleDateString();
                 })()
               : "Not set"}
-          </p>
+          </p> */}
         </div>
 
         {/* Description */}
