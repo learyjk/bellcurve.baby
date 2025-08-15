@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, JetBrains_Mono, Cherry_Bomb_One } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
@@ -22,6 +22,19 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+  subsets: ["latin"],
+});
+
+const cherryBomb = Cherry_Bomb_One({
+  variable: "--font-cherry-bomb",
+  display: "swap",
+  subsets: ["latin"],
+  weight: "400",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,7 +42,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased`}>
+      <body
+        className={`${geistSans.className} ${jetbrainsMono.variable} ${cherryBomb.variable} antialiased`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

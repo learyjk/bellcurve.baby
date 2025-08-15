@@ -36,7 +36,7 @@ export function GaussianCurve({
   minLabel,
   meanLabel,
   maxLabel,
-  showGrid = true,
+  showGrid = false,
 }: GaussianCurveProps) {
   const yAxisLabelWidth = 40; // Space for Y-axis labels
 
@@ -107,21 +107,24 @@ export function GaussianCurve({
     graphBottomOffset;
 
   return (
-    <div className={`flex flex-col items-center ${className}`}>
-      <div className="mb-2 text-sm text-gray-600">{title}</div>
+    <div className={`flex flex-col font-mono ${className}`}>
+      <div className="mb-2 text-sm font-bold tracking-widest uppercase">
+        {title}
+      </div>
       <svg
         width={width + yAxisLabelWidth}
         height={height}
         viewBox={`0 0 ${width + yAxisLabelWidth} ${height}`}
-        className="border border-gray-200 rounded-lg bg-gray-50 overflow-visible"
+        className="overflow-visible"
       >
         {/* Y-axis labels */}
         <text
           x={yAxisLabelWidth - 4}
           y={height - graphBottomOffset}
           fontSize="10"
-          fill="#666"
+          fill="hsl(var(--muted-foreground))"
           textAnchor="end"
+          fontFamily="JetBrains Mono, monospace"
         >
           ${minPrice.toFixed(2)}
         </text>
@@ -129,8 +132,9 @@ export function GaussianCurve({
           x={yAxisLabelWidth - 4}
           y={15}
           fontSize="10"
-          fill="#666"
+          fill="hsl(var(--muted-foreground))"
           textAnchor="end"
+          fontFamily="JetBrains Mono, monospace"
         >
           ${maxPrice.toFixed(2)}
         </text>
@@ -149,7 +153,7 @@ export function GaussianCurve({
                   <path
                     d="M 20 0 L 0 0 0 20"
                     fill="none"
-                    stroke="#e5e5e5"
+                    stroke="hsl(var(--border))"
                     strokeWidth="0.5"
                   />
                 </pattern>
@@ -163,8 +167,9 @@ export function GaussianCurve({
             x={0}
             y={height - 4}
             fontSize="10"
-            fill="#666"
+            fill="hsl(var(--muted-foreground))"
             textAnchor="start"
+            fontFamily="JetBrains Mono, monospace"
           >
             {minLabel ?? min}
           </text>
@@ -172,8 +177,9 @@ export function GaussianCurve({
             x={width / 2}
             y={height - 4}
             fontSize="10"
-            fill="#666"
+            fill="hsl(var(--muted-foreground))"
             textAnchor="middle"
+            fontFamily="JetBrains Mono, monospace"
           >
             {meanLabel ?? mean}
           </text>
@@ -181,8 +187,9 @@ export function GaussianCurve({
             x={width}
             y={height - 4}
             fontSize="10"
-            fill="#666"
+            fill="hsl(var(--muted-foreground))"
             textAnchor="end"
+            fontFamily="JetBrains Mono, monospace"
           >
             {maxLabel ?? max}
           </text>
@@ -191,7 +198,7 @@ export function GaussianCurve({
           <path
             d={curvePath}
             fill="none"
-            stroke="#3b82f6"
+            stroke="hsl(var(--foreground))"
             strokeWidth="2"
             className="drop-shadow-sm"
           />
@@ -201,14 +208,14 @@ export function GaussianCurve({
             d={`${curvePath} L ${userGuessX} ${
               height - graphBottomOffset
             } L ${userGuessX} ${height - graphBottomOffset} Z`}
-            fill="#3b82f6"
+            fill="none"
             fillOpacity="0.1"
           />
 
           {/* User's guess indicator */}
           <g>
             {/* Vertical line at user's guess */}
-            <line
+            {/* <line
               x1={userGuessX}
               y1={userGuessY}
               x2={userGuessX}
@@ -216,21 +223,21 @@ export function GaussianCurve({
               stroke="#ef4444"
               strokeWidth="2"
               strokeDasharray="4,2"
-            />
+            /> */}
 
             {/* Dot at user's guess position on curve */}
             <circle
               cx={userGuessX}
               cy={userGuessY}
-              r="4"
-              fill="#ef4444"
-              stroke="white"
+              r="6"
+              fill="hsl(var(--primary))"
+              stroke="hsl(var(--foreground))"
               strokeWidth="2"
               className="drop-shadow-sm"
             />
 
             {/* Label for user's guess */}
-            <text
+            {/* <text
               x={userGuessX}
               y={userGuessY - 8}
               fontSize="10"
@@ -239,7 +246,7 @@ export function GaussianCurve({
               fontWeight="600"
             >
               You
-            </text>
+            </text> */}
           </g>
         </g>
       </svg>

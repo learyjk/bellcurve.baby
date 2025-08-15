@@ -15,7 +15,7 @@ import { AuthButton } from "@/components/auth-button";
 
 export async function Navbar() {
   return (
-    <nav className="flex items-center justify-between w-full px-4 py-2 border-b bg-white dark:bg-gray-900">
+    <nav className="flex items-center justify-between w-full px-4 py-2 border-b">
       <NavigationMenu viewport={false}>
         <NavigationMenuList>
           <NavigationMenuItem>

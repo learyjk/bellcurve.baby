@@ -1,5 +1,6 @@
 "use client";
 import { Slider } from "@/components/ui/slider";
+import { Card, CardContent } from "@/components/ui/card";
 import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
 import { Tables } from "@/database.types";
 import { DATE_DEVIATION_DAYS, WEIGHT_DEVIATION_OUNCES } from "@/lib/constants";
@@ -9,6 +10,7 @@ export function GuessSliders({
   weightGuessOunces,
   onValueChange,
   pool,
+  layout = "adaptive",
 }: {
   birthDateDeviation: number;
   weightGuessOunces: number;
@@ -17,6 +19,7 @@ export function GuessSliders({
     weightGuessOunces?: number;
   }) => void;
   pool?: Tables<"pools">;
+  layout?: "horizontal" | "vertical" | "adaptive";
 }) {
   // If backend provides meanWeight in ounces, convert to lbs/oz
   let meanWeightOz = pool?.mu_weight ?? 121.6; // fallback to 7.6 lbs in oz
@@ -72,87 +75,124 @@ export function GuessSliders({
   const meanDateLabel = formatDate(dueDate);
   const currentGuessDateLabel = formatDate(currentGuessDate);
 
+  // Determine the layout classes based on the layout prop
+  const getLayoutClasses = () => {
+    switch (layout) {
+      case "horizontal":
+        return "flex flex-row gap-4";
+      case "vertical":
+        return "flex flex-col gap-4";
+      case "adaptive":
+      default:
+        // Adaptive: vertical on small screens, horizontal on medium and up
+        // Use xl breakpoint for horizontal to ensure enough space for side-by-side curves
+        return "flex flex-col xl:flex-row gap-4";
+    }
+  };
+
   return (
-    <>
-      {/* Sliders Side by Side */}
-      <div className="flex flex-col md:flex-row gap-8 mt-6">
+    <div className="font-mono">
+      {/* Sliders with Dynamic Layout */}
+      <div className={`${getLayoutClasses()}`}>
         {/* Birth Date Guess Slider with Gaussian Curve */}
-        <div className="flex-1">
-          <div className="mb-4 flex justify-center">
-            <GaussianCurve
-              currentGuess={birthDateDeviation}
-              mean={0}
-              min={-DATE_DEVIATION_DAYS}
-              max={DATE_DEVIATION_DAYS}
-              minPrice={minComponentPrice}
-              maxPrice={maxComponentPrice}
-              title="Birth Date Probability Distribution"
-              minLabel={minDateLabel}
-              meanLabel={meanDateLabel}
-              maxLabel={maxDateLabel}
-              sigma={dateSigma}
-            />
-          </div>
-          <Slider
-            id="birth_date_deviation"
-            name="birth_date_deviation"
-            defaultValue={[birthDateDeviation]}
-            min={-DATE_DEVIATION_DAYS}
-            max={DATE_DEVIATION_DAYS}
-            step={1}
-            className="w-full"
-            onValueChange={(val) =>
-              onValueChange({ birthDateDeviation: val[0] })
-            }
-          />
-          <div className="text-xs text-gray-600 flex justify-between">
-            <span>{minDateLabel}</span>
-            <span>{meanDateLabel}</span>
-            <span>{maxDateLabel}</span>
-          </div>
-          <div className="text-sm text-center" id="birth_date_deviation_value">
-            {currentGuessDateLabel}
-          </div>
+        <div className="flex-1bg-white">
+          <Card className="shadow-none bg-primary-foreground">
+            <CardContent className="p-6">
+              <div className="mb-4 flex justify-center">
+                <GaussianCurve
+                  currentGuess={birthDateDeviation}
+                  mean={0}
+                  min={-DATE_DEVIATION_DAYS}
+                  max={DATE_DEVIATION_DAYS}
+                  minPrice={minComponentPrice}
+                  maxPrice={maxComponentPrice}
+                  title="Date Price Curve"
+                  minLabel={minDateLabel}
+                  meanLabel={meanDateLabel}
+                  maxLabel={maxDateLabel}
+                  sigma={dateSigma}
+                />
+              </div>
+              <div className="relative">
+                <Slider
+                  id="birth_date_deviation"
+                  name="birth_date_deviation"
+                  defaultValue={[birthDateDeviation]}
+                  min={-DATE_DEVIATION_DAYS}
+                  max={DATE_DEVIATION_DAYS}
+                  step={1}
+                  className="w-full"
+                  onValueChange={(val) =>
+                    onValueChange({ birthDateDeviation: val[0] })
+                  }
+                />
+                <div
+                  className="absolute top-4 text-xs font-mono transform -translate-x-1/2 text-center whitespace-nowrap"
+                  style={{
+                    left: `${
+                      ((birthDateDeviation - -DATE_DEVIATION_DAYS) /
+                        (DATE_DEVIATION_DAYS - -DATE_DEVIATION_DAYS)) *
+                      100
+                    }%`,
+                  }}
+                  id="birth_date_deviation_value"
+                >
+                  {currentGuessDateLabel}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
         {/* Weight Guess Slider */}
         <div className="flex-1">
-          <div className="mb-4 flex justify-center">
-            <GaussianCurve
-              currentGuess={weightGuessOunces}
-              mean={meanWeightOz}
-              min={weightMinOz}
-              max={weightMaxOz}
-              minPrice={minComponentPrice}
-              maxPrice={maxComponentPrice}
-              title="Birth Weight Probability Distribution"
-              minLabel={`${weightMinLbs} lbs ${weightMinRemOz} oz`}
-              maxLabel={`${weightMaxLbs} lbs ${weightMaxRemOz} oz`}
-              meanLabel={`${meanWeightLbs} lbs ${meanWeightRemOz} oz`}
-              sigma={weightSigma * 16} // convert sigma from lbs to oz
-            />
-          </div>
-          <Slider
-            id="weight_guess_ounces"
-            name="weight_guess_ounces"
-            defaultValue={[weightGuessOunces]}
-            min={weightMinOz}
-            max={weightMaxOz}
-            step={1}
-            className="w-full"
-            onValueChange={(val) =>
-              onValueChange({ weightGuessOunces: val[0] })
-            }
-          />
-          <div className="text-xs text-gray-600 flex justify-between">
-            <span>{`${weightMinLbs} lbs ${weightMinRemOz} oz`}</span>
-            <span>{`${meanWeightLbs} lbs ${meanWeightRemOz} oz`}</span>
-            <span>{`${weightMaxLbs} lbs ${weightMaxRemOz} oz`}</span>
-          </div>
-          <div className="text-sm text-center mt-2" id="weight_guess_value">
-            {currentWeightLbs} lbs {currentWeightOz} oz
-          </div>
+          <Card className="shadow-none bg-primary-foreground">
+            <CardContent className="p-6">
+              <div className="mb-4 flex justify-center">
+                <GaussianCurve
+                  currentGuess={weightGuessOunces}
+                  mean={meanWeightOz}
+                  min={weightMinOz}
+                  max={weightMaxOz}
+                  minPrice={minComponentPrice}
+                  maxPrice={maxComponentPrice}
+                  title="Weight Price Curve"
+                  minLabel={`${weightMinLbs} lbs ${weightMinRemOz} oz`}
+                  maxLabel={`${weightMaxLbs} lbs ${weightMaxRemOz} oz`}
+                  meanLabel={`${meanWeightLbs} lbs ${meanWeightRemOz} oz`}
+                  sigma={weightSigma * 16} // convert sigma from lbs to oz
+                />
+              </div>
+              <div className="relative">
+                <Slider
+                  id="weight_guess_ounces"
+                  name="weight_guess_ounces"
+                  defaultValue={[weightGuessOunces]}
+                  min={weightMinOz}
+                  max={weightMaxOz}
+                  step={1}
+                  className="w-full"
+                  onValueChange={(val) =>
+                    onValueChange({ weightGuessOunces: val[0] })
+                  }
+                />
+                <div
+                  className="absolute top-4 text-xs font-mono transform -translate-x-1/2 text-center whitespace-nowrap"
+                  style={{
+                    left: `${
+                      ((weightGuessOunces - weightMinOz) /
+                        (weightMaxOz - weightMinOz)) *
+                      100
+                    }%`,
+                  }}
+                  id="weight_guess_value"
+                >
+                  {currentWeightLbs} lbs {currentWeightOz} oz
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Tables } from "@/database.types";
 import { GuessSliders } from "@/components/ui/baby/guess-sliders";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/app/baby/data-table";
 import { guessColumns } from "@/app/baby/[slug]/columns";
 import { getGuessPrice } from "@/lib/helpers/pricing";
@@ -112,105 +113,144 @@ export function BabyPoolClient({
     weightGuess: weightGuessOunces,
   });
 
+  // Calculate total donations from all guesses
+  const totalDonations = guesses.reduce(
+    (sum, guess) => sum + (guess.calculated_price || 0),
+    0
+  );
+
   return (
-    <div>
-      <div className="text-center mb-4">
-        <h2 className="text-2xl font-bold">
-          Make you guess for {pool.baby_name || "the Baby"}&apos;s Arrival!
-        </h2>
-        <p className="text-muted-foreground">
-          Expected due date:{" "}
-          {pool.mu_due_date
-            ? (() => {
-                const [year, month, day] = (pool.mu_due_date as string)
-                  .split("-")
-                  .map(Number);
-                return new Date(year, month - 1, day).toLocaleDateString();
-              })()
-            : "Not set"}
-        </p>
-        {/* Descrition */}
+    <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-24">
+      {/* Left Column - Content Area */}
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold mb-4">
+            Make you guess for {pool.baby_name || "the Baby"}&apos;s Arrival!
+          </h2>
+          {/* Image */}
+          {pool.image_url && (
+            <div className="relative w-32 mb-4 max-w-32 bg-white p-2 shadow-lg transform rotate-6 overflow-hidden">
+              <div className="relative w-full h-24 overflow-hidden">
+                <Image
+                  src={pool.image_url}
+                  alt={
+                    pool.baby_name
+                      ? `${pool.baby_name} pool`
+                      : "Baby pool image"
+                  }
+                  fill
+                  className="object-cover"
+                  sizes="128px"
+                  priority
+                />
+              </div>
+            </div>
+          )}
+          <p className="text-muted-foreground">
+            Expected due date:{" "}
+            {pool.mu_due_date
+              ? (() => {
+                  const [year, month, day] = (pool.mu_due_date as string)
+                    .split("-")
+                    .map(Number);
+                  return new Date(year, month - 1, day).toLocaleDateString();
+                })()
+              : "Not set"}
+          </p>
+        </div>
+
+        {/* Description */}
         {pool.description && (
-          <p className="text-muted-foreground mt-2">{pool.description}</p>
+          <p className="text-muted-foreground leading-relaxed">
+            {pool.description}
+          </p>
         )}
-        {/* Image */}
-        {pool.image_url && (
-          <div className="flex justify-center my-4">
-            <div className="relative w-[200px] h-[200px] rounded shadow border overflow-hidden">
-              <Image
-                src={pool.image_url}
-                alt={
-                  pool.baby_name ? `${pool.baby_name} pool` : "Baby pool image"
-                }
-                fill
-                className="object-cover"
-                sizes="200px"
-                priority
-              />
+
+        {/* Data Table */}
+        <div>
+          <h2 className="text-xl font-bold mb-4 text-center">
+            Previous Donations
+          </h2>
+          {guesses.length === 0 ? (
+            <div className="text-center text-gray-500 py-8 text-lg">
+              No results - be the first!
             </div>
-          </div>
-        )}
+          ) : (
+            <DataTable columns={guessColumns} data={guesses} />
+          )}
+        </div>
       </div>
-      <form
-        className="mb-0"
-        action={async () => {
-          const payload = getGuessPayload();
-          if (payload) await formAction(payload);
-        }}
-      >
-        <div className="mb-8">
-          <GuessSliders
-            birthDateDeviation={birthDateDeviation}
-            weightGuessOunces={weightGuessOunces}
-            onValueChange={handleGuessChange}
-            pool={pool}
-          />
-        </div>
-        <div className="mb-8">
-          <div className="p-6 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl text-center border border-blue-200 shadow">
-            <div className="text-lg font-semibold text-gray-700 mb-2">
-              Total Guess Price
+
+      {/* Right Column - Sticky Sidebar */}
+      <div className="lg:sticky lg:top-4 lg:h-fit">
+        <Card>
+          <CardContent className="p-4 space-y-6">
+            {/* Show sum of all donations */}
+            <div>
+              <div className="font-cherry-bomb text-5xl mb-1">
+                {`$${totalDonations.toFixed(0)} donated`}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {guesses.length} donation{guesses.length !== 1 ? "s" : ""}
+              </div>
             </div>
-            <div className="text-3xl font-bold text-blue-600 mb-2">
-              ${totalPrice.toFixed(2)}
-            </div>
-            <div className="flex justify-center space-x-4 text-sm text-gray-600">
-              <span>Date price: ${datePrice.toFixed(2)}</span>
-              <span>Weight price: ${weightPrice.toFixed(2)}</span>
-            </div>
-            <div className="text-sm text-gray-600">
-              Based on your current guess
-            </div>
-          </div>
-        </div>
-        <div className="mt-8 text-center">
-          <Button
-            type="submit"
-            disabled={isPending}
-            className="w-full h-12 text-lg flex items-center justify-center"
-          >
-            {isPending ? (
-              <>
-                <LoadingSpinner />
-                Processing...
-              </>
-            ) : (
-              `Place Guess for $${totalPrice.toFixed(2)}`
-            )}
-          </Button>
-        </div>
-      </form>
-      <div className="mt-12">
-        <h2 className="text-xl font-bold mb-4 text-center">
-          Previous Donations
-        </h2>
-        {guesses.length === 0 ? (
-          <div className="text-center text-gray-500 py-8 text-lg">
-            No results - be the first!
-          </div>
-        ) : (
-          <DataTable columns={guessColumns} data={guesses} />
-        )}
+            <form
+              className="mb-0"
+              action={async () => {
+                const payload = getGuessPayload();
+                if (payload) await formAction(payload);
+              }}
+            >
+              <div className="">
+                <GuessSliders
+                  birthDateDeviation={birthDateDeviation}
+                  weightGuessOunces={weightGuessOunces}
+                  onValueChange={handleGuessChange}
+                  pool={pool}
+                  layout="vertical"
+                />
+              </div>
+              <div className="mt-4">
+                <Card className="bg-primary-foreground shadow-none">
+                  <CardContent className="p-6 text-center">
+                    <div className="text-sm font-mono font-bold tracking-widest uppercase mb-2">
+                      Total Guess Price
+                    </div>
+                    <div className="font-cherry-bomb text-5xl mb-2 text-foreground">
+                      ${totalPrice.toFixed(2)}
+                    </div>
+                    <div className="flex justify-center items-start gap-2">
+                      <div className="flex flex-col items-end font-mono space-y-1 text-xs text-muted-foreground">
+                        <span>Date price:</span>
+                        <span>Weight price:</span>
+                      </div>
+                      <div className="flex flex-col items-start font-mono space-y-1 text-xs text-muted-foreground">
+                        <span>${datePrice.toFixed(2)}</span>
+                        <span>${weightPrice.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="text-center mt-4">
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full h-12 text-lg flex items-center justify-center"
+                >
+                  {isPending ? (
+                    <>
+                      <LoadingSpinner />
+                      Processing...
+                    </>
+                  ) : (
+                    `Place Guess for $${totalPrice.toFixed(2)}`
+                  )}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
