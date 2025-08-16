@@ -2,12 +2,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function HowItWorks() {
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
-      <h1 className="text-3xl font-bold mb-8">
-        Baby Guessing Pool: How It Works
+    <div className="max-w-4xl mx-auto">
+      <h1 className="text-3xl font-cherry-bomb font-semibold tracking-tight mb-4">
+        How It Works
       </h1>
       <Tabs defaultValue="layman" className="w-full">
-        <TabsList className="mb-6">
+        <TabsList className="mb-4">
           <TabsTrigger value="layman">For the layman</TabsTrigger>
           <TabsTrigger value="nerds">For the nerds</TabsTrigger>
         </TabsList>

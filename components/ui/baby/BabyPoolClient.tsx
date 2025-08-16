@@ -11,6 +11,25 @@ import { guessColumns } from "@/app/baby/[slug]/columns";
 import { getGuessPrice } from "@/lib/helpers/pricing";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
+
+// Small, dependency-free renderer for basic spacing and simple lists.
+// - Preserves paragraphs (double newlines)
+// - Preserves single-line breaks inside paragraphs
+// - Renders simple ordered (1.) and unordered (-/*) lists
+// This keeps things lightweight and avoids adding a Markdown dependency.
+function renderDescription(text: string) {
+  if (!text) return null;
+  const normalized = text.replace(/\r\n/g, "\n");
+  const blocks = normalized.split(/\n\s*\n+/);
+  return blocks.map((block, bi) => {
+    // Fallback: paragraph, keep single newlines as line breaks using whitespace-pre-wrap
+    return (
+      <p key={bi} className="whitespace-pre-wrap mb-4">
+        {block}
+      </p>
+    );
+  });
+}
 import {
   createCheckoutSession,
   CreateCheckoutSessionState,
@@ -124,31 +143,52 @@ export function BabyPoolClient({
       {/* Left Column - Content Area */}
       <div className="space-y-6">
         <div>
-          <h2 className="text-4xl text-pretty font-semibold tracking-tight mb-1">
-            Guess and donate on {pool.baby_name || "the Baby"}&apos;s Arrival!
+          <h2 className="text-4xl text-pretty font-semibold tracking-tighter mb-1">
+            Guess and donate for {pool.baby_name || "the Baby"}&apos;s Arrival!
           </h2>
           <p className="text-muted-foreground text-sm mb-6">
             Organized by {pool.organized_by}
           </p>
-          {/* Image */}
-          {pool.image_url && (
-            <div className="relative w-32 mb-4 max-w-32 bg-white p-2 shadow-lg transform rotate-6 overflow-hidden">
-              <div className="relative w-full h-24 overflow-hidden">
-                <Image
-                  src={pool.image_url}
-                  alt={
-                    pool.baby_name
-                      ? `${pool.baby_name} pool`
-                      : "Baby pool image"
-                  }
-                  fill
-                  className="object-cover"
-                  sizes="128px"
-                  priority
-                />
+          <div className="flex">
+            {/* Baby Image */}
+            {pool.image_url && (
+              <div className="relative w-40 mb-4 max-w-40 h-40 bg-white p-2 shadow-lg transform -rotate-6 overflow-hidden">
+                <div className="relative w-full h-full overflow-hidden">
+                  <Image
+                    src={pool.image_url}
+                    alt={
+                      pool.baby_name
+                        ? `${pool.baby_name} pool`
+                        : "Baby pool image"
+                    }
+                    fill
+                    className="object-cover"
+                    sizes="128px"
+                    priority
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
+            {/* OrganizerImage */}
+            {pool.image_url && (
+              <div className="relative w-40 mb-4 max-w-40 h-40 bg-white p-2 shadow-lg transform rotate-6 -translate-x-4 translate-y-4 overflow-hidden">
+                <div className="relative w-full h-full overflow-hidden">
+                  <Image
+                    src={pool.organizer_image_url || pool.image_url}
+                    alt={
+                      pool.baby_name
+                        ? `${pool.baby_name} pool`
+                        : "Baby pool image"
+                    }
+                    fill
+                    className="object-cover"
+                    sizes="128px"
+                    priority
+                  />
+                </div>
+              </div>
+            )}
+          </div>
           {/* <p className="text-muted-foreground">
             Expected due date:{" "}
             {pool.mu_due_date
@@ -164,18 +204,18 @@ export function BabyPoolClient({
 
         {/* Description */}
         {pool.description && (
-          <p className="text-muted-foreground leading-relaxed">
-            {pool.description}
-          </p>
+          <div className="text-foreground leading-relaxed">
+            {renderDescription(pool.description)}
+          </div>
         )}
 
         {/* Data Table */}
         <div>
-          <h2 className="text-xl font-bold mb-4 text-center">
+          <h2 className="text-xl font-semibold text-pretty tracking-tight mb-2">
             Previous Donations
           </h2>
           {guesses.length === 0 ? (
-            <div className="text-center text-gray-500 py-8 text-lg">
+            <div className="text-sm text-muted-foreground text-lg">
               No results - be the first!
             </div>
           ) : (
@@ -214,7 +254,7 @@ export function BabyPoolClient({
                 />
               </div>
               <div className="mt-4">
-                <Card className="bg-primary-foreground shadow-none">
+                <Card className="shadow-none">
                   <CardContent className="p-6 text-center">
                     <div className="text-sm font-mono font-bold tracking-widest uppercase mb-2">
                       Total Guess Price

@@ -10,6 +10,8 @@ interface GaussianCurveProps {
   max: number;
   minPrice: number;
   maxPrice: number;
+  // If provided, use this price for the user's guess instead of recomputing.
+  computedPrice?: number;
   sigma?: number;
   width?: number;
   height?: number;
@@ -28,6 +30,8 @@ export function GaussianCurve({
   max,
   minPrice,
   maxPrice,
+  // optional externally-computed price for the user's current guess
+  computedPrice,
   sigma,
   width = 300,
   height = 140,
@@ -69,14 +73,16 @@ export function GaussianCurve({
     return points;
   }, [safeMin, safeMax, mean, safeMinPrice, safeMaxPrice, sigma, bound]);
 
-  const userPrice = getGuessComponentPrice({
-    guess: currentGuess,
-    mean,
-    bound,
-    minPrice: safeMinPrice,
-    maxPrice: safeMaxPrice,
-    ...(sigma !== undefined ? { sigma } : {}),
-  });
+  const userPrice =
+    computedPrice ??
+    getGuessComponentPrice({
+      guess: currentGuess,
+      mean,
+      bound,
+      minPrice: safeMinPrice,
+      maxPrice: safeMaxPrice,
+      ...(sigma !== undefined ? { sigma } : {}),
+    });
 
   // Centralize the bottom offset for all elements that align to the graph base
   const graphBottomOffset = 16; // 10 (original) + 6 (extra nudge)

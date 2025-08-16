@@ -462,100 +462,104 @@ export function CreateBabyPoolForm() {
               placeholder="Write something about this baby pool..."
               rows={4}
               className="w-full mt-2 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-input-background"
-              maxLength={500}
+              maxLength={1000}
             />
             <div className="text-xs text-gray-400 mt-1">
-              {description.length}/500 characters
+              {description.length}/1000 characters
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Basic spacing and simple Markdown (line breaks, bold, links) are
+              supported and will be rendered on the pool page.
             </div>
           </div>
-          <div className="flex gap-8">
-            <div className="flex-1">
-              <Label
-                htmlFor="due_date"
-                className="text-base font-semibold tracking-tight"
-              >
-                Expected Due Date
-              </Label>
-              <Input
-                id="due_date"
-                name="due_date"
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                required
-                className="rounded mt-2"
-              />
-            </div>
-            <div className="flex-1">
-              <Label className="text-base font-semibold tracking-tight">
-                Expected Weight
-              </Label>
-              <div className="flex gap-4 items-center mt-2">
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="mu_weight_lbs"
-                    name="mu_weight_lbs"
-                    type="number"
-                    min={0}
-                    max={20}
-                    value={Math.floor(muWeight)}
-                    onChange={(e) => {
-                      const lbs = Math.max(
-                        0,
-                        Math.min(20, Number(e.target.value))
-                      );
-                      setMuWeight(lbs + (muWeight % 1));
-                    }}
-                    className="rounded w-20 px-3 text-center"
-                    required
-                  />
-                  <span className="text-sm text-muted-foreground">lbs</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="mu_weight_oz"
-                    name="mu_weight_oz"
-                    type="number"
-                    min={0}
-                    max={15}
-                    value={Math.round((muWeight % 1) * 16)}
-                    onChange={(e) => {
-                      const oz = Math.max(
-                        0,
-                        Math.min(15, Number(e.target.value))
-                      );
-                      setMuWeight(Math.floor(muWeight) + oz / 16);
-                    }}
-                    className="rounded w-20 px-3 text-center"
-                    required
-                  />
-                  <span className="text-sm text-muted-foreground">oz</span>
-                </div>
-              </div>
-              {/* Hidden input for ounces for backend */}
-              <input
-                type="hidden"
-                name="mu_weight_ounces"
-                value={
-                  Math.floor(muWeight) * 16 + Math.round((muWeight % 1) * 16)
-                }
-              />
-            </div>
-          </div>
-          {/* Optionally, you can add a field for muDate (date deviation in days) if you want the user to control it. */}
 
           {/* Price Range Configuration */}
           <div className="space-y-6 pt-6 border-t border-gray-200">
             <div>
               <h3 className="text-2xl tracking-tighter font-semibold">
-                Guess Price Configuration
+                Pricing Model Configuration
               </h3>
               <p className="text-xs text-muted-foreground">
                 Set the price range for your guessing pool.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="flex-1">
+                <Label
+                  htmlFor="due_date"
+                  className="text-base font-semibold tracking-tight"
+                >
+                  Expected Due Date
+                </Label>
+                <Input
+                  id="due_date"
+                  name="due_date"
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  required
+                  className="rounded mt-2"
+                />
+              </div>
+              <div className="flex-1">
+                <Label className="text-base font-semibold tracking-tight">
+                  Expected Weight
+                </Label>
+                <div className="flex gap-4 items-center mt-2">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="mu_weight_lbs"
+                      name="mu_weight_lbs"
+                      type="number"
+                      min={0}
+                      max={20}
+                      value={Math.floor(muWeight)}
+                      onChange={(e) => {
+                        const lbs = Math.max(
+                          0,
+                          Math.min(20, Number(e.target.value))
+                        );
+                        setMuWeight(lbs + (muWeight % 1));
+                      }}
+                      className="rounded w-20 px-3 text-center"
+                      required
+                    />
+                    <span className="text-sm text-muted-foreground">lbs</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="mu_weight_oz"
+                      name="mu_weight_oz"
+                      type="number"
+                      min={0}
+                      max={15}
+                      value={Math.round((muWeight % 1) * 16)}
+                      onChange={(e) => {
+                        const oz = Math.max(
+                          0,
+                          Math.min(15, Number(e.target.value))
+                        );
+                        setMuWeight(Math.floor(muWeight) + oz / 16);
+                      }}
+                      className="rounded w-20 px-3 text-center"
+                      required
+                    />
+                    <span className="text-sm text-muted-foreground">oz</span>
+                  </div>
+                </div>
+                {/* Hidden input for ounces for backend */}
+                <input
+                  type="hidden"
+                  name="mu_weight_ounces"
+                  value={
+                    Math.floor(muWeight) * 16 + Math.round((muWeight % 1) * 16)
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <Label
                   htmlFor="price_floor"
@@ -618,7 +622,7 @@ export function CreateBabyPoolForm() {
                   }}
                   placeholder="5"
                   required
-                  className="rounded mt-2 w-full md:max-w-sm px-4"
+                  className="rounded mt-2 px-4"
                 />
               </div>
               <div>
@@ -678,7 +682,7 @@ export function CreateBabyPoolForm() {
                   }}
                   placeholder="50"
                   required
-                  className="rounded mt-2 w-full md:max-w-sm px-4"
+                  className="rounded mt-2 w-full"
                 />
                 {/* Inline validation message for the price inputs */}
                 {priceError && (
@@ -689,10 +693,10 @@ export function CreateBabyPoolForm() {
           </div>
           {/* Pricing Model Selection */}
           <div>
-            <label className="block font-medium mb-2">
+            <label className="font-semibold text-base tracking-tight">
               Select Pricing Model (Sigma Behavior)
             </label>
-            <div className="flex gap-4 mb-4">
+            <div className="flex gap-4 py-2">
               <label>
                 <input
                   type="radio"
@@ -715,9 +719,6 @@ export function CreateBabyPoolForm() {
               </label>
             </div>
             {/* Preview */}
-            <h2 className="text-lg font-semibold mb-2">
-              Pricing Model Preview
-            </h2>
             <div className="flex flex-col md:flex-row gap-8">
               <div className="flex-1">
                 {/* Calculate absolute date labels for the date graph */}
@@ -753,7 +754,6 @@ export function CreateBabyPoolForm() {
                       minLabel={minDateLabel}
                       maxLabel={maxDateLabel}
                       sigma={pricingModelSigmas[pricingModel].dateSigma}
-                      className="py-8"
                       showGrid={false}
                     />
                   );
@@ -779,7 +779,6 @@ export function CreateBabyPoolForm() {
                   minLabel={formatWeightLabel(muWeight - 3)}
                   maxLabel={formatWeightLabel(muWeight + 3)}
                   sigma={pricingModelSigmas[pricingModel].weightSigma}
-                  className="py-8"
                   showGrid={false}
                 />
               </div>

@@ -1,3 +1,5 @@
+"use client";
+import { Tables } from "@/database.types";
 import { useMemo } from "react";
 import { DataTable } from "@/app/baby/data-table";
 import { ColumnDef } from "@tanstack/react-table";
@@ -6,28 +8,35 @@ import GuessScatterPlot, {
   ActualOutcome as BetActualOutcome,
 } from "@/components/baby/guess-scatter-plot";
 
-export type RankedGuess = {
+type RankedGuess = {
   name: string;
   guessed_birth_date: string;
   guessed_weight: number;
   distance: number;
+  rank: number;
 };
 
-export function LiveRankingsTable({
+export default function LockedPoolDisplay({
+  pool,
   guesses,
-  actualBirthDate,
-  actualBirthWeight,
 }: {
-  guesses: Array<{
-    name: string;
-    guessed_birth_date: string;
-    guessed_weight: number;
-  }>;
-  actualBirthDate: string;
-  actualBirthWeight?: number;
+  pool: Tables<"pools">;
+  guesses: Tables<"guesses">[];
 }) {
-  // Client-side ranking logic
+  const safeGuesses = useMemo(
+    () =>
+      guesses.map((guess) => ({
+        name: guess.name || "Anonymous",
+        guessed_birth_date: guess.guessed_birth_date,
+        guessed_weight: guess.guessed_weight,
+      })),
+    [guesses]
+  );
+
   const ranked: RankedGuess[] = useMemo(() => {
+    const actualBirthDate = pool.actual_birth_date;
+    const actualBirthWeight = pool.actual_birth_weight;
+
     if (
       !actualBirthDate ||
       actualBirthWeight === undefined ||
@@ -35,26 +44,29 @@ export function LiveRankingsTable({
       isNaN(Number(actualBirthWeight))
     )
       return [];
+
     const actualDate = new Date(actualBirthDate).getTime();
     const actualWeight = Number(actualBirthWeight);
-    // Get min/max for normalization
-    const dateValues = guesses.map((guess) =>
+
+    const dateValues = safeGuesses.map((guess) =>
       new Date(guess.guessed_birth_date).getTime()
     );
     dateValues.push(actualDate);
     const minDate = Math.min(...dateValues);
     const maxDate = Math.max(...dateValues);
-    const weightValues = guesses.map((guess) => guess.guessed_weight);
+
+    const weightValues = safeGuesses.map((guess) => guess.guessed_weight);
     weightValues.push(actualWeight);
     const minWeight = Math.min(...weightValues);
     const maxWeight = Math.max(...weightValues);
-    // Avoid division by zero
+
     const dateRange = maxDate - minDate || 1;
     const weightRange = maxWeight - minWeight || 1;
-    // Normalize actual values
+
     const actualDateNorm = (actualDate - minDate) / dateRange;
     const actualWeightNorm = (actualWeight - minWeight) / weightRange;
-    return guesses
+
+    const rankedGuesses = safeGuesses
       .map((guess) => {
         const guessDateValue = new Date(guess.guessed_birth_date).getTime();
         const guessDateNorm = (guessDateValue - minDate) / dateRange;
@@ -73,9 +85,15 @@ export function LiveRankingsTable({
         };
       })
       .sort((a, b) => a.distance - b.distance);
-  }, [guesses, actualBirthDate, actualBirthWeight]);
+
+    return rankedGuesses.map((guess, index) => ({
+      ...guess,
+      rank: index + 1,
+    }));
+  }, [safeGuesses, pool.actual_birth_date, pool.actual_birth_weight]);
 
   const columns: ColumnDef<RankedGuess>[] = [
+    { accessorKey: "rank", header: "Rank" },
     { accessorKey: "name", header: "Name" },
     {
       accessorKey: "guessed_birth_date",
@@ -87,7 +105,7 @@ export function LiveRankingsTable({
     },
     {
       accessorKey: "guessed_weight",
-      header: "Guessed Weight (lbs)",
+      header: "Guessed Weight",
       cell: ({ row }) => {
         const weightInOunces = row.getValue("guessed_weight") as number;
         const pounds = Math.floor(weightInOunces / 16);
@@ -98,12 +116,18 @@ export function LiveRankingsTable({
     {
       accessorKey: "distance",
       header: "Distance",
-      cell: ({ row }) => Number(row.getValue("distance")).toFixed(2),
+      cell: ({ row }) => Number(row.getValue("distance")).toFixed(4),
     },
   ];
 
   return (
-    <div className="mt-8">
+    <div className="w-full max-w-6xl mx-auto rounded-xl p-8">
+      <h1 className="text-2xl font-bold text-center mb-4">
+        Thanks for playing!
+      </h1>
+      <p className="text-center mb-8">
+        Stay tuned for updates from {pool.organized_by}.
+      </p>
       <GuessScatterPlot
         guesses={
           ranked.map((r) => ({
@@ -115,13 +139,15 @@ export function LiveRankingsTable({
         }
         actual={
           {
-            actualBirthDate: actualBirthDate,
-            actualWeight: Number(actualBirthWeight),
+            actualBirthDate: pool.actual_birth_date,
+            actualWeight: Number(pool.actual_birth_weight),
           } as BetActualOutcome
         }
       />
-      <DataTable columns={columns} data={ranked} />
-      <div className="mt-8"></div>
+      <div className="mt-8">
+        <h3 className="font-bold text-2xl mb-2">Final Rankings</h3>
+        <DataTable columns={columns} data={ranked} />
+      </div>
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
 import { Tables } from "@/database.types";
 import { DATE_DEVIATION_DAYS, WEIGHT_DEVIATION_OUNCES } from "@/lib/constants";
+import { pricingModelSigmas } from "@/lib/helpers/pricingModels";
+import { getGuessComponentPrice } from "@/lib/helpers/pricing";
 
 export function GuessSliders({
   birthDateDeviation,
@@ -48,8 +50,9 @@ export function GuessSliders({
   const maxComponentPrice = maxGuessPrice / 2;
 
   // Sigma values from the pool (fallback to defaults if missing)
-  const dateSigma = pool?.sigma_days ?? 4;
-  const weightSigma = pool?.sigma_weight ?? 0.6;
+  const dateSigma = pool?.sigma_days ?? pricingModelSigmas.standard.dateSigma;
+  const weightSigma =
+    pool?.sigma_weight ?? pricingModelSigmas.standard.weightSigma;
 
   const dueDate = pool?.mu_due_date
     ? new Date(`${pool.mu_due_date}T00:00:00`)
@@ -75,6 +78,25 @@ export function GuessSliders({
   const meanDateLabel = formatDate(dueDate);
   const currentGuessDateLabel = formatDate(currentGuessDate);
 
+  // Precompute component prices so GaussianCurve and total match exactly
+  const dateComponentPrice = getGuessComponentPrice({
+    guess: birthDateDeviation,
+    mean: 0,
+    bound: DATE_DEVIATION_DAYS,
+    minPrice: minComponentPrice,
+    maxPrice: maxComponentPrice,
+    sigma: dateSigma,
+  });
+
+  const weightComponentPrice = getGuessComponentPrice({
+    guess: weightGuessOunces,
+    mean: meanWeightOz,
+    bound: WEIGHT_DEVIATION_OUNCES,
+    minPrice: minComponentPrice,
+    maxPrice: maxComponentPrice,
+    sigma: weightSigma * 16, // convert sigma from lbs to oz
+  });
+
   // Determine the layout classes based on the layout prop
   const getLayoutClasses = () => {
     switch (layout) {
@@ -95,8 +117,8 @@ export function GuessSliders({
       {/* Sliders with Dynamic Layout */}
       <div className={`${getLayoutClasses()}`}>
         {/* Birth Date Guess Slider with Gaussian Curve */}
-        <div className="flex-1bg-white">
-          <Card className="shadow-none bg-primary-foreground">
+        <div className="flex-0">
+          <Card className="shadow-none max-w-[400px]">
             <CardContent className="p-6">
               <div className="mb-4 flex justify-center">
                 <GaussianCurve
@@ -111,6 +133,7 @@ export function GuessSliders({
                   meanLabel={meanDateLabel}
                   maxLabel={maxDateLabel}
                   sigma={dateSigma}
+                  computedPrice={dateComponentPrice}
                 />
               </div>
               <div className="relative">
@@ -144,8 +167,8 @@ export function GuessSliders({
           </Card>
         </div>
         {/* Weight Guess Slider */}
-        <div className="flex-1">
-          <Card className="shadow-none bg-primary-foreground">
+        <div className="flex-0">
+          <Card className="shadow-none max-w-[400px]">
             <CardContent className="p-6">
               <div className="mb-4 flex justify-center">
                 <GaussianCurve
@@ -160,6 +183,7 @@ export function GuessSliders({
                   maxLabel={`${weightMaxLbs} lbs ${weightMaxRemOz} oz`}
                   meanLabel={`${meanWeightLbs} lbs ${meanWeightRemOz} oz`}
                   sigma={weightSigma * 16} // convert sigma from lbs to oz
+                  computedPrice={weightComponentPrice}
                 />
               </div>
               <div className="relative">

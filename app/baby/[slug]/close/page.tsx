@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import ClosePoolForm from "./close-pool-form";
 import { getPoolBySlug } from "@/lib/data/pool/getPoolBySlug";
 import { getGuessesForPool } from "@/lib/data/guesses/getGuessesForPool";
@@ -20,6 +20,10 @@ export default async function ClosePoolPage({
   }
 
   const pool = await getPoolBySlug(slug);
+
+  if (pool?.is_locked) {
+    redirect("/baby");
+  }
 
   if (!pool || String(pool.user_id).trim() !== String(user.id).trim()) {
     console.log("POOL USER ID MISMATCH", pool?.user_id, user.id);

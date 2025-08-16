@@ -28,7 +28,7 @@ export async function closePool(
   const values = {
     actual_birth_date: formData.get("actual_birth_date") as string,
     actual_birth_weight: parseFloat(
-      formData.get("actual_birth_weight") as string
+      formData.get("actual_birth_weight_ounces") as string
     ),
     pool_id: formData.get("pool_id") as string,
   };
@@ -87,14 +87,14 @@ export async function closePool(
     .from("pools")
     .update({
       actual_birth_date: values.actual_birth_date,
-      actual_birth_weight: values.actual_birth_weight,
+      actual_birth_weight: values.actual_birth_weight / 16, // convert oz to lbs
       is_locked: true,
     })
     .eq("id", values.pool_id);
 
   if (error) {
     console.error("Error closing pool:", error);
-    return { message: "Failed to close pool" };
+    return { message: `Failed to close pool: ${error.message}` };
   }
 
   revalidatePath(`/baby/${pool.slug}`);

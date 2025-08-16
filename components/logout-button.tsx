@@ -11,5 +11,9 @@ export function LogoutButton() {
     window.location.href = "/auth/login";
   };
 
-  return <Button onClick={logout}>Logout</Button>;
+  return (
+    <Button onClick={logout} variant="outline">
+      Logout
+    </Button>
+  );
 }
