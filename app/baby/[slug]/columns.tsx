@@ -37,12 +37,4 @@ export const guessColumns: ColumnDef<Tables<"guesses">>[] = [
       return Number(price).toFixed(2);
     },
   },
-  {
-    accessorKey: "created_at",
-    header: "Placed At",
-    cell: ({ row }) => {
-      const date = row.getValue("created_at") as string | null;
-      return date ? new Date(date).toLocaleString() : "-";
-    },
-  },
 ];

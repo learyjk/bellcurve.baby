@@ -10,6 +10,8 @@ interface GaussianCurveProps {
   max: number;
   minPrice: number;
   maxPrice: number;
+  // If provided, use this price for the user's guess instead of recomputing.
+  computedPrice?: number;
   sigma?: number;
   width?: number;
   height?: number;
@@ -28,6 +30,8 @@ export function GaussianCurve({
   max,
   minPrice,
   maxPrice,
+  // optional externally-computed price for the user's current guess
+  computedPrice,
   sigma,
   width = 300,
   height = 140,
@@ -36,36 +40,49 @@ export function GaussianCurve({
   minLabel,
   meanLabel,
   maxLabel,
-  showGrid = true,
+  showGrid = false,
 }: GaussianCurveProps) {
   const yAxisLabelWidth = 40; // Space for Y-axis labels
 
+  // Defensive: ensure min < max and minPrice < maxPrice to avoid NaN in scales
+  const safeMin = Number.isFinite(min) ? min : 0;
+  let safeMax = Number.isFinite(max) ? max : safeMin + 1;
+  if (safeMax <= safeMin) safeMax = safeMin + 1;
+
+  const safeMinPrice = Number.isFinite(minPrice) ? minPrice : 0;
+  let safeMaxPrice = Number.isFinite(maxPrice) ? maxPrice : safeMinPrice + 1;
+  if (safeMaxPrice <= safeMinPrice) safeMaxPrice = safeMinPrice + 1;
+
+  const bound = Math.max(Math.abs(safeMin - mean), Math.abs(safeMax - mean));
+
   const curveData = useMemo(() => {
-    const points = [];
+    const points: { x: number; y: number }[] = [];
     const steps = 100;
     for (let i = 0; i <= steps; i++) {
-      const x = min + (i / steps) * (max - min);
+      const x = safeMin + (i / steps) * (safeMax - safeMin);
       const y = getGuessComponentPrice({
         guess: x,
         mean,
-        bound: Math.max(Math.abs(min - mean), Math.abs(max - mean)),
-        minPrice,
-        maxPrice,
+        bound,
+        minPrice: safeMinPrice,
+        maxPrice: safeMaxPrice,
         ...(sigma !== undefined ? { sigma } : {}),
       });
       points.push({ x, y });
     }
     return points;
-  }, [min, max, mean, minPrice, maxPrice, sigma]);
+  }, [safeMin, safeMax, mean, safeMinPrice, safeMaxPrice, sigma, bound]);
 
-  const userPrice = getGuessComponentPrice({
-    guess: currentGuess,
-    mean,
-    bound: Math.max(Math.abs(min - mean), Math.abs(max - mean)),
-    minPrice,
-    maxPrice,
-    ...(sigma !== undefined ? { sigma } : {}),
-  });
+  const userPrice =
+    computedPrice ??
+    getGuessComponentPrice({
+      guess: currentGuess,
+      mean,
+      bound,
+      minPrice: safeMinPrice,
+      maxPrice: safeMaxPrice,
+      ...(sigma !== undefined ? { sigma } : {}),
+    });
 
   // Centralize the bottom offset for all elements that align to the graph base
   const graphBottomOffset = 16; // 10 (original) + 6 (extra nudge)
@@ -73,12 +90,13 @@ export function GaussianCurve({
   const curvePath = useMemo(() => {
     if (curveData.length === 0) return "";
 
-    const xScale = (x: number) => ((x - min) / (max - min)) * width;
+    const denomX = safeMax - safeMin || 1;
+    const denomY = safeMaxPrice - safeMinPrice || 1;
+
+    const xScale = (x: number) => ((x - safeMin) / denomX) * width;
     // Use the shared graphBottomOffset
     const yScale = (y: number) =>
-      height -
-      ((y - minPrice) / (maxPrice - minPrice)) * height * 0.8 -
-      graphBottomOffset;
+      height - ((y - safeMinPrice) / denomY) * height * 0.8 - graphBottomOffset;
 
     let path = `M ${xScale(curveData[0].x)} ${yScale(curveData[0].y)}`;
 
@@ -90,49 +108,57 @@ export function GaussianCurve({
     return path;
   }, [
     curveData,
-    min,
-    max,
+    safeMin,
+    safeMax,
     width,
     height,
-    minPrice,
-    maxPrice,
+    safeMinPrice,
+    safeMaxPrice,
     graphBottomOffset,
   ]);
-
-  const userGuessX = ((currentGuess - min) / (max - min)) * width;
+  const denomX = safeMax - safeMin || 1;
+  const denomY = safeMaxPrice - safeMinPrice || 1;
+  const userGuessX = Number.isFinite(currentGuess)
+    ? ((currentGuess - safeMin) / denomX) * width
+    : 0;
   // Use the shared graphBottomOffset
-  const userGuessY =
-    height -
-    ((userPrice - minPrice) / (maxPrice - minPrice)) * height * 0.8 -
-    graphBottomOffset;
+  const userGuessY = Number.isFinite(userPrice)
+    ? height -
+      ((userPrice - safeMinPrice) / denomY) * height * 0.8 -
+      graphBottomOffset
+    : height - graphBottomOffset;
 
   return (
-    <div className={`flex flex-col items-center ${className}`}>
-      <div className="mb-2 text-sm text-gray-600">{title}</div>
+    <div className={`flex flex-col font-mono ${className}`}>
+      <div className="mb-2 text-sm font-bold tracking-widest uppercase">
+        {title}
+      </div>
       <svg
         width={width + yAxisLabelWidth}
         height={height}
         viewBox={`0 0 ${width + yAxisLabelWidth} ${height}`}
-        className="border border-gray-200 rounded-lg bg-gray-50 overflow-visible"
+        className="overflow-visible"
       >
         {/* Y-axis labels */}
         <text
           x={yAxisLabelWidth - 4}
           y={height - graphBottomOffset}
           fontSize="10"
-          fill="#666"
+          fill="hsl(var(--muted-foreground))"
           textAnchor="end"
+          fontFamily="JetBrains Mono, monospace"
         >
-          ${minPrice.toFixed(2)}
+          ${safeMinPrice.toFixed(2)}
         </text>
         <text
           x={yAxisLabelWidth - 4}
           y={15}
           fontSize="10"
-          fill="#666"
+          fill="hsl(var(--muted-foreground))"
           textAnchor="end"
+          fontFamily="JetBrains Mono, monospace"
         >
-          ${maxPrice.toFixed(2)}
+          ${safeMaxPrice.toFixed(2)}
         </text>
 
         <g transform={`translate(${yAxisLabelWidth}, 0)`}>
@@ -149,7 +175,7 @@ export function GaussianCurve({
                   <path
                     d="M 20 0 L 0 0 0 20"
                     fill="none"
-                    stroke="#e5e5e5"
+                    stroke="hsl(var(--border))"
                     strokeWidth="0.5"
                   />
                 </pattern>
@@ -163,17 +189,19 @@ export function GaussianCurve({
             x={0}
             y={height - 4}
             fontSize="10"
-            fill="#666"
+            fill="hsl(var(--muted-foreground))"
             textAnchor="start"
+            fontFamily="JetBrains Mono, monospace"
           >
-            {minLabel ?? min}
+            {minLabel ?? safeMin}
           </text>
           <text
             x={width / 2}
             y={height - 4}
             fontSize="10"
-            fill="#666"
+            fill="hsl(var(--muted-foreground))"
             textAnchor="middle"
+            fontFamily="JetBrains Mono, monospace"
           >
             {meanLabel ?? mean}
           </text>
@@ -181,17 +209,18 @@ export function GaussianCurve({
             x={width}
             y={height - 4}
             fontSize="10"
-            fill="#666"
+            fill="hsl(var(--muted-foreground))"
             textAnchor="end"
+            fontFamily="JetBrains Mono, monospace"
           >
-            {maxLabel ?? max}
+            {maxLabel ?? safeMax}
           </text>
 
           {/* Gaussian curve */}
           <path
             d={curvePath}
             fill="none"
-            stroke="#3b82f6"
+            stroke="hsl(var(--foreground))"
             strokeWidth="2"
             className="drop-shadow-sm"
           />
@@ -201,14 +230,14 @@ export function GaussianCurve({
             d={`${curvePath} L ${userGuessX} ${
               height - graphBottomOffset
             } L ${userGuessX} ${height - graphBottomOffset} Z`}
-            fill="#3b82f6"
+            fill="none"
             fillOpacity="0.1"
           />
 
           {/* User's guess indicator */}
           <g>
             {/* Vertical line at user's guess */}
-            <line
+            {/* <line
               x1={userGuessX}
               y1={userGuessY}
               x2={userGuessX}
@@ -216,21 +245,21 @@ export function GaussianCurve({
               stroke="#ef4444"
               strokeWidth="2"
               strokeDasharray="4,2"
-            />
+            /> */}
 
             {/* Dot at user's guess position on curve */}
             <circle
               cx={userGuessX}
               cy={userGuessY}
-              r="4"
-              fill="#ef4444"
-              stroke="white"
+              r="6"
+              fill="hsl(var(--primary))"
+              stroke="hsl(var(--foreground))"
               strokeWidth="2"
               className="drop-shadow-sm"
             />
 
             {/* Label for user's guess */}
-            <text
+            {/* <text
               x={userGuessX}
               y={userGuessY - 8}
               fontSize="10"
@@ -239,7 +268,7 @@ export function GaussianCurve({
               fontWeight="600"
             >
               You
-            </text>
+            </text> */}
           </g>
         </g>
       </svg>

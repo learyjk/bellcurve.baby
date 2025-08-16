@@ -16,6 +16,7 @@ export async function createPool(
   formData: FormData
 ): Promise<CreatePoolState> {
   const baby_name = formData.get("baby_name") as string;
+  const organized_by = formData.get("organized_by") as string;
   const due_date = formData.get("due_date") as string;
   const slug = formData.get("slug") as string;
   const price_floor = parseFloat(formData.get("price_floor") as string);
@@ -28,10 +29,21 @@ export async function createPool(
   );
   const description = formData.get("description") as string | null;
   const imageFile = formData.get("image") as File | null;
+  const organizerImageFile = formData.get("organizer_image") as File | null;
   const supabase = await createClient();
 
   let image_url: string | null = null;
   if (imageFile && imageFile.size > 0) {
+    // Check file size (400kB limit)
+    const maxSize = 400 * 1024; // 400kB in bytes
+    if (imageFile.size > maxSize) {
+      return {
+        message:
+          "Image file size must be under 400kB. Please choose a smaller image or compress it.",
+        errors: {},
+      };
+    }
+
     // Upload image to Supabase Storage
     const fileExt = imageFile.name.split(".").pop();
     const fileName = `${slug}-${uuidv4()}.${fileExt}`;
@@ -55,6 +67,41 @@ export async function createPool(
     image_url = publicUrlData?.publicUrl || null;
   }
 
+  let organizer_image_url: string | null = null;
+  if (organizerImageFile && organizerImageFile.size > 0) {
+    // Check file size (400kB limit)
+    const maxSize = 400 * 1024; // 400kB in bytes
+    if (organizerImageFile.size > maxSize) {
+      return {
+        message:
+          "Organizer image file size must be under 400kB. Please choose a smaller image or compress it.",
+        errors: {},
+      };
+    }
+
+    // Upload organizer image to Supabase Storage
+    const fileExt = organizerImageFile.name.split(".").pop();
+    const fileName = `${slug}-organizer-${uuidv4()}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage
+      .from("pool-images")
+      .upload(fileName, organizerImageFile, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: organizerImageFile.type,
+      });
+    if (uploadError) {
+      return {
+        message: `Organizer image upload failed: ${uploadError.message}`,
+        errors: {},
+      };
+    }
+    // Get public URL
+    const { data: publicUrlData } = supabase.storage
+      .from("pool-images")
+      .getPublicUrl(fileName);
+    organizer_image_url = publicUrlData?.publicUrl || null;
+  }
+
   // Get user_id from Supabase session
   const {
     data: { user },
@@ -69,9 +116,9 @@ export async function createPool(
   }
   const user_id = user.id;
 
-  if (!baby_name || !due_date || !slug) {
+  if (!baby_name || !organized_by || !due_date || !slug) {
     return {
-      message: "All fields are required.",
+      message: "All required fields must be filled.",
       errors: {},
     };
   }
@@ -105,6 +152,7 @@ export async function createPool(
 
   const poolData: TablesInsert<"pools"> = {
     baby_name,
+    organized_by,
     mu_due_date: due_date,
     slug,
     user_id,
@@ -115,6 +163,7 @@ export async function createPool(
     sigma_weight,
     description: description || null,
     image_url,
+    organizer_image_url,
   };
   const { data: newPool, error } = await supabase
     .from("pools")

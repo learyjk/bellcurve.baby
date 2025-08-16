@@ -79,8 +79,9 @@ export function getGuessPrice(input: GuessPriceInput) {
   let mu_weight = pool.mu_weight ?? 121.6; // 7.6 lbs in oz
   const price_floor = pool.price_floor ?? 5;
   const price_ceiling = pool.price_ceiling ?? 50;
-  const sigma_days = pool.sigma_days ?? 4;
-  let sigma_weight = pool.sigma_weight ?? 0.6; // in lbs
+  const sigma_days = pool.sigma_days ?? pricingModelSigmas.standard.dateSigma;
+  let sigma_weight =
+    pool.sigma_weight ?? pricingModelSigmas.standard.weightSigma; // in lbs
 
   // If mu_weight is in lbs, convert to oz
   if (mu_weight < 30) {

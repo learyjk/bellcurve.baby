@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { JetBrains_Mono, Cherry_Bomb_One, Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
@@ -16,10 +16,23 @@ export const metadata: Metadata = {
   description: "The fastest way to build apps with Next.js and Supabase",
 };
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   display: "swap",
   subsets: ["latin"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+  subsets: ["latin"],
+});
+
+const cherryBomb = Cherry_Bomb_One({
+  variable: "--font-cherry-bomb",
+  display: "swap",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 export default function RootLayout({
@@ -29,7 +42,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased`}>
+      <body
+        className={`${inter.className} ${jetbrainsMono.variable} ${cherryBomb.variable} antialiased`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
