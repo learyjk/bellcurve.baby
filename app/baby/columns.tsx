@@ -32,6 +32,14 @@ export const columns: ColumnDef<Tables<"pools">>[] = [
     },
   },
   {
+    accessorKey: "is_locked",
+    header: "Status",
+    cell: ({ row }) => {
+      const isLocked = row.getValue("is_locked");
+      return <div>{isLocked ? "Locked" : "Open"}</div>;
+    },
+  },
+  {
     accessorKey: "mu_due_date",
     header: "Due Date",
     cell: ({ row }) => {
@@ -58,10 +66,14 @@ export const columns: ColumnDef<Tables<"pools">>[] = [
             <DropdownMenuItem asChild>
               <Link href={`/baby/${baby.slug}`}>View Pool</Link>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Link href={`/baby/${baby.slug}/close`}>Close Pool</Link>
-            </DropdownMenuItem>
+            {!baby.is_locked && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Link href={`/baby/${baby.slug}/close`}>Close Pool</Link>
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       );

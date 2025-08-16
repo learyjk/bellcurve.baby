@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useTheme } from "next-themes"
-import { Toaster as Sonner, ToasterProps } from "sonner"
+import { useTheme } from "next-themes";
+import { Toaster as Sonner, ToasterProps } from "sonner";
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  const { theme = "system" } = useTheme();
 
   return (
     <Sonner
@@ -12,14 +12,31 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
+          "--normal-bg": "hsl(var(--background))",
+          "--normal-text": "hsl(var(--foreground))",
+          "--normal-border": "hsl(var(--border))",
+          "--error-bg": "hsl(var(--destructive))",
+          "--error-text": "hsl(var(--destructive-foreground))",
+          "--success-bg": "hsl(var(--primary))",
+          "--success-text": "hsl(var(--primary-foreground))",
         } as React.CSSProperties
       }
+      toastOptions={{
+        style: {
+          background: "hsl(var(--background))",
+          color: "hsl(var(--foreground))",
+          border: "1px solid hsl(var(--border))",
+        },
+        classNames: {
+          error:
+            "!bg-destructive !text-destructive-foreground !border-destructive",
+          success: "!bg-primary !text-primary-foreground !border-primary",
+          warning: "!bg-secondary !text-secondary-foreground !border-secondary",
+        },
+      }}
       {...props}
     />
-  )
-}
+  );
+};
 
-export { Toaster }
+export { Toaster };
