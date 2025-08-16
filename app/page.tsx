@@ -4,6 +4,7 @@ import Image from "next/image";
 import MainHero from "@/components/blocks/hero-sections/main-hero";
 import { Card, CardContent } from "@/components/ui/card";
 import SuperLogo from "@/components/svg/super-logo";
+import priceSurface from "../public/price_surface.gif";
 
 export default function Home() {
   return (
@@ -16,7 +17,7 @@ export default function Home() {
           <Card className="overflow-hidden shadow-none">
             <CardContent className="p-0">
               <Image
-                src="/price_surface.gif"
+                src={priceSurface}
                 alt="Bell Curve Logo"
                 width={500}
                 height={500}
