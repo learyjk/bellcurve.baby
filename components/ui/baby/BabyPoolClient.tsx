@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useActionState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Tables } from "@/database.types";
+import { User } from "@supabase/supabase-js";
 import { GuessSliders } from "@/components/ui/baby/guess-sliders";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -36,6 +36,7 @@ import {
 } from "@/lib/actions/baby/createCheckoutSession";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -44,23 +45,23 @@ const stripePromise = loadStripe(
 export function BabyPoolClient({
   pool,
   guesses,
+  user,
 }: {
   pool: Tables<"pools">;
   guesses: Tables<"guesses">[];
+  user: User | null;
 }) {
   const [name, setName] = useState<string>("");
+  const router = useRouter();
+
+  // Initialize name from user prop
   useEffect(() => {
-    async function fetchUserName() {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user && user.user_metadata?.display_name) {
-        setName(user.user_metadata.display_name);
-      }
+    if (user?.user_metadata?.display_name) {
+      setName(user.user_metadata.display_name);
     }
-    fetchUserName();
-  }, []);
+  }, [user]);
+
+  const isLoggedIn = !!user;
 
   const [birthDateDeviation, setBirthDateDeviation] = useState(0);
 
@@ -215,7 +216,7 @@ export function BabyPoolClient({
             Previous Donations
           </h2>
           {guesses.length === 0 ? (
-            <div className="text-sm text-muted-foreground text-lg">
+            <div className="text-lg text-muted-foreground">
               No results - be the first!
             </div>
           ) : (
@@ -240,8 +241,10 @@ export function BabyPoolClient({
             <form
               className="mb-0"
               action={async () => {
-                const payload = getGuessPayload();
-                if (payload) await formAction(payload);
+                if (isLoggedIn) {
+                  const payload = getGuessPayload();
+                  if (payload) await formAction(payload);
+                }
               }}
             >
               <div className="">
@@ -276,20 +279,30 @@ export function BabyPoolClient({
                 </Card>
               </div>
               <div className="text-center mt-4">
-                <Button
-                  type="submit"
-                  disabled={isPending}
-                  className="w-full h-12 text-lg flex items-center justify-center"
-                >
-                  {isPending ? (
-                    <>
-                      <LoadingSpinner />
-                      Processing...
-                    </>
-                  ) : (
-                    `Place Guess for $${totalPrice.toFixed(2)}`
-                  )}
-                </Button>
+                {isLoggedIn ? (
+                  <Button
+                    type="submit"
+                    disabled={isPending}
+                    className="w-full h-12 text-lg flex items-center justify-center"
+                  >
+                    {isPending ? (
+                      <>
+                        <LoadingSpinner />
+                        Processing...
+                      </>
+                    ) : (
+                      `Place Guess for $${totalPrice.toFixed(2)}`
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={() => router.push("/auth/login")}
+                    className="w-full h-12 text-lg flex items-center justify-center"
+                  >
+                    Login to Guess
+                  </Button>
+                )}
               </div>
             </form>
           </CardContent>

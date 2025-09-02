@@ -5,6 +5,28 @@ import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
+// Helper function to get the base URL with proper protocol
+function getBaseUrl() {
+  if (process.env.NEXT_PUBLIC_BASE_URL) {
+    // If it already has a protocol, use it as is
+    if (process.env.NEXT_PUBLIC_BASE_URL.startsWith("http")) {
+      return process.env.NEXT_PUBLIC_BASE_URL;
+    }
+    // Otherwise, add https for production-like URLs or http for localhost
+    const isLocalhost = process.env.NEXT_PUBLIC_BASE_URL.includes("localhost");
+    const protocol = isLocalhost ? "http://" : "https://";
+    return `${protocol}${process.env.NEXT_PUBLIC_BASE_URL}`;
+  }
+
+  // Fallback logic
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // Development fallback
+  return "http://localhost:3000";
+}
+
 export type CreateCheckoutSessionState = {
   sessionId?: string;
   error?: string;
@@ -58,8 +80,8 @@ export async function createCheckoutSession(
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/baby/${data.slug}?payment=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/baby/${data.slug}?payment=cancelled`,
+      success_url: `${getBaseUrl()}/baby/${data.slug}?payment=success`,
+      cancel_url: `${getBaseUrl()}/baby/${data.slug}?payment=cancelled`,
       metadata: {
         poolId: data.poolId,
         slug: data.slug,

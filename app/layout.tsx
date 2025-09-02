@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 // import OneTapGoogle from "@/components/one-tap-google";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -54,8 +55,13 @@ export default function RootLayout({
           <Navbar />
           {children}
           <Toaster />
+          <footer className="w-full flex flex-col items-center border-t mx-auto text-center text-xs gap-8 p-4">
+            <div className="flex items-center gap-4">
+              <p>Built by Heather & Keegan</p>
+              <ThemeSwitcher />
+            </div>
+          </footer>
         </ThemeProvider>
-        {/* <OneTapGoogle /> */}
       </body>
     </html>
   );

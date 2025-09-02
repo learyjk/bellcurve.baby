@@ -3,6 +3,7 @@ import { BabyPoolClient } from "@/components/ui/baby/BabyPoolClient";
 import { getGuessesForPool } from "@/lib/data/guesses/getGuessesForPool";
 import { getPoolBySlug } from "@/lib/data/pool/getPoolBySlug";
 import LockedPoolDisplay from "./locked-pool-display";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function BabyPoolPage({
   params,
@@ -18,13 +19,19 @@ export default async function BabyPoolPage({
 
   const guesses = await getGuessesForPool(pool.id);
 
+  // Get user on server side
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (pool.is_locked) {
     return <LockedPoolDisplay pool={pool} guesses={guesses} />;
   }
 
   return (
     <div className="w-full max-w-6xl mx-auto rounded-xl p-8">
-      <BabyPoolClient pool={pool} guesses={guesses} />
+      <BabyPoolClient pool={pool} guesses={guesses} user={user} />
     </div>
   );
 }
