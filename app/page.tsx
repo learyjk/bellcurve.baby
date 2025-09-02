@@ -19,7 +19,7 @@ export default function Home() {
                 src={priceSurface}
                 alt="Bell Curve Logo"
                 width={500}
-                height={500}
+                style={{ height: "auto" }}
                 className="mx-auto"
               />
             </CardContent>

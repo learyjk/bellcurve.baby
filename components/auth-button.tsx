@@ -16,18 +16,23 @@ import { User } from "@supabase/supabase-js";
 import { LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 
-export function AuthButton() {
-  const [user, setUser] = useState<User | null>(null);
+export function AuthButton({ user: initialUser }: { user?: User | null }) {
+  const [user, setUser] = useState<User | null>(initialUser || null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const supabase = createClient();
 
-    // Get initial user
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
+    // If we already have user from props, just listen for changes
+    if (initialUser) {
       setLoading(false);
-    });
+    } else {
+      // Get initial user only if not provided via props
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        setUser(user);
+        setLoading(false);
+      });
+    }
 
     // Listen for auth changes
     const {
@@ -38,7 +43,7 @@ export function AuthButton() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [initialUser]);
 
   const logout = async () => {
     const supabase = createClient();
@@ -59,7 +64,7 @@ export function AuthButton() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative size-8 rounded-full p-0">
-          <CurrentUserAvatar />
+          <CurrentUserAvatar user={user} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>

@@ -52,15 +52,17 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          {children}
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <footer className="w-full flex flex-col items-center border-t mx-auto text-center text-xs gap-8 p-4">
+              <div className="flex items-center gap-4">
+                <p>Built by Heather & Keegan</p>
+                <ThemeSwitcher />
+              </div>
+            </footer>
+          </div>
           <Toaster />
-          <footer className="w-full flex flex-col items-center border-t mx-auto text-center text-xs gap-8 p-4">
-            <div className="flex items-center gap-4">
-              <p>Built by Heather & Keegan</p>
-              <ThemeSwitcher />
-            </div>
-          </footer>
         </ThemeProvider>
       </body>
     </html>

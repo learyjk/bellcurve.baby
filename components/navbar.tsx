@@ -84,14 +84,17 @@ export async function Navbar() {
 
         {/* Center section - Logo */}
         <div className="flex-shrink-0">
-          <Link href="/">
+          <Link href="/" className="flex items-center gap-2">
             <LogoOnly />
+            <span className="font-cherry-bomb text-primary text-sm hidden md:block">
+              bellcurve baby
+            </span>
           </Link>
         </div>
 
         {/* Right section - Auth Button */}
         <div className="flex-1 flex justify-end">
-          <AuthButton />
+          <AuthButton user={user} />
         </div>
       </nav>
     </>
