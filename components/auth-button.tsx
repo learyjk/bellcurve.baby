@@ -22,7 +22,7 @@ export function AuthButton() {
 
   useEffect(() => {
     const supabase = createClient();
-    
+
     // Get initial user
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
@@ -30,7 +30,9 @@ export function AuthButton() {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
@@ -78,7 +80,12 @@ export function AuthButton() {
     </DropdownMenu>
   ) : (
     <div className="flex gap-2">
-      <Button asChild size="sm" variant={"outline"} className="hidden sm:inline-flex">
+      <Button
+        asChild
+        size="sm"
+        variant={"outline"}
+        className="hidden sm:inline-flex"
+      >
         <Link href="/auth/login">Sign in</Link>
       </Button>
       <Button asChild size="sm" variant={"default"}>

@@ -31,63 +31,66 @@ export async function Navbar() {
 
   return (
     <>
-      <nav className="relative flex items-center justify-between w-full mx-auto px-4 py-2 border-b md:grid md:grid-cols-3">
-        {/* Mobile: Menu Button, Desktop: Hidden */}
-        <MobileMenu 
-          canCreateBabyPool={canCreateBabyPool}
-          className="md:hidden"
-        />
+      <nav className="relative flex items-center w-full mx-auto px-4 py-2 border-b">
+        {/* Left section - Mobile: Menu Button, Desktop: Navigation Menu */}
+        <div className="flex-1 flex justify-start">
+          {/* Mobile: Menu Button */}
+          <MobileMenu
+            canCreateBabyPool={canCreateBabyPool}
+            className="md:hidden"
+          />
 
-        {/* Mobile: Logo center, Desktop: Logo center */}
-        <div className="flex items-center md:justify-self-center md:order-2">
+          {/* Desktop: Navigation Menu */}
+          <NavigationMenu className="hidden md:flex">
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Menu</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid gap-2 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                    <li className="row-span-3">
+                      <NavigationMenuLink asChild>
+                        <Link
+                          className="from-muted/50 to-muted flex h-full w-full flex-col justify-end rounded-md bg-gradient-to-b p-6 no-underline outline-hidden select-none focus:shadow-md"
+                          href="/"
+                        >
+                          <div className="mt-4 mb-2 text-lg font-medium">
+                            bellcurve.baby
+                          </div>
+                          <p className="text-muted-foreground text-sm leading-tight">
+                            A Guessing Game for Expecting Parents and Friends
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
+                    {canCreateBabyPool && (
+                      <ListItem href="/baby" title="My Babies">
+                        See My Babies
+                      </ListItem>
+                    )}
+                    {canCreateBabyPool && (
+                      <ListItem href="/baby/create" title="Create Baby Pool">
+                        Create My Baby Pool
+                      </ListItem>
+                    )}
+                    <ListItem href="/guesses" title="My Guesses">
+                      View all your submitted guesses
+                    </ListItem>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
+
+        {/* Center section - Logo */}
+        <div className="flex-shrink-0">
           <Link href="/">
             <LogoOnly />
           </Link>
         </div>
 
-        {/* Desktop: Navigation Menu, Mobile: Hidden */}
-        <NavigationMenu className="hidden md:flex items-start justify-self-start md:order-1">
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuTrigger>Menu</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <ul className="grid gap-2 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                  <li className="row-span-3">
-                    <NavigationMenuLink asChild>
-                      <Link
-                        className="from-muted/50 to-muted flex h-full w-full flex-col justify-end rounded-md bg-gradient-to-b p-6 no-underline outline-hidden select-none focus:shadow-md"
-                        href="/"
-                      >
-                        <div className="mt-4 mb-2 text-lg font-medium">
-                          bellcurve.baby
-                        </div>
-                        <p className="text-muted-foreground text-sm leading-tight">
-                          A Guessing Game for Expecting Parents and Friends
-                        </p>
-                      </Link>
-                    </NavigationMenuLink>
-                  </li>
-                  {canCreateBabyPool && (
-                    <ListItem href="/baby" title="My Babies">
-                      See My Babies
-                    </ListItem>
-                  )}
-                  {canCreateBabyPool && (
-                    <ListItem href="/baby/create" title="Create Baby Pool">
-                      Create My Baby Pool
-                    </ListItem>
-                  )}
-                  <ListItem href="/guesses" title="My Guesses">
-                    View all your submitted guesses
-                  </ListItem>
-                </ul>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
-
-        {/* Mobile and Desktop: Auth Button */}
-        <div className="flex items-center justify-self-end md:order-3">
+        {/* Right section - Auth Button */}
+        <div className="flex-1 flex justify-end">
           <AuthButton />
         </div>
       </nav>
