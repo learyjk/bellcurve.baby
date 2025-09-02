@@ -1,4 +1,3 @@
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import HowItWorks from "@/components/blocks/hero-sections/how_it_works_component";
 import Image from "next/image";
 import MainHero from "@/components/blocks/hero-sections/main-hero";
@@ -20,18 +19,12 @@ export default function Home() {
                 src={priceSurface}
                 alt="Bell Curve Logo"
                 width={500}
-                height={500}
+                style={{ height: "auto" }}
                 className="mx-auto"
               />
             </CardContent>
           </Card>
         </section>
-        <footer className="w-full flex flex-col items-center border-t mx-auto text-center text-xs gap-8 p-4">
-          <div className="flex items-center gap-4">
-            <p>Built by Heather & Keegan</p>
-            <ThemeSwitcher />
-          </div>
-        </footer>
       </div>
     </main>
   );

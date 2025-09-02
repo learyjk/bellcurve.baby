@@ -129,115 +129,118 @@ export function GaussianCurve({
     : height - graphBottomOffset;
 
   return (
-    <div className={`flex flex-col font-mono ${className}`}>
+    <div className={`flex flex-col font-mono w-full ${className}`}>
       <div className="mb-2 text-sm font-bold tracking-widest uppercase">
         {title}
       </div>
-      <svg
-        width={width + yAxisLabelWidth}
-        height={height}
-        viewBox={`0 0 ${width + yAxisLabelWidth} ${height}`}
-        className="overflow-visible"
-      >
-        {/* Y-axis labels */}
-        <text
-          x={yAxisLabelWidth - 4}
-          y={height - graphBottomOffset}
-          fontSize="10"
-          fill="hsl(var(--muted-foreground))"
-          textAnchor="end"
-          fontFamily="JetBrains Mono, monospace"
+      <div className="w-full max-w-full overflow-hidden">
+        <svg
+          width={width + yAxisLabelWidth}
+          height={height}
+          viewBox={`0 0 ${width + yAxisLabelWidth} ${height}`}
+          className="w-full h-auto max-w-full min-w-0"
+          preserveAspectRatio="xMidYMid meet"
+          style={{ maxWidth: "100%" }}
         >
-          ${safeMinPrice.toFixed(2)}
-        </text>
-        <text
-          x={yAxisLabelWidth - 4}
-          y={15}
-          fontSize="10"
-          fill="hsl(var(--muted-foreground))"
-          textAnchor="end"
-          fontFamily="JetBrains Mono, monospace"
-        >
-          ${safeMaxPrice.toFixed(2)}
-        </text>
-
-        <g transform={`translate(${yAxisLabelWidth}, 0)`}>
-          {/* Grid lines (optional) */}
-          {showGrid && (
-            <>
-              <defs>
-                <pattern
-                  id="grid"
-                  width="20"
-                  height="20"
-                  patternUnits="userSpaceOnUse"
-                >
-                  <path
-                    d="M 20 0 L 0 0 0 20"
-                    fill="none"
-                    stroke="hsl(var(--border))"
-                    strokeWidth="0.5"
-                  />
-                </pattern>
-              </defs>
-              <rect width={width} height="100%" fill="url(#grid)" />
-            </>
-          )}
-
-          {/* X-axis labels */}
+          {/* Y-axis labels */}
           <text
-            x={0}
-            y={height - 4}
-            fontSize="10"
-            fill="hsl(var(--muted-foreground))"
-            textAnchor="start"
-            fontFamily="JetBrains Mono, monospace"
-          >
-            {minLabel ?? safeMin}
-          </text>
-          <text
-            x={width / 2}
-            y={height - 4}
-            fontSize="10"
-            fill="hsl(var(--muted-foreground))"
-            textAnchor="middle"
-            fontFamily="JetBrains Mono, monospace"
-          >
-            {meanLabel ?? mean}
-          </text>
-          <text
-            x={width}
-            y={height - 4}
+            x={yAxisLabelWidth - 4}
+            y={height - graphBottomOffset}
             fontSize="10"
             fill="hsl(var(--muted-foreground))"
             textAnchor="end"
             fontFamily="JetBrains Mono, monospace"
           >
-            {maxLabel ?? safeMax}
+            ${safeMinPrice.toFixed(2)}
+          </text>
+          <text
+            x={yAxisLabelWidth - 4}
+            y={15}
+            fontSize="10"
+            fill="hsl(var(--muted-foreground))"
+            textAnchor="end"
+            fontFamily="JetBrains Mono, monospace"
+          >
+            ${safeMaxPrice.toFixed(2)}
           </text>
 
-          {/* Gaussian curve */}
-          <path
-            d={curvePath}
-            fill="none"
-            stroke="hsl(var(--foreground))"
-            strokeWidth="2"
-            className="drop-shadow-sm"
-          />
+          <g transform={`translate(${yAxisLabelWidth}, 0)`}>
+            {/* Grid lines (optional) */}
+            {showGrid && (
+              <>
+                <defs>
+                  <pattern
+                    id="grid"
+                    width="20"
+                    height="20"
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <path
+                      d="M 20 0 L 0 0 0 20"
+                      fill="none"
+                      stroke="hsl(var(--border))"
+                      strokeWidth="0.5"
+                    />
+                  </pattern>
+                </defs>
+                <rect width={width} height="100%" fill="url(#grid)" />
+              </>
+            )}
 
-          {/* Fill area under curve */}
-          <path
-            d={`${curvePath} L ${userGuessX} ${
-              height - graphBottomOffset
-            } L ${userGuessX} ${height - graphBottomOffset} Z`}
-            fill="none"
-            fillOpacity="0.1"
-          />
+            {/* X-axis labels */}
+            <text
+              x={0}
+              y={height - 4}
+              fontSize="10"
+              fill="hsl(var(--muted-foreground))"
+              textAnchor="start"
+              fontFamily="JetBrains Mono, monospace"
+            >
+              {minLabel ?? safeMin}
+            </text>
+            <text
+              x={width / 2}
+              y={height - 4}
+              fontSize="10"
+              fill="hsl(var(--muted-foreground))"
+              textAnchor="middle"
+              fontFamily="JetBrains Mono, monospace"
+            >
+              {meanLabel ?? mean}
+            </text>
+            <text
+              x={width}
+              y={height - 4}
+              fontSize="10"
+              fill="hsl(var(--muted-foreground))"
+              textAnchor="end"
+              fontFamily="JetBrains Mono, monospace"
+            >
+              {maxLabel ?? safeMax}
+            </text>
 
-          {/* User's guess indicator */}
-          <g>
-            {/* Vertical line at user's guess */}
-            {/* <line
+            {/* Gaussian curve */}
+            <path
+              d={curvePath}
+              fill="none"
+              stroke="hsl(var(--foreground))"
+              strokeWidth="2"
+              className="drop-shadow-sm"
+            />
+
+            {/* Fill area under curve */}
+            <path
+              d={`${curvePath} L ${userGuessX} ${
+                height - graphBottomOffset
+              } L ${userGuessX} ${height - graphBottomOffset} Z`}
+              fill="none"
+              fillOpacity="0.1"
+            />
+
+            {/* User's guess indicator */}
+            <g>
+              {/* Vertical line at user's guess */}
+              {/* <line
               x1={userGuessX}
               y1={userGuessY}
               x2={userGuessX}
@@ -247,19 +250,19 @@ export function GaussianCurve({
               strokeDasharray="4,2"
             /> */}
 
-            {/* Dot at user's guess position on curve */}
-            <circle
-              cx={userGuessX}
-              cy={userGuessY}
-              r="6"
-              fill="hsl(var(--primary))"
-              stroke="hsl(var(--foreground))"
-              strokeWidth="2"
-              className="drop-shadow-sm"
-            />
+              {/* Dot at user's guess position on curve */}
+              <circle
+                cx={userGuessX}
+                cy={userGuessY}
+                r="6"
+                fill="hsl(var(--primary))"
+                stroke="hsl(var(--foreground))"
+                strokeWidth="2"
+                className="drop-shadow-sm"
+              />
 
-            {/* Label for user's guess */}
-            {/* <text
+              {/* Label for user's guess */}
+              {/* <text
               x={userGuessX}
               y={userGuessY - 8}
               fontSize="10"
@@ -269,9 +272,10 @@ export function GaussianCurve({
             >
               You
             </text> */}
+            </g>
           </g>
-        </g>
-      </svg>
+        </svg>
+      </div>
 
       {/* Probability display */}
       <div className="mt-2 text-xs text-center text-gray-600">

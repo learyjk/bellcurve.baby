@@ -755,6 +755,8 @@ export function CreateBabyPoolForm() {
                       maxLabel={maxDateLabel}
                       sigma={pricingModelSigmas[pricingModel].dateSigma}
                       showGrid={false}
+                      width={280}
+                      height={120}
                     />
                   );
                 })()}
@@ -780,6 +782,8 @@ export function CreateBabyPoolForm() {
                   maxLabel={formatWeightLabel(muWeight + 3)}
                   sigma={pricingModelSigmas[pricingModel].weightSigma}
                   showGrid={false}
+                  width={280}
+                  height={120}
                 />
               </div>
             </div>

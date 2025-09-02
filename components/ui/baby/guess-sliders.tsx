@@ -118,8 +118,8 @@ export function GuessSliders({
       <div className={`${getLayoutClasses()}`}>
         {/* Birth Date Guess Slider with Gaussian Curve */}
         <div className="flex-0">
-          <Card className="shadow-none max-w-[400px]">
-            <CardContent className="p-6">
+          <Card className="shadow-none w-full max-w-sm">
+            <CardContent className="p-4 sm:p-6">
               <div className="mb-4 flex justify-center">
                 <GaussianCurve
                   currentGuess={birthDateDeviation}
@@ -134,6 +134,8 @@ export function GuessSliders({
                   maxLabel={maxDateLabel}
                   sigma={dateSigma}
                   computedPrice={dateComponentPrice}
+                  width={280}
+                  height={120}
                 />
               </div>
               <div className="relative">
@@ -168,8 +170,8 @@ export function GuessSliders({
         </div>
         {/* Weight Guess Slider */}
         <div className="flex-0">
-          <Card className="shadow-none max-w-[400px]">
-            <CardContent className="p-6">
+          <Card className="shadow-none w-full max-w-sm">
+            <CardContent className="p-4 sm:p-6">
               <div className="mb-4 flex justify-center">
                 <GaussianCurve
                   currentGuess={weightGuessOunces}
@@ -184,6 +186,8 @@ export function GuessSliders({
                   meanLabel={`${meanWeightLbs} lbs ${meanWeightRemOz} oz`}
                   sigma={weightSigma * 16} // convert sigma from lbs to oz
                   computedPrice={weightComponentPrice}
+                  width={280}
+                  height={120}
                 />
               </div>
               <div className="relative">

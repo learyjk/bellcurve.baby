@@ -74,12 +74,12 @@ export default function MainHero() {
         />
 
         <div />
-        <Card>
+        <Card className="shadow-none w-full max-w-sm">
           <CardContent className="p-6 text-center">
             <div className="text-sm font-mono font-bold tracking-widest uppercase mb-2">
               Total Guess Price
             </div>
-            <div className="font-cherry-bomb text-5xl mb-2 text-foreground mb-4">
+            <div className="font-cherry-bomb text-5xl mb-2 text-foreground">
               {(() => {
                 try {
                   const { totalPrice } = getGuessPrice({
@@ -93,7 +93,7 @@ export default function MainHero() {
                 }
               })()}
             </div>
-            <div className="flex gap-3 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center w-full">
               <Button asChild className="w-full">
                 <Link href="/auth/sign-up">Sign up & create pool</Link>
               </Button>
