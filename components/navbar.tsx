@@ -13,8 +13,20 @@ import {
 } from "@/components/ui/navigation-menu";
 import { AuthButton } from "@/components/auth-button";
 import { Logo } from "./svg/logo";
+import { createClient } from "@/lib/supabase/server";
+import { hasFeatureAccess } from "@/lib/features";
+import { FEATURES } from "@/lib/features/types";
 
 export async function Navbar() {
+  const supabase = await createClient();
+  
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Check if user has access to create baby pools
+  const canCreateBabyPool = user ? await hasFeatureAccess(user.id, FEATURES.CREATE_BABY_POOL) : false;
+
   return (
     <nav className="grid grid-cols-3 items-center w-full mx-auto px-4 py-2 border-b">
       <NavigationMenu className="flex items-start justify-self-start">
@@ -38,11 +50,18 @@ export async function Navbar() {
                     </Link>
                   </NavigationMenuLink>
                 </li>
-                <ListItem href="/baby" title="My Babies">
-                  See My Babies
-                </ListItem>
-                <ListItem href="/baby/create" title="Create Baby Pool">
-                  Create My Baby Pool
+                {canCreateBabyPool && (
+                  <ListItem href="/baby" title="My Babies">
+                    See My Babies
+                  </ListItem>
+                )}
+                {canCreateBabyPool && (
+                  <ListItem href="/baby/create" title="Create Baby Pool">
+                    Create My Baby Pool
+                  </ListItem>
+                )}
+                <ListItem href="/guesses" title="My Guesses">
+                  View all your submitted guesses
                 </ListItem>
               </ul>
             </NavigationMenuContent>
