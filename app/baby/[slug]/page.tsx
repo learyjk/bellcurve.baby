@@ -7,10 +7,13 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function BabyPoolPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ payment?: string }>;
 }) {
   const { slug } = await params;
+  const { payment } = await searchParams;
   const pool = await getPoolBySlug(slug);
 
   if (!pool) {
@@ -31,7 +34,12 @@ export default async function BabyPoolPage({
 
   return (
     <div className="w-full max-w-6xl mx-auto rounded-xl p-8">
-      <BabyPoolClient pool={pool} guesses={guesses} user={user} />
+      <BabyPoolClient
+        pool={pool}
+        guesses={guesses}
+        user={user}
+        paymentStatus={payment}
+      />
     </div>
   );
 }

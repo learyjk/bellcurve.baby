@@ -46,10 +46,12 @@ export function BabyPoolClient({
   pool,
   guesses,
   user,
+  paymentStatus,
 }: {
   pool: Tables<"pools">;
   guesses: Tables<"guesses">[];
   user: User | null;
+  paymentStatus?: string;
 }) {
   const [name, setName] = useState<string>("");
   const router = useRouter();
@@ -62,6 +64,38 @@ export function BabyPoolClient({
   }, [user]);
 
   const isLoggedIn = !!user;
+
+  // Handle payment status messages
+  useEffect(() => {
+    if (paymentStatus === "success") {
+      // Check if user actually has a recent guess for this pool
+      const userGuesses = guesses.filter((guess) => guess.user_id === user?.id);
+      const hasRecentGuess = userGuesses.some((guess) => {
+        const guessTime = new Date(guess.created_at || 0).getTime();
+        const fiveMinutesAgo = Date.now() - 5 * 60 * 1000; // 5 minutes ago
+        return guessTime > fiveMinutesAgo;
+      });
+
+      if (hasRecentGuess) {
+        toast.success("Payment successful! Your guess has been recorded.");
+      } else {
+        // Payment succeeded but no guess found - likely webhook failure
+        toast.error(
+          "Payment processed but guess creation failed. You will be redirected to get help.",
+          { duration: 5000 }
+        );
+        setTimeout(() => {
+          window.location.href = `/payment-error?payment_intent=unknown&session_id=unknown&error=guess_creation_failed`;
+        }, 2000);
+      }
+    } else if (paymentStatus === "cancelled") {
+      toast.error("Payment was cancelled. Your guess was not recorded.");
+    } else if (paymentStatus === "error") {
+      toast.error(
+        "There was an error processing your guess. Please contact support if you were charged."
+      );
+    }
+  }, [paymentStatus, guesses, user?.id]);
 
   const [birthDateDeviation, setBirthDateDeviation] = useState(0);
 
