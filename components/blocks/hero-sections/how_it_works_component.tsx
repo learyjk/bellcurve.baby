@@ -6,6 +6,9 @@ export default function HowItWorks() {
       <h1 className="text-3xl font-cherry-bomb font-semibold tracking-tight mb-4">
         How It Works
       </h1>
+      <h2 className="text-lg text-muted-foreground font-medium mb-8">
+        Probabilistic pricing: The more likely your guess, the more it costs
+      </h2>
       <Tabs defaultValue="layman" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="layman">For the layman</TabsTrigger>

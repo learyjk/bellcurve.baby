@@ -6,6 +6,7 @@ import { Tables } from "@/database.types";
 import { DATE_DEVIATION_DAYS, WEIGHT_DEVIATION_OUNCES } from "@/lib/constants";
 import { pricingModelSigmas } from "@/lib/helpers/pricingModels";
 import { getGuessComponentPrice } from "@/lib/helpers/pricing";
+import Image from "next/image";
 
 export function GuessSliders({
   birthDateDeviation,
@@ -119,7 +120,7 @@ export function GuessSliders({
         {/* Birth Date Guess Slider with Gaussian Curve */}
         <div className="flex-0">
           <Card className="shadow-none w-full max-w-sm">
-            <CardContent className="p-4 sm:p-6">
+            <CardContent className="pt-4 px-4 pb-10">
               <div className="mb-4 flex justify-center">
                 <GaussianCurve
                   currentGuess={birthDateDeviation}
@@ -150,9 +151,15 @@ export function GuessSliders({
                   onValueChange={(val) =>
                     onValueChange({ birthDateDeviation: val[0] })
                   }
+                  minImage={
+                    <Image src="/bread.png" alt="baby" width={22} height={22} />
+                  }
+                  maxImage={
+                    <Image src="/toast.png" alt="baby" width={22} height={22} />
+                  }
                 />
                 <div
-                  className="absolute top-4 text-xs font-mono transform -translate-x-1/2 text-center whitespace-nowrap"
+                  className="absolute mt-3 text-xs font-mono transform -translate-x-1/2 text-center whitespace-nowrap"
                   style={{
                     left: `${
                       ((birthDateDeviation - -DATE_DEVIATION_DAYS) /
@@ -171,7 +178,7 @@ export function GuessSliders({
         {/* Weight Guess Slider */}
         <div className="flex-0">
           <Card className="shadow-none w-full max-w-sm">
-            <CardContent className="p-4 sm:p-6">
+            <CardContent className="pt-4 px-4 pb-10">
               <div className="mb-4 flex justify-center">
                 <GaussianCurve
                   currentGuess={weightGuessOunces}
@@ -202,9 +209,25 @@ export function GuessSliders({
                   onValueChange={(val) =>
                     onValueChange({ weightGuessOunces: val[0] })
                   }
+                  minImage={
+                    <Image
+                      src="/thin-baby.png"
+                      alt="baby small"
+                      width={22}
+                      height={22}
+                    />
+                  }
+                  maxImage={
+                    <Image
+                      src="/fat-baby.png"
+                      alt="baby big"
+                      width={22}
+                      height={22}
+                    />
+                  }
                 />
                 <div
-                  className="absolute top-4 text-xs font-mono transform -translate-x-1/2 text-center whitespace-nowrap"
+                  className="absolute mt-3 text-xs font-mono transform -translate-x-1/2 text-center whitespace-nowrap"
                   style={{
                     left: `${
                       ((weightGuessOunces - weightMinOz) /

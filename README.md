@@ -6,3 +6,6 @@ TODO:
 [X] Only standard and chill
 [ ] Stripe payout via Stripe connect
 [ ] Share a Baby
+[ ] Anonymous guesses
+[ ] Favicon
+[ ] T/S Guesses on prod not going thorugh (staging too?)

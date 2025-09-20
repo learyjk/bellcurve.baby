@@ -11,8 +11,13 @@ function Slider({
   value,
   min = 0,
   max = 100,
+  minImage,
+  maxImage,
   ...props
-}: React.ComponentProps<typeof SliderPrimitive.Root>) {
+}: React.ComponentProps<typeof SliderPrimitive.Root> & {
+  minImage?: React.ReactNode;
+  maxImage?: React.ReactNode;
+}) {
   const _values = React.useMemo(
     () =>
       Array.isArray(value)
@@ -24,45 +29,54 @@ function Slider({
   );
 
   return (
-    <SliderPrimitive.Root
-      data-slot="slider"
-      defaultValue={defaultValue}
-      value={value}
-      min={min}
-      max={max}
-      className={cn(
-        "relative flex w-full touch-none items-center select-none font-mono data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
-        className
+    <div className="w-full">
+      {(minImage || maxImage) && (
+        <div className="flex flex-row justify-between items-center w-full mb-2">
+          <div className="flex-1 flex justify-start">{minImage}</div>
+          <div className="flex-1" />
+          <div className="flex-1 flex justify-end">{maxImage}</div>
+        </div>
       )}
-      {...props}
-    >
-      <SliderPrimitive.Track
-        data-slot="slider-track"
+      <SliderPrimitive.Root
+        data-slot="slider"
+        defaultValue={defaultValue}
+        value={value}
+        min={min}
+        max={max}
         className={cn(
-          "relative grow overflow-hidden rounded-full border-2 border-foreground data-[orientation=horizontal]:h-2.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-2.5"
+          "relative flex w-full touch-none items-center select-none font-mono data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
+          className
         )}
-        style={{ backgroundColor: "hsl(var(--muted))" }}
+        {...props}
       >
-        <SliderPrimitive.Range
-          data-slot="slider-range"
+        <SliderPrimitive.Track
+          data-slot="slider-track"
           className={cn(
-            "absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full"
+            "relative grow overflow-hidden rounded-full border-2 border-foreground data-[orientation=horizontal]:h-2.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-2.5"
           )}
-          style={{ backgroundColor: "hsl(var(--foreground))" }}
-        />
-      </SliderPrimitive.Track>
-      {Array.from({ length: _values.length }, (_, index) => (
-        <SliderPrimitive.Thumb
-          data-slot="slider-thumb"
-          key={index}
-          className="ring-ring/50 block size-4 shrink-0 rounded-full border-2 shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
-          style={{
-            backgroundColor: "hsl(var(--primary))",
-            borderColor: "hsl(var(--foreground))",
-          }}
-        />
-      ))}
-    </SliderPrimitive.Root>
+          style={{ backgroundColor: "hsl(var(--muted))" }}
+        >
+          <SliderPrimitive.Range
+            data-slot="slider-range"
+            className={cn(
+              "absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full"
+            )}
+            style={{ backgroundColor: "hsl(var(--foreground))" }}
+          />
+        </SliderPrimitive.Track>
+        {Array.from({ length: _values.length }, (_, index) => (
+          <SliderPrimitive.Thumb
+            data-slot="slider-thumb"
+            key={index}
+            className="ring-ring/50 block size-4 shrink-0 rounded-full border-2 shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+            style={{
+              backgroundColor: "hsl(var(--primary))",
+              borderColor: "hsl(var(--foreground))",
+            }}
+          />
+        ))}
+      </SliderPrimitive.Root>
+    </div>
   );
 }
 
