@@ -70,7 +70,11 @@ export default async function PaymentErrorPage({
 
             <div className="flex flex-col gap-3">
               <Button asChild className="w-full">
-                <Link href="mailto:support@bellcurve.baby?subject=Payment%20Processing%20Error&body=Payment%20Reference:%20${params.payment_intent}%0ASession%20ID:%20${params.session_id}">
+                <Link
+                  href={`mailto:leary.keegan@gmail.com?subject=Payment%20Processing%20Error&body=Payment%20Reference:%20${
+                    params.payment_intent || "unknown"
+                  }%0ASession%20ID:%20${params.session_id || "unknown"}`}
+                >
                   <Mail className="mr-2 h-4 w-4" />
                   Contact Support
                 </Link>

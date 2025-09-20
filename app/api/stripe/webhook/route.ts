@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/database.types";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -43,13 +43,57 @@ function markEventAsProcessed(eventId: string, status: string) {
 type GuessInsert = Database["public"]["Tables"]["guesses"]["Insert"];
 
 async function createGuess(guess: GuessInsert, paymentIntentId: string) {
-  const supabase = await createClient();
+  console.log("🔑 createGuess called with service key check:", {
+    hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    serviceKeyLength: process.env.SUPABASE_SERVICE_ROLE_KEY?.length || 0,
+  });
+
+  // Check if service role key is configured
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error(
+      "SUPABASE_SERVICE_ROLE_KEY not configured - this will cause RLS permission errors"
+    );
+    throw new Error("Service role key not configured for webhook operations");
+  }
+
+  // Create service client that bypasses RLS for webhook operations
+  const supabase = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
   // Add payment_id to the guess for tracking
   const guessWithPaymentId = {
     ...guess,
     payment_id: paymentIntentId,
   };
+
+  console.log("Attempting to create guess:", {
+    guess: guessWithPaymentId,
+    payment_id: paymentIntentId,
+  });
+
+  // First, let's verify the pool exists and user has access
+  const { data: poolCheck, error: poolError } = await supabase
+    .from("pools")
+    .select("id, user_id, is_locked")
+    .eq("id", guessWithPaymentId.pool_id)
+    .single();
+
+  if (poolError) {
+    console.error("Pool verification failed:", {
+      pool_id: guessWithPaymentId.pool_id,
+      error: poolError,
+    });
+    throw new Error(`Pool not found or inaccessible: ${poolError.message}`);
+  }
+
+  if (poolCheck.is_locked) {
+    console.error("Pool is locked:", {
+      pool_id: guessWithPaymentId.pool_id,
+    });
+    throw new Error("Cannot add guess to locked pool");
+  }
 
   const { data, error } = await supabase
     .from("guesses")
@@ -62,9 +106,24 @@ async function createGuess(guess: GuessInsert, paymentIntentId: string) {
       message: error.message,
       details: error.details,
       code: error.code,
+      hint: error.hint,
       guess: guessWithPaymentId,
+      supabase_error_type: typeof error,
+      postgresql_code: error.code,
     });
-    throw new Error(`Failed to create guess: ${error.message}`);
+
+    // Check for common error types
+    if (error.code === "23505") {
+      throw new Error(`Duplicate guess detected: ${error.message}`);
+    } else if (error.code === "23503") {
+      throw new Error(`Foreign key constraint violation: ${error.message}`);
+    } else if (error.code === "42501") {
+      throw new Error(`Permission denied (RLS policy): ${error.message}`);
+    } else {
+      throw new Error(
+        `Failed to create guess: ${error.message} (Code: ${error.code})`
+      );
+    }
   }
 
   console.log("Successfully created guess:", {
@@ -77,11 +136,32 @@ async function createGuess(guess: GuessInsert, paymentIntentId: string) {
   return data;
 }
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, stripe-signature",
+    },
+  });
+}
+
 export async function POST(req: NextRequest) {
+  console.log("🚀 WEBHOOK POST HANDLER CALLED - START");
+
   const body = await req.text();
   const signatureHeader = await headers()
     .then((h) => h.get("stripe-signature"))
     .catch(() => null);
+
+  console.log("Webhook received:", {
+    bodyLength: body.length,
+    hasSignature: !!signatureHeader,
+    signaturePreview: signatureHeader?.substring(0, 50) + "...",
+    webhookSecretConfigured: !!webhookSecret,
+    serviceKeyConfigured: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+  });
 
   if (!signatureHeader) {
     console.error("Missing Stripe signature header");
@@ -98,9 +178,18 @@ export async function POST(req: NextRequest) {
       signatureHeader,
       webhookSecret
     );
+    console.log("Webhook signature verification successful:", {
+      eventType: event.type,
+      eventId: event.id,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
-    console.error(`Webhook signature verification failed: ${message}`);
+    console.error(`Webhook signature verification failed: ${message}`, {
+      error: err,
+      bodyPreview: body.substring(0, 200),
+      signatureHeader: signatureHeader,
+      webhookSecretLength: webhookSecret?.length,
+    });
     return new NextResponse(`Webhook Error: ${message}`, { status: 400 });
   }
 

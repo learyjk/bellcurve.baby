@@ -297,7 +297,7 @@ export function BabyPoolClient({
                       Total Guess Price
                     </div>
                     <div className="font-cherry-bomb text-5xl mb-2 text-foreground">
-                      ${totalPrice.toFixed(2)}
+                      {`$${totalPrice.toFixed(2)}`}
                     </div>
                     <div className="flex justify-center items-start gap-2">
                       <div className="flex flex-col items-end font-mono space-y-1 text-xs text-muted-foreground">
@@ -305,8 +305,8 @@ export function BabyPoolClient({
                         <span>Weight price:</span>
                       </div>
                       <div className="flex flex-col items-start font-mono space-y-1 text-xs text-muted-foreground">
-                        <span>${datePrice.toFixed(2)}</span>
-                        <span>${weightPrice.toFixed(2)}</span>
+                        <span>{`$${datePrice.toFixed(2)}`}</span>
+                        <span>{`$${weightPrice.toFixed(2)}`}</span>
                       </div>
                     </div>
                   </CardContent>
