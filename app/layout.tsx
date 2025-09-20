@@ -70,7 +70,15 @@ export default function RootLayout({
               </div>
             </footer>
           </div>
-          <Toaster />
+          <Toaster
+            position="top-center"
+            expand={true}
+            richColors={true}
+            closeButton={true}
+            style={{
+              zIndex: 99999,
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>

@@ -46,8 +46,12 @@ export default async function MyGuessesPage() {
     return (
       <div className="max-w-4xl mx-auto mt-10 p-6 border rounded-lg bg-card shadow">
         <h1 className="text-2xl font-bold mb-4">My Guesses</h1>
-        <div className="text-destructive">There was an error loading your guesses. Try again later.</div>
-        <pre className="mt-4 text-xs text-muted-foreground overflow-auto whitespace-pre-wrap">{JSON.stringify(error, null, 2)}</pre>
+        <div className="text-destructive">
+          There was an error loading your guesses. Try again later.
+        </div>
+        <pre className="mt-4 text-xs text-muted-foreground overflow-auto whitespace-pre-wrap">
+          {JSON.stringify(error, null, 2)}
+        </pre>
       </div>
     );
   }
@@ -74,8 +78,12 @@ export default async function MyGuessesPage() {
               {rows.map((guess) => {
                 return (
                   <TableRow key={guess.id}>
-                    <TableCell>{guess.pools?.baby_name || guess.pools?.slug}</TableCell>
-                    <TableCell>{new Date(guess.guessed_birth_date).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      {guess.pools?.baby_name || guess.pools?.slug}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(guess.guessed_birth_date).toLocaleDateString()}
+                    </TableCell>
                     <TableCell>
                       {(() => {
                         const weightInOunces = guess.guessed_weight;
@@ -84,10 +92,14 @@ export default async function MyGuessesPage() {
                         return `${pounds} lbs ${ounces} oz`;
                       })()}
                     </TableCell>
-                    <TableCell>${guess.calculated_price.toFixed(2)}</TableCell>
+                    <TableCell>{`$${guess.calculated_price.toFixed(
+                      2
+                    )}`}</TableCell>
                     <TableCell>{guess.payment_status || "unpaid"}</TableCell>
                     <TableCell>
-                      {guess.created_at ? new Date(guess.created_at).toLocaleDateString() : "-"}
+                      {guess.created_at
+                        ? new Date(guess.created_at).toLocaleDateString()
+                        : "-"}
                     </TableCell>
                   </TableRow>
                 );
@@ -96,7 +108,9 @@ export default async function MyGuessesPage() {
           </Table>
         </div>
       ) : (
-        <p className="text-muted-foreground">You have not submitted any guesses yet.</p>
+        <p className="text-muted-foreground">
+          You have not submitted any guesses yet.
+        </p>
       )}
     </div>
   );

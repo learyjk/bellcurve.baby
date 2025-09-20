@@ -46,10 +46,12 @@ export function BabyPoolClient({
   pool,
   guesses,
   user,
+  paymentStatus,
 }: {
   pool: Tables<"pools">;
   guesses: Tables<"guesses">[];
   user: User | null;
+  paymentStatus?: string;
 }) {
   const [name, setName] = useState<string>("");
   const router = useRouter();
@@ -62,6 +64,53 @@ export function BabyPoolClient({
   }, [user]);
 
   const isLoggedIn = !!user;
+
+  // Handle payment status messages
+  useEffect(() => {
+    console.log("🎯 Payment status effect:", { paymentStatus });
+
+    if (!paymentStatus) return;
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const showToasts = () => {
+      if (paymentStatus === "success") {
+        console.log("Payment success - showing toast");
+        toast.success("Payment successful! Your guess has been recorded.", {
+          duration: 4000,
+        });
+      } else if (paymentStatus === "cancelled") {
+        console.log("Payment cancelled - showing toast");
+        toast.error("Payment was cancelled. Your guess was not recorded.");
+      } else if (paymentStatus === "error") {
+        console.log("Payment error - showing toast");
+        toast.error(
+          "There was an error processing your payment. Please contact support if you were charged."
+        );
+      }
+    };
+
+    // Try immediate first (for normal client flow), but also schedule a fallback after
+    // a short delay in case the Toaster hasn't mounted yet during hydration.
+    try {
+      showToasts();
+    } catch (err) {
+      console.warn("Immediate toast failed, will retry after delay", err);
+    }
+
+    timer = setTimeout(() => {
+      console.log("Fallback payment toast attempt after delay");
+      try {
+        showToasts();
+      } catch (err) {
+        console.error("Fallback toast failed", err);
+      }
+    }, 200);
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [paymentStatus]);
 
   const [birthDateDeviation, setBirthDateDeviation] = useState(0);
 
@@ -263,7 +312,7 @@ export function BabyPoolClient({
                       Total Guess Price
                     </div>
                     <div className="font-cherry-bomb text-5xl mb-2 text-foreground">
-                      ${totalPrice.toFixed(2)}
+                      {`$${totalPrice.toFixed(2)}`}
                     </div>
                     <div className="flex justify-center items-start gap-2">
                       <div className="flex flex-col items-end font-mono space-y-1 text-xs text-muted-foreground">
@@ -271,8 +320,8 @@ export function BabyPoolClient({
                         <span>Weight price:</span>
                       </div>
                       <div className="flex flex-col items-start font-mono space-y-1 text-xs text-muted-foreground">
-                        <span>${datePrice.toFixed(2)}</span>
-                        <span>${weightPrice.toFixed(2)}</span>
+                        <span>{`$${datePrice.toFixed(2)}`}</span>
+                        <span>{`$${weightPrice.toFixed(2)}`}</span>
                       </div>
                     </div>
                   </CardContent>
