@@ -10,6 +10,8 @@ TODO:
 [ ] Favicon
 [ ] T/S Guesses on prod not going thorugh (staging too?)
 
+add announcement page
 info icon with popup under avg weight "7 lbs 6 oz roughly the national average newborn weight"
 H1's should be cherry bomb font and coral color
+H2's should be cherry bomb font and dark color. Increase the kerning for readability.
 block letters on homepage
