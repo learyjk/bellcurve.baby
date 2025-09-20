@@ -198,7 +198,7 @@ export async function POST(req: NextRequest) {
       // Mark event as failed
       markEventAsProcessed(eventId, `failed: ${message}`);
 
-      // Log the failure for manual investigation with all necessary details
+      // Log the failure for manual investigation with all necessary details.
       console.error(
         "=== URGENT: GUESS CREATION FAILED AFTER SUCCESSFUL PAYMENT ===",
         {
