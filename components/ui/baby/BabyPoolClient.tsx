@@ -67,35 +67,50 @@ export function BabyPoolClient({
 
   // Handle payment status messages
   useEffect(() => {
-    if (paymentStatus === "success") {
-      // Check if user actually has a recent guess for this pool
-      const userGuesses = guesses.filter((guess) => guess.user_id === user?.id);
-      const hasRecentGuess = userGuesses.some((guess) => {
-        const guessTime = new Date(guess.created_at || 0).getTime();
-        const fiveMinutesAgo = Date.now() - 5 * 60 * 1000; // 5 minutes ago
-        return guessTime > fiveMinutesAgo;
-      });
+    console.log("🎯 Payment status effect:", { paymentStatus });
 
-      if (hasRecentGuess) {
-        toast.success("Payment successful! Your guess has been recorded.");
-      } else {
-        // Payment succeeded but no guess found - likely webhook failure
+    if (!paymentStatus) return;
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const showToasts = () => {
+      if (paymentStatus === "success") {
+        console.log("Payment success - showing toast");
+        toast.success("Payment successful! Your guess has been recorded.", {
+          duration: 4000,
+        });
+      } else if (paymentStatus === "cancelled") {
+        console.log("Payment cancelled - showing toast");
+        toast.error("Payment was cancelled. Your guess was not recorded.");
+      } else if (paymentStatus === "error") {
+        console.log("Payment error - showing toast");
         toast.error(
-          "Payment processed but guess creation failed. You will be redirected to get help.",
-          { duration: 5000 }
+          "There was an error processing your payment. Please contact support if you were charged."
         );
-        setTimeout(() => {
-          window.location.href = `/payment-error?payment_intent=unknown&session_id=unknown&error=guess_creation_failed`;
-        }, 2000);
       }
-    } else if (paymentStatus === "cancelled") {
-      toast.error("Payment was cancelled. Your guess was not recorded.");
-    } else if (paymentStatus === "error") {
-      toast.error(
-        "There was an error processing your guess. Please contact support if you were charged."
-      );
+    };
+
+    // Try immediate first (for normal client flow), but also schedule a fallback after
+    // a short delay in case the Toaster hasn't mounted yet during hydration.
+    try {
+      showToasts();
+    } catch (err) {
+      console.warn("Immediate toast failed, will retry after delay", err);
     }
-  }, [paymentStatus, guesses, user?.id]);
+
+    timer = setTimeout(() => {
+      console.log("Fallback payment toast attempt after delay");
+      try {
+        showToasts();
+      } catch (err) {
+        console.error("Fallback toast failed", err);
+      }
+    }, 200);
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [paymentStatus]);
 
   const [birthDateDeviation, setBirthDateDeviation] = useState(0);
 

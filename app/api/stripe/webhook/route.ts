@@ -73,6 +73,21 @@ async function createGuess(guess: GuessInsert, paymentIntentId: string) {
     payment_id: paymentIntentId,
   });
 
+  // Check if a guess with this payment_id already exists (duplicate prevention)
+  const { data: existingGuess, error: existingError } = await supabase
+    .from("guesses")
+    .select("id, payment_id")
+    .eq("payment_id", paymentIntentId)
+    .single();
+
+  if (existingGuess && !existingError) {
+    console.log("Guess already exists for this payment:", {
+      existing_guess_id: existingGuess.id,
+      payment_id: paymentIntentId,
+    });
+    return existingGuess;
+  }
+
   // First, let's verify the pool exists and user has access
   const { data: poolCheck, error: poolError } = await supabase
     .from("pools")
