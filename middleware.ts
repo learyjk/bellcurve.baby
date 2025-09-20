@@ -21,6 +21,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|stripe/webhook|.*\\.[^/]+$).*)",
+    // Exclude api/stripe/webhook explicitly so Stripe POSTs are not intercepted
+    // by this middleware and cause redirects (307). Keep other exclusions.
+    "/((?!api/stripe/webhook|api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.[^/]+$).*)",
   ],
 };
