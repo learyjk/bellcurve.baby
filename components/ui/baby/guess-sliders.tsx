@@ -6,7 +6,10 @@ import { Tables } from "@/database.types";
 import { DATE_DEVIATION_DAYS, WEIGHT_DEVIATION_OUNCES } from "@/lib/constants";
 import { pricingModelSigmas } from "@/lib/helpers/pricingModels";
 import { getGuessComponentPrice } from "@/lib/helpers/pricing";
-import Image from "next/image";
+import FatBaby from "@/app/assets/FatBaby";
+import ThinBaby from "@/app/assets/ThinBaby";
+import Bread from "@/app/assets/Bread";
+import Toast from "@/app/assets/Toast";
 
 export function GuessSliders({
   birthDateDeviation,
@@ -151,12 +154,8 @@ export function GuessSliders({
                   onValueChange={(val) =>
                     onValueChange({ birthDateDeviation: val[0] })
                   }
-                  minImage={
-                    <Image src="/bread.svg" alt="baby" width={22} height={22} />
-                  }
-                  maxImage={
-                    <Image src="/toast.svg" alt="baby" width={22} height={22} />
-                  }
+                  minImage={<Bread width={22} height={22} />}
+                  maxImage={<Toast width={22} height={22} />}
                 />
                 <div
                   className="absolute mt-3 text-xs font-mono transform -translate-x-1/2 text-center whitespace-nowrap"
@@ -209,22 +208,8 @@ export function GuessSliders({
                   onValueChange={(val) =>
                     onValueChange({ weightGuessOunces: val[0] })
                   }
-                  minImage={
-                    <Image
-                      src="/thin-baby.svg"
-                      alt="baby small"
-                      width={22}
-                      height={22}
-                    />
-                  }
-                  maxImage={
-                    <Image
-                      src="/fat-baby.svg"
-                      alt="baby big"
-                      width={22}
-                      height={22}
-                    />
-                  }
+                  minImage={<ThinBaby width={22} height={22} />}
+                  maxImage={<FatBaby width={22} height={22} />}
                 />
                 <div
                   className="absolute mt-3 text-xs font-mono transform -translate-x-1/2 text-center whitespace-nowrap"

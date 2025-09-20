@@ -57,7 +57,7 @@ export default function MainHero() {
   return (
     <section className="w-full max-w-4xl mx-auto px-4 py-12">
       <div className="flex flex-col gap-2 items-center">
-        <h1 className="text-3xl md:text-6xl font-bold tracking-tighter text-pretty text-center mb-4">
+        <h1 className="font-cherry-bomb text-3xl md:text-6xl font-boldtext-pretty text-center mb-4">
           Collect donations and celebrate your newborn with a fun guessing game.
         </h1>
         <p className="text-lg text-muted-foreground text-center max-w-2xl mb-2">
