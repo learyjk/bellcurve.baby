@@ -9,3 +9,7 @@ TODO:
 [ ] Anonymous guesses
 [ ] Favicon
 [ ] T/S Guesses on prod not going thorugh (staging too?)
+
+info icon with popup under avg weight "7 lbs 6 oz roughly the national average newborn weight"
+H1's should be cherry bomb font and coral color
+block letters on homepage
