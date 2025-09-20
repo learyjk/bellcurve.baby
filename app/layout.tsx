@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Cherry_Bomb_One, Inter } from "next/font/google";
+import { JetBrains_Mono, Cherry_Bomb_One, Quicksand } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
@@ -18,10 +18,17 @@ export const metadata: Metadata = {
     "Collect donations and celebrate your newborn with a fun guessing game.",
 };
 
-const inter = Inter({
-  variable: "--font-inter",
+// const inter = Inter({
+//   variable: "--font-inter",
+//   display: "swap",
+//   subsets: ["latin"],
+// });
+
+const quicksand = Quicksand({
+  variable: "--font-quicksand",
   display: "swap",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -45,7 +52,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.className} ${jetbrainsMono.variable} ${cherryBomb.variable} antialiased`}
+        className={`${quicksand.className} ${jetbrainsMono.variable} ${cherryBomb.variable} antialiased`}
       >
         <ThemeProvider
           attribute="class"
