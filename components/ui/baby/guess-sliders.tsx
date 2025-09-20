@@ -152,10 +152,10 @@ export function GuessSliders({
                     onValueChange({ birthDateDeviation: val[0] })
                   }
                   minImage={
-                    <Image src="/bread.png" alt="baby" width={22} height={22} />
+                    <Image src="/bread.svg" alt="baby" width={22} height={22} />
                   }
                   maxImage={
-                    <Image src="/toast.png" alt="baby" width={22} height={22} />
+                    <Image src="/toast.svg" alt="baby" width={22} height={22} />
                   }
                 />
                 <div
@@ -211,7 +211,7 @@ export function GuessSliders({
                   }
                   minImage={
                     <Image
-                      src="/thin-baby.png"
+                      src="/thin-baby.svg"
                       alt="baby small"
                       width={22}
                       height={22}
@@ -219,7 +219,7 @@ export function GuessSliders({
                   }
                   maxImage={
                     <Image
-                      src="/fat-baby.png"
+                      src="/fat-baby.svg"
                       alt="baby big"
                       width={22}
                       height={22}
