@@ -4,12 +4,12 @@ TODO:
 Stripe payout via Stripe connect
 
 [ ] add announcement page
-[ ] info icon with popup under avg weight "7 lbs 6 oz roughly the national average newborn weight"
 [ ] video
 [ ] prizes
 
 [ ] Share a Baby
 
+[X] info icon with popup under avg weight "7 lbs 6 oz roughly the national average newborn weight"
 [X] Update Google prod redirect
 [X] Create baby pool image and description.
 [X] Only standard and chill
