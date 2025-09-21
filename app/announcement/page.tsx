@@ -45,13 +45,20 @@ export default function AnnouncementPage() {
               {" "}
               As woefully practical and unluxurious people, we didn’t want a
               pile of gifts that may not go to use. So we built something
-              playful, nerdy, and community-driven. It’s an expression of who we
-              are as a couple, and we hope it invites you into the anticipation!
+              playful, nerdy, and community-driven.{" "}
+              <strong>
+                It’s an expression of who we are as a couple, and we hope it
+                invites you into the anticipation!
+              </strong>
             </p>
 
             <h2 className="mt-4 max-w-xl mx-auto text-2xl font-semibold">
               At a glance: How it works
             </h2>
+
+            <p className="max-w-xl mx-auto text-sm text-muted-foreground">
+              (See the full explanation <Link href="/#how-it-works">here</Link>)
+            </p>
 
             <ol className="max-w-xl mx-auto list-decimal list-inside space-y-3">
               <li>
@@ -62,7 +69,8 @@ export default function AnnouncementPage() {
               <li>
                 <strong>Pay the odds.</strong> Safer guesses cost more; bold
                 guesses cost less. The cost of your guess is your donation to
-                our family.
+                our family. Feel free to make multiple guesses for better
+                chances!
               </li>
               <li>
                 <strong>See the chart.</strong> Your guess(es) appear alongside
@@ -79,23 +87,45 @@ export default function AnnouncementPage() {
             </h2>
 
             <p className="max-w-xl mx-auto">
-              {" "}
               We had just booked the venue for our baby shower, and were at
               dinner with Keegan’s parents. The table talk drifted toward what
               games to play at the party.
             </p>
 
             <p className="max-w-xl mx-auto">
-              Keegan’s stepdad, Dave, casually tossed out an idea: “What about a
-              betting pool on the baby’s birth date and weight?”
+              That’s when things went off the rails.
+            </p>
+
+            <p className="max-w-xl mx-auto">
+              Keegan’s stepdad, Dave, casually tossed out an idea:
+            </p>
+
+            <p className="max-w-xl mx-auto font-bold italic">
+              “What about a betting pool on the baby’s birth date and weight?”
             </p>
 
             <p className="max-w-xl mx-auto">
               The moment she heard “betting pool,” Heather wasn’t picturing
               slips of paper. She saw a giant parameter space filling with
-              guesses. She wondered: Would everyone cluster around the “safe”
-              answers? How could we tempt people into making bolder, wilder
-              guesses?
+              guesses. She wondered:
+            </p>
+
+            <ul className="max-w-xl mx-auto list-disc list-inside space-y-2">
+              <li>Would everyone cluster around the “safe” answers?</li>
+              <li>
+                How could we tempt people into making bolder, wilder guesses?
+              </li>
+            </ul>
+
+            <p className="max-w-xl mx-auto">
+              She dove into birth data distributions and noticed something
+              beautiful: both birth weights and dates follow a curve that looks
+              almost exactly like a bell curve.
+            </p>
+
+            <p className="max-w-xl mx-auto">
+              She started refining the pricing model and designing data
+              visualizations.
             </p>
 
             <div className="grid md:grid-cols-2 gap-6 my-8">
@@ -116,9 +146,42 @@ export default function AnnouncementPage() {
             </div>
 
             <p className="max-w-xl mx-auto">
+              As she floated ideas to Keegan, his brain went exactly where it
+              always goes:
+            </p>
+
+            <p className="max-w-xl font-bold italic mx-auto">
+              “This has to be a web app.”
+            </p>
+
+            <p className="max-w-xl mx-auto">
+              Keegan started wire-framing, prototyping a user-friendly
+              interface, and setting up a backend that accepted donations
+              through Stripe.
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-6 my-6">
+              <Image
+                src="/image2.png"
+                alt="prototype"
+                width={390}
+                height={152}
+                className="rounded w-full object-cover mx-auto max-w-sm"
+              />
+              <Image
+                src="/image3.png"
+                alt="prototype-2"
+                width={386}
+                height={160}
+                className="rounded w-full object-cover mx-auto max-w-sm"
+              />
+            </div>
+
+            <p className="max-w-xl mx-auto">
               Heather worked on the branding and design in parallel. Many late
               nights followed. Two laptops side by side, digitally playing in
-              the same Github repo and Figma file.
+              the same Github repo and Figma file. But sometimes, nothing beats
+              good ol’ fashioned analog.
             </p>
 
             <figure className="mt-6">
@@ -132,8 +195,7 @@ export default function AnnouncementPage() {
             </figure>
 
             <p className="mt-6 max-w-xl mx-auto">
-              Thanks for reading — we can’t wait to share the game with you when
-              the baby arrives!
+              Thanks for reading — we are excited to share this with you!
             </p>
 
             <p className="mt-6 max-w-xl mx-auto">
