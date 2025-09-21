@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { getGuessComponentPrice } from "@/lib/helpers/pricing";
+import { TooltipIcon } from "@/components/ui/tooltip-icon";
 
 interface GaussianCurveProps {
   currentGuess: number;
@@ -17,6 +18,7 @@ interface GaussianCurveProps {
   height?: number;
   className?: string;
   title: string;
+  tooltipText?: string;
   minLabel?: string;
   meanLabel?: string;
   maxLabel?: string;
@@ -37,6 +39,7 @@ export function GaussianCurve({
   height = 140,
   className = "",
   title,
+  tooltipText,
   minLabel,
   meanLabel,
   maxLabel,
@@ -130,8 +133,9 @@ export function GaussianCurve({
 
   return (
     <div className={`flex flex-col font-mono w-full ${className}`}>
-      <div className="mb-2 text-sm font-bold tracking-widest uppercase">
+      <div className="flex items-center gap-2 mb-2 text-sm font-bold tracking-widest uppercase">
         {title}
+        {tooltipText && <TooltipIcon text={tooltipText} />}
       </div>
       <div className="w-full max-w-full overflow-hidden">
         <svg

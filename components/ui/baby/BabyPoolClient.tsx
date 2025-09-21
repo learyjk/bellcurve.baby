@@ -36,7 +36,7 @@ import {
 } from "@/lib/actions/baby/createCheckoutSession";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
@@ -59,6 +59,7 @@ export function BabyPoolClient({
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   // Initialize name from user prop
   useEffect(() => {
@@ -71,23 +72,18 @@ export function BabyPoolClient({
 
   // Handle payment status messages
   useEffect(() => {
-    console.log("🎯 Payment status effect:", { paymentStatus });
-
     if (!paymentStatus) return;
 
     let timer: ReturnType<typeof setTimeout> | null = null;
 
     const showToasts = () => {
       if (paymentStatus === "success") {
-        console.log("Payment success - showing toast");
         toast.success("Payment successful! Your guess has been recorded.", {
           duration: 4000,
         });
       } else if (paymentStatus === "cancelled") {
-        console.log("Payment cancelled - showing toast");
         toast.error("Payment was cancelled. Your guess was not recorded.");
       } else if (paymentStatus === "error") {
-        console.log("Payment error - showing toast");
         toast.error(
           "There was an error processing your payment. Please contact support if you were charged."
         );
@@ -362,7 +358,7 @@ export function BabyPoolClient({
                 ) : (
                   <Button
                     type="button"
-                    onClick={() => router.push("/auth/login")}
+                    onClick={() => router.push(`/auth/login?next=${pathname}`)}
                     className="w-full h-12 text-lg flex items-center justify-center"
                   >
                     Login to Guess

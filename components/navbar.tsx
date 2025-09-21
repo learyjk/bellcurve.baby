@@ -86,8 +86,8 @@ export async function Navbar() {
         <div className="flex-shrink-0">
           <Link href="/" className="flex items-center gap-2">
             <LogoOnly />
-            <span className="font-cherry-bomb text-primary text-sm hidden md:block">
-              bellcurve baby
+            <span className="font-cherry-bomb text-primary text-md hidden md:block">
+              bellcurve.baby
             </span>
           </Link>
         </div>

@@ -15,10 +15,12 @@ import { createClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 export function AuthButton({ user: initialUser }: { user?: User | null }) {
   const [user, setUser] = useState<User | null>(initialUser || null);
   const [loading, setLoading] = useState(true);
+  const pathname = usePathname();
 
   useEffect(() => {
     const supabase = createClient();
@@ -91,10 +93,10 @@ export function AuthButton({ user: initialUser }: { user?: User | null }) {
         variant={"outline"}
         className="hidden sm:inline-flex"
       >
-        <Link href="/auth/login">Sign in</Link>
+        <Link href={`/auth/login?next=${pathname}`}>Sign in</Link>
       </Button>
       <Button asChild size="sm" variant={"default"}>
-        <Link href="/auth/sign-up">Sign up</Link>
+        <Link href={`/auth/sign-up?next=${pathname}`}>Sign up</Link>
       </Button>
     </div>
   );
