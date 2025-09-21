@@ -10,11 +10,12 @@ Stripe payout via Stripe connect
 [] Favicon
 [X] T/S Guesses on prod not going thorugh (staging too?)
 
-redirect after sign up to baby page
-add announcement page
-info icon with popup under avg weight "7 lbs 6 oz roughly the national average newborn weight"
-H2's should be cherry bomb font and dark color. Increase the kerning for readability.
-Link to baby from guesses page
-block letters on homepage footer
-video
-update stripe icon to circular favicon
+[] redirect after sign up to baby page
+[] add announcement page
+[] info icon with popup under avg weight "7 lbs 6 oz roughly the national average newborn weight"
+[] H2's should be cherry bomb font and dark color. Increase the kerning for readability.
+[] Link to baby from guesses page
+[] block letters on homepage footer
+[] video
+[] update stripe icon to circular favicon
+[] prizes
