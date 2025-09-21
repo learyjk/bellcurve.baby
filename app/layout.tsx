@@ -5,6 +5,7 @@ import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import Image from "next/image";
 // import OneTapGoogle from "@/components/one-tap-google";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -64,9 +65,17 @@ export default function RootLayout({
             <Navbar />
             <main className="flex-1">{children}</main>
             <footer className="w-full flex flex-col items-center border-t mx-auto text-center text-xs gap-8 p-4">
-              <div className="flex items-center gap-4">
-                <p>Built by Heather & Keegan</p>
-                <ThemeSwitcher />
+              <div className="flex flex-col items-center gap-4">
+                <Image
+                  src="/bcb-h-stack.svg"
+                  alt="Heather and Keegan"
+                  width={100}
+                  height={100}
+                />
+                <div className="flex items-center justify-center gap-4">
+                  <p>Built by Heather & Keegan</p>
+                  <ThemeSwitcher />
+                </div>
               </div>
             </footer>
           </div>

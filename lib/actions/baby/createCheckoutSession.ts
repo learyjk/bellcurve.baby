@@ -42,6 +42,7 @@ export async function createCheckoutSession(
     price: number;
     babyName: string;
     name?: string;
+    isAnonymous?: boolean;
   }
 ): Promise<CreateCheckoutSessionState> {
   const supabase = await createClient();
@@ -90,6 +91,7 @@ export async function createCheckoutSession(
         guessWeight: data.guessWeight.toString(),
         price: data.price.toString(),
         name: data.name || user.user_metadata?.name || "",
+        isAnonymous: data.isAnonymous?.toString() || "false",
       },
     });
 

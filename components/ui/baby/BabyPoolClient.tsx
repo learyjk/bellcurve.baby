@@ -37,6 +37,8 @@ import {
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -54,6 +56,8 @@ export function BabyPoolClient({
   paymentStatus?: string;
 }) {
   const [name, setName] = useState<string>("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
 
   // Initialize name from user prop
@@ -145,6 +149,7 @@ export function BabyPoolClient({
       const handleRedirect = async () => {
         const stripe = await stripePromise;
         if (stripe) {
+          setIsRedirecting(true);
           await stripe.redirectToCheckout({ sessionId: state.sessionId! });
         } else {
           toast.error("Stripe.js has not loaded yet.");
@@ -172,6 +177,7 @@ export function BabyPoolClient({
       price: totalPrice,
       babyName: pool.baby_name || "the baby",
       name,
+      isAnonymous,
     };
   };
 
@@ -327,14 +333,24 @@ export function BabyPoolClient({
                   </CardContent>
                 </Card>
               </div>
+              <div className="flex items-center space-x-2 mt-4">
+                <Checkbox
+                  id="anonymous"
+                  checked={isAnonymous}
+                  onCheckedChange={(checked) =>
+                    setIsAnonymous(checked as boolean)
+                  }
+                />
+                <Label htmlFor="anonymous">Make my guess anonymous</Label>
+              </div>
               <div className="text-center mt-4">
                 {isLoggedIn ? (
                   <Button
                     type="submit"
-                    disabled={isPending}
+                    disabled={isPending || isRedirecting}
                     className="w-full h-12 text-lg flex items-center justify-center"
                   >
-                    {isPending ? (
+                    {isPending || isRedirecting ? (
                       <>
                         <LoadingSpinner />
                         Processing...
