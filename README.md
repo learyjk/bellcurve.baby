@@ -12,10 +12,10 @@ Stripe payout via Stripe connect
 
 [] redirect after sign up to baby page
 [] add announcement page
-[] info icon with popup under avg weight "7 lbs 6 oz roughly the national average newborn weight"
-[] H2's should be cherry bomb font and dark color. Increase the kerning for readability.
-[] Link to baby from guesses page
-[] block letters on homepage footer
+[] update copy for Finn's baby page
+[] for create pool page, add in "7 lbs 6 oz is the national average birth weight for boys. 7 lbs 2 oz is the national average for girls."
+[] Increase the kerning of H2's
+[] Link to baby page from guesses page
+[X] block letters on homepage footer
 [] video
-[] update stripe icon to circular favicon
-[] prizes
+[X] update stripe icon to circular favicon
