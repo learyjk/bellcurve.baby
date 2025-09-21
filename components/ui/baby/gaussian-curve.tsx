@@ -2,7 +2,12 @@
 
 import { useMemo } from "react";
 import { getGuessComponentPrice } from "@/lib/helpers/pricing";
-import { TooltipIcon } from "@/components/ui/tooltip-icon";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { Info } from "lucide-react";
 
 interface GaussianCurveProps {
   currentGuess: number;
@@ -135,7 +140,16 @@ export function GaussianCurve({
     <div className={`flex flex-col font-mono w-full ${className}`}>
       <div className="flex items-center gap-2 mb-2 text-sm font-bold tracking-widest uppercase">
         {title}
-        {tooltipText && <TooltipIcon text={tooltipText} />}
+        {tooltipText && (
+          <Popover>
+            <PopoverTrigger>
+              <Info className="h-4 w-4 text-muted-foreground" />
+            </PopoverTrigger>
+            <PopoverContent>
+              <p className="text-xs">{tooltipText}</p>
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
       <div className="w-full max-w-full overflow-hidden">
         <svg
@@ -282,7 +296,7 @@ export function GaussianCurve({
       </div>
 
       {/* Probability display */}
-      <div className="mt-2 text-xs text-primary-foreground/80">
+      <div className="mt-4 text-center text-muted-foreground text-xs">
         <div>
           Individual guess price:{" "}
           <span className="font-semibold text-primary">

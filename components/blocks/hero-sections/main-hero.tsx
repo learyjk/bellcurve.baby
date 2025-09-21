@@ -60,7 +60,7 @@ export default function MainHero() {
         <Button
           asChild
           variant="secondary"
-          className="rounded-full  px-4 py-0 h-8 text-xs font-mono font-bold tracking-widest uppercase border hover:bg-card transition-bg duration-200"
+          className="rounded-full  px-4 py-0 h-8 text-xs font-mono font-bold tracking-widest uppercase border hover:bg-primary/60 transition-bg duration-200"
         >
           <Link href="/announcement">Read the announcement ➔</Link>
         </Button>
@@ -82,11 +82,11 @@ export default function MainHero() {
 
         <div />
         <Card className="shadow-none w-full max-w-sm">
-          <CardContent className="p-6 text-center">
+          <CardContent className="p-4 text-center">
             <div className="text-sm font-mono font-bold tracking-widest uppercase mb-2">
               Total Guess Price
             </div>
-            <div className="font-cherry-bomb text-5xl mb-2 text-foreground">
+            <div className="font-cherry-bomb text-5xl mb-4 text-foreground">
               {(() => {
                 try {
                   const { totalPrice } = getGuessPrice({

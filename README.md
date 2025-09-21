@@ -2,7 +2,6 @@ bellcurve.baby
 TODO:
 
 [ ] video
-[ ] prizes
 
 Post Launch:
 
@@ -11,6 +10,7 @@ Post Launch:
 
 Done:
 
+[X] prizes
 [X] add announcement page
 [X] info icon with popup under avg weight "7 lbs 6 oz roughly the national average newborn weight"
 [X] Update Google prod redirect
