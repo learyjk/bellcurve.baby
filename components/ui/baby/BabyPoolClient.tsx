@@ -282,7 +282,7 @@ export function BabyPoolClient({
           <CardContent className="p-4 space-y-6">
             {/* Show sum of all donations */}
             <div>
-              <div className="font-cherry-bomb text-5xl mb-1">
+              <div className="font-cherry-bomb text-4xl mb-1">
                 {`$${totalDonations.toFixed(0)} donated`}
               </div>
               <div className="text-sm text-muted-foreground">
@@ -337,7 +337,9 @@ export function BabyPoolClient({
                     setIsAnonymous(checked as boolean)
                   }
                 />
-                <Label htmlFor="anonymous">Make my guess anonymous</Label>
+                <Label htmlFor="anonymous">
+                  Make my guess publicly anonymous
+                </Label>
               </div>
               <div className="text-center mt-4">
                 {isLoggedIn ? (

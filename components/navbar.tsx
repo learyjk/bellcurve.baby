@@ -72,6 +72,9 @@ export async function Navbar() {
                         Create My Baby Pool
                       </ListItem>
                     )}
+                    <ListItem href="/announcement" title="Announcement">
+                      Read our announcement
+                    </ListItem>
                     <ListItem href="/guesses" title="My Guesses">
                       View all your submitted guesses
                     </ListItem>

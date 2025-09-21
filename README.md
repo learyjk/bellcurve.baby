@@ -1,14 +1,17 @@
 bellcurve.baby
 TODO:
 
-Stripe payout via Stripe connect
-
-[ ] add announcement page
 [ ] video
 [ ] prizes
 
+Post Launch:
+
+[ ] Stripe payout via Stripe connect
 [ ] Share a Baby
 
+Done:
+
+[X] add announcement page
 [X] info icon with popup under avg weight "7 lbs 6 oz roughly the national average newborn weight"
 [X] Update Google prod redirect
 [X] Create baby pool image and description.

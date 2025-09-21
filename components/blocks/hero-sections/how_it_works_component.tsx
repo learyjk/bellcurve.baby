@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function HowItWorks() {
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-cherry-bomb font-semibold mb-4">
+      <h1 className="text-3xl font-cherry-bomb tracking-wide font-semibold mb-4">
         How It Works
       </h1>
       <h2 className="text-lg text-muted-foreground font-medium mb-8">

@@ -33,7 +33,7 @@ export default async function BabyPoolPage({
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto rounded-xl p-8">
+    <div className="w-full max-w-6xl mx-auto rounded-xl px-4 py-12">
       <BabyPoolClient
         pool={pool}
         guesses={guesses}

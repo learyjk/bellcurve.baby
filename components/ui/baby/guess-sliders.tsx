@@ -159,7 +159,7 @@ export function GuessSliders({
                   maxImage={<Toast width={22} height={22} />}
                 />
                 <div
-                  className="absolute mt-3 text-xs font-mono transform -translate-x-1/2 text-center whitespace-nowrap"
+                  className="absolute mt-2 text-xs font-mono transform -translate-x-1/2 text-center whitespace-nowrap bg-card px-2 py-1 border rounded"
                   style={{
                     left: `${
                       ((birthDateDeviation - -DATE_DEVIATION_DAYS) /
@@ -214,7 +214,7 @@ export function GuessSliders({
                   maxImage={<FatBaby width={22} height={22} />}
                 />
                 <div
-                  className="absolute mt-3 text-xs font-mono transform -translate-x-1/2 text-center whitespace-nowrap"
+                  className="absolute mt-2 text-xs font-mono transform -translate-x-1/2 text-center whitespace-nowrap bg-card px-2 py-1 border rounded"
                   style={{
                     left: `${
                       ((weightGuessOunces - weightMinOz) /

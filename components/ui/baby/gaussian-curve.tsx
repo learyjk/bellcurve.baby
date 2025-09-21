@@ -258,10 +258,10 @@ export function GaussianCurve({
               <circle
                 cx={userGuessX}
                 cy={userGuessY}
-                r="6"
+                r="4"
                 fill="hsl(var(--primary))"
                 stroke="hsl(var(--foreground))"
-                strokeWidth="2"
+                strokeWidth="0"
                 className="drop-shadow-sm"
               />
 
@@ -282,10 +282,10 @@ export function GaussianCurve({
       </div>
 
       {/* Probability display */}
-      <div className="mt-2 text-xs text-center text-gray-600">
+      <div className="mt-2 text-xs text-primary-foreground/80">
         <div>
           Individual guess price:{" "}
-          <span className="font-semibold text-red-600">
+          <span className="font-semibold text-primary">
             ${userPrice.toFixed(2)}
           </span>
         </div>
