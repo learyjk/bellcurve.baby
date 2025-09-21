@@ -93,11 +93,11 @@ export default function HowItWorks() {
             <div className="p-4 rounded-lg border">
               <ul className="space-y-2">
                 <li>
-                  <strong>Standard (&sigma; = x%):</strong> Standard
+                  <strong>Standard (&sigma; = 100%):</strong> Standard
                   distribution, balanced curve
                 </li>
                 <li>
-                  <strong>Chill (&sigma; = x%):</strong> Wide distribution,
+                  <strong>Chill (&sigma; = 120%):</strong> Wide distribution,
                   gentler price gradients
                 </li>
               </ul>
