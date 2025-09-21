@@ -46,6 +46,13 @@ export function MobileMenu({ canCreateBabyPool, className }: MobileMenuProps) {
               </Link>
             )}
             <Link
+              href="/announcement"
+              className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+              onClick={() => setIsOpen(false)}
+            >
+              Announcement
+            </Link>
+            <Link
               href="/guesses"
               className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
               onClick={() => setIsOpen(false)}
