@@ -60,7 +60,7 @@ export default async function MyGuessesPage() {
   const rows: GuessWithPool[] = guesses || [];
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6">
+    <div className="max-w-4xl mx-auto mt-10 px-4 py-12">
       <h1 className="text-2xl font-bold mb-4">My Guesses</h1>
       {rows.length > 0 ? (
         <div className="rounded border">
