@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function HowItWorks() {
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-cherry-bomb font-semibold tracking-tight mb-4">
+      <h1 className="text-3xl font-cherry-bomb font-semibold mb-4">
         How It Works
       </h1>
       <h2 className="text-lg text-muted-foreground font-medium mb-8">
@@ -32,7 +32,8 @@ export default function HowItWorks() {
             <p>
               We cap the prices so nobody goes broke and nobody gets to play for
               free. It&apos;s like surge pricing, but for baby predictions, and
-              with well-meaning donations to the parents instead of corporate greed. 
+              with well-meaning donations to the parents instead of corporate
+              greed.
             </p>
             <p>
               Before the guesses go live, the creators pick one of these models:

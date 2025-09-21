@@ -2,7 +2,6 @@ import HowItWorks from "@/components/blocks/hero-sections/how_it_works_component
 import Image from "next/image";
 import MainHero from "@/components/blocks/hero-sections/main-hero";
 import { Card, CardContent } from "@/components/ui/card";
-import SuperLogo from "@/components/svg/super-logo";
 import priceSurface from "../public/price_surface.gif";
 
 export default function Home() {
@@ -12,7 +11,7 @@ export default function Home() {
         <MainHero />
         <section className="w-full max-w-2xl flex flex-col items-start gap-4 p-8">
           <HowItWorks />
-          <SuperLogo width={150} />
+          {/* <SuperLogo width={150} /> */}
           <Card className="overflow-hidden shadow-none">
             <CardContent className="p-0">
               <Image

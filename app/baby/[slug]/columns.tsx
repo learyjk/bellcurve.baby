@@ -6,7 +6,11 @@ export const guessColumns: ColumnDef<Tables<"guesses">>[] = [
   {
     accessorKey: "name",
     header: "Name",
-    cell: ({ row }) => row.getValue("name") || "Anonymous",
+    cell: ({ row }) => {
+      const isAnonymous = row.original.is_anonymous;
+      const name: string = row.getValue("name");
+      return isAnonymous ? "Anonymous" : name || "Anonymous";
+    },
   },
   {
     accessorKey: "guessed_birth_date",

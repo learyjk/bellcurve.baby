@@ -30,7 +30,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
         classNames: {
           error:
             "!bg-destructive !text-destructive-foreground !border-destructive",
-          success: "!bg-primary !text-primary-foreground !border-primary",
+          success: "!bg-white !text-primary-foreground",
           warning: "!bg-secondary !text-secondary-foreground !border-secondary",
         },
       }}
