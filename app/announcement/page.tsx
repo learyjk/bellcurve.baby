@@ -57,7 +57,11 @@ export default function AnnouncementPage() {
             </h2>
 
             <p className="max-w-xl mx-auto text-sm text-muted-foreground">
-              (See the full explanation <Link href="/#how-it-works">here</Link>)
+              (See the full explanation{" "}
+              <Link className="underline" href="/#how-it-works">
+                here
+              </Link>
+              )
             </p>
 
             <ol className="max-w-xl mx-auto list-decimal list-inside space-y-3">
