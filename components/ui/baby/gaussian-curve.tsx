@@ -258,10 +258,10 @@ export function GaussianCurve({
               <circle
                 cx={userGuessX}
                 cy={userGuessY}
-                r="6"
+                r="4"
                 fill="hsl(var(--primary))"
                 stroke="hsl(var(--foreground))"
-                strokeWidth="2"
+                strokeWidth="0"
                 className="drop-shadow-sm"
               />
 

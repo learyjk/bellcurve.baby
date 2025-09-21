@@ -337,7 +337,9 @@ export function BabyPoolClient({
                     setIsAnonymous(checked as boolean)
                   }
                 />
-                <Label htmlFor="anonymous">Make my guess anonymous</Label>
+                <Label htmlFor="anonymous">
+                  Make my guess publicly anonymous
+                </Label>
               </div>
               <div className="text-center mt-4">
                 {isLoggedIn ? (
