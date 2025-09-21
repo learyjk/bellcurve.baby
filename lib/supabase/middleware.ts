@@ -3,6 +3,22 @@ import { NextResponse, type NextRequest } from "next/server";
 import { hasEnvVars } from "../utils";
 
 export async function updateSession(request: NextRequest) {
+  // If this is a request for static assets (images, Next.js static files,
+  // favicon, or the stripe webhook), skip middleware processing so public
+  // assets are served without auth redirects.
+  const pathname = request.nextUrl.pathname || "";
+  const staticExtPattern = /\.(svg|png|jpg|jpeg|webp|gif|avif)$/i;
+  if (
+    pathname.startsWith("/_next/static") ||
+    pathname.startsWith("/_next/image") ||
+    staticExtPattern.test(pathname) ||
+    pathname === "/favicon.ico" ||
+    pathname === "/favicon.png" ||
+    pathname.startsWith("/api/stripe/webhook")
+  ) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });
