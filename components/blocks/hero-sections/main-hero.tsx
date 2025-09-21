@@ -57,6 +57,13 @@ export default function MainHero() {
   return (
     <section className="w-full max-w-4xl mx-auto px-4 py-12">
       <div className="flex flex-col gap-2 items-center">
+        <Button
+          asChild
+          variant="secondary"
+          className="rounded-full  px-4 py-0 h-8 text-xs font-mono font-bold tracking-widest uppercase border hover:bg-card transition-bg duration-200"
+        >
+          <Link href="/announcement">Read the announcement ➔</Link>
+        </Button>
         <h1 className="font-cherry-bomb text-3xl md:text-6xl font-boldtext-pretty text-center mb-4">
           Collect donations and celebrate your newborn with a fun guessing game.
         </h1>

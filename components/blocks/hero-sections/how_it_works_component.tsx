@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function HowItWorks() {
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto" id="how-it-works">
       <h1 className="text-3xl font-cherry-bomb tracking-wide font-semibold mb-4">
         How It Works
       </h1>
@@ -18,22 +18,21 @@ export default function HowItWorks() {
           <div className="space-y-4">
             <p>We&apos;re not just randomly slapping prices on your guesses.</p>
             <p>
-              Think of it like this—imagine everyone&apos;s guesses plotted on a
-              hill. The peak of the hill is the expected due date or birth
+              Think of it like this: imagine everyone&apos;s guesses plotted on
+              a hill. The peak of the hill is the expected due date or birth
               weight. If you guess right at the peak, you&apos;re paying premium
-              prices because, well, you&apos;re probably right and that&apos;s
-              not fair to everyone else.
+              prices because, well, you have the highest chance of being right.
             </p>
             <p>
-              But if you guess way out in left field—like the baby will be born
-              3 weeks late or weigh 12 pounds—your guess gets cheaper because
+              But if you guess way out in left field, like the baby will be born
+              3 weeks late or weigh 12 pounds, your guess gets cheaper because
               you&apos;re taking a bigger risk.
             </p>
             <p>
               We cap the prices so nobody goes broke and nobody gets to play for
-              free. It&apos;s like surge pricing, but for baby predictions, and
-              with well-meaning donations to the parents instead of corporate
-              greed.
+              free. It&apos;s like surge pricing, for baby predictions…with
+              well-meaning donations to the parents instead of corporate
+              capitalism 😁.
             </p>
             <p>
               Before the guesses go live, the creators pick one of these models:
@@ -52,14 +51,16 @@ export default function HowItWorks() {
             </div>
             <p>
               Basically, we&apos;re trying to make it fair while keeping it fun.
-              And yes, there&apos;s actual math involved, but you don&apos;t
-              need to care about that part.
+              There&apos;s actual math involved. If you&apos;re interested in
+              that stuff, you can tab over to &ldquo;for the nerds&rdquo;.
             </p>
           </div>
         </TabsContent>
         <TabsContent value="nerds">
           <div className="space-y-4">
-            <p>You know who you are. Game recognize game.</p>
+            <p>
+              You know who you are. Accept a virtual high-five from Heather.
+            </p>
             <p>
               We&apos;re using a Gaussian distribution centered on the expected
               value (due date or birth weight) to model the probability of each
@@ -74,7 +75,7 @@ export default function HowItWorks() {
                   using the Gaussian
                 </li>
                 <li>
-                  Apply min-max normalization:{" "}
+                  Apply min-max normalization:
                   <code className="px-2 py-1 rounded text-sm font-mono border">
                     (value - min) / (max - min)
                   </code>
@@ -92,12 +93,12 @@ export default function HowItWorks() {
             <div className="p-4 rounded-lg border">
               <ul className="space-y-2">
                 <li>
-                  <strong>Standard</strong> (σ = x%): Standard distribution,
-                  balanced curve
+                  <strong>Standard (&sigma; = 100%):</strong> Standard
+                  distribution, balanced curve
                 </li>
                 <li>
-                  <strong>Chill</strong> (σ = x%): Wide distribution, gentler
-                  price gradients
+                  <strong>Chill (&sigma; = 120%):</strong> Wide distribution,
+                  gentler price gradients
                 </li>
               </ul>
             </div>
@@ -112,6 +113,29 @@ export default function HowItWorks() {
               where someone pays $0.01 to guess the baby will be born in 10
               years.
             </p>
+
+            <p>Some statistical caveats:</p>
+            <div className="p-4 rounded-lg border">
+              <ul className="space-y-2">
+                <li>
+                  <strong>Our distributions are completely symmetric</strong>. A
+                  real due date probability curve is skewed left because
+                  you&rsquo;re more likely to give birth prematurely than
+                  postmaturely (you&rsquo;ll almost certainly be medically
+                  induced by 42 weeks).
+                </li>
+                <li>
+                  <strong>
+                    We keep the date and weight pricing functions independent.
+                  </strong>
+                  We don&rsquo;t account for the fact that there is a strong
+                  correlation between birth weight and date, i.e. a premature
+                  baby is more likely to weigh below average. A more accurate
+                  pricing curve would make higher weights cheaper <em>if</em>
+                  you guess an earlier due date.
+                </li>
+              </ul>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
