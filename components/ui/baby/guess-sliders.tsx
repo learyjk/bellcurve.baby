@@ -140,6 +140,7 @@ export function GuessSliders({
                   computedPrice={dateComponentPrice}
                   width={280}
                   height={120}
+                  tooltipText="Mean is the due date. +/- 3 weeks captures ~99% of births."
                 />
               </div>
               <div className="relative">
@@ -194,6 +195,7 @@ export function GuessSliders({
                   computedPrice={weightComponentPrice}
                   width={280}
                   height={120}
+                  tooltipText="In USA, 7 lbs 6 oz is the mean for boys. 7 lbs 2 oz is the mean for girls."
                 />
               </div>
               <div className="relative">
