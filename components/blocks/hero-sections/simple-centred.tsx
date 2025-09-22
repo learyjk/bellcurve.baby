@@ -34,7 +34,7 @@ export default function HeroSectionSimpleCentred() {
           {/* End Announcement Banner */}
           {/* Title */}
           <div className="mx-auto mt-5 max-w-2xl text-center">
-            <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+            <h1 className="font-cherry-bomb text-3xl md:text-6xl font-bold text-pretty text-center tracking-wide mb-4">
               Celebrate Baby&apos;s Arrival with a Fun Family Guessing Game
             </h1>
           </div>

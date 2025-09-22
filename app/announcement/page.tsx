@@ -14,7 +14,7 @@ export default function AnnouncementPage() {
       <div className="w-full max-w-4xl px-4">
         <article className="mx-auto max-w-4xl prose prose-lg prose-invert dark:prose-invert leading-relaxed">
           <header className="mb-8">
-            <h1 className="text-4xl font-cherry-bomb tracking-wide md:text-5xl font-bold leading-tight max-w-4xl mx-auto">
+            <h1 className="font-cherry-bomb text-3xl md:text-6xl font-bold text-pretty tracking-wide mb-4">
               What do you get when a web developer falls in love with a
               mathematical modeler &amp; data-vis designer?
             </h1>

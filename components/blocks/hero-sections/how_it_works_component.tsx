@@ -3,9 +3,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function HowItWorks() {
   return (
     <div className="max-w-4xl mx-auto" id="how-it-works">
-      <h1 className="text-3xl font-cherry-bomb tracking-wide font-semibold mb-4">
+      <h2 className="text-3xl font-cherry-bomb tracking-wide font-semibold mb-4">
         How It Works
-      </h1>
+      </h2>
       <h2 className="text-lg text-muted-foreground font-medium mb-8">
         Probabilistic pricing: The more likely your guess, the more it costs
       </h2>

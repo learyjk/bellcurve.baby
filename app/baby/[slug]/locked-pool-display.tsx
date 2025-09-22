@@ -122,7 +122,7 @@ export default function LockedPoolDisplay({
 
   return (
     <div className="w-full max-w-6xl mx-auto rounded-xl p-8">
-      <h1 className="text-2xl font-bold text-center mb-4">
+      <h1 className="font-cherry-bomb text-3xl md:text-6xl font-bold text-pretty text-center tracking-wide mb-4">
         Thanks for playing!
       </h1>
       <p className="text-center mb-8">
