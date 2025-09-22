@@ -64,7 +64,7 @@ export default function MainHero() {
         >
           <Link href="/announcement">Read the announcement ➔</Link>
         </Button>
-        <h1 className="font-cherry-bomb text-3xl md:text-6xl font-boldtext-pretty text-center mb-4">
+        <h1 className="font-cherry-bomb text-3xl md:text-6xl font-bold text-pretty text-center tracking-wide mb-4">
           Collect donations and celebrate your newborn with a fun guessing game.
         </h1>
         <p className="text-lg text-muted-foreground text-center max-w-2xl mb-2">

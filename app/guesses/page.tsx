@@ -46,7 +46,9 @@ export default async function MyGuessesPage() {
 
     return (
       <div className="max-w-4xl mx-auto mt-10 p-6 border rounded-lg bg-card shadow">
-        <h1 className="text-2xl font-bold mb-4">My Guesses</h1>
+        <h1 className="font-cherry-bomb text-3xl md:text-6xl font-bold text-pretty text-center tracking-wide mb-4">
+          My Guesses
+        </h1>
         <div className="text-destructive">
           There was an error loading your guesses. Try again later.
         </div>
@@ -61,7 +63,9 @@ export default async function MyGuessesPage() {
 
   return (
     <div className="max-w-4xl mx-auto mt-10 px-4 py-12">
-      <h1 className="text-2xl font-bold mb-4">My Guesses</h1>
+      <h1 className="font-cherry-bomb text-3xl md:text-6xl font-bold text-pretty text-center tracking-wide mb-4">
+        My Guesses
+      </h1>
       {rows.length > 0 ? (
         <div className="rounded border">
           <Table>
