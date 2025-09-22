@@ -117,8 +117,8 @@ export default function HowItWorks() {
             <p>Some statistical caveats:</p>
             <div className="p-4 rounded-lg border">
               <ul className="space-y-2">
-                <li>
-                  <strong>Our distributions are completely symmetric</strong>. A
+                <li className="mb-4">
+                  <strong>Our distributions are completely symmetric.</strong> A
                   real due date probability curve is skewed left because
                   you&rsquo;re more likely to give birth prematurely than
                   postmaturely (you&rsquo;ll almost certainly be medically
@@ -126,7 +126,8 @@ export default function HowItWorks() {
                 </li>
                 <li>
                   <strong>
-                    We keep the date and weight pricing functions independent.
+                    We keep the date and weight pricing functions
+                    independent.&nbsp;
                   </strong>
                   We don&rsquo;t account for the fact that there is a strong
                   correlation between birth weight and date, i.e. a premature
