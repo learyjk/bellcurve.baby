@@ -1,6 +1,7 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { Tables } from "@/database.types";
+import { formatPacificDate } from "@/lib/helpers/date";
 
 export const guessColumns: ColumnDef<Tables<"guesses">>[] = [
   {
@@ -16,8 +17,8 @@ export const guessColumns: ColumnDef<Tables<"guesses">>[] = [
     accessorKey: "guessed_birth_date",
     header: "Guessed Date",
     cell: ({ row }) => {
-      const date = row.getValue("guessed_birth_date") as string;
-      return new Date(date).toLocaleDateString();
+      const date = row.getValue("guessed_birth_date") as string | null;
+      return formatPacificDate(date);
     },
   },
   {

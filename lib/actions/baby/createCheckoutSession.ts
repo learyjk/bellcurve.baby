@@ -56,11 +56,23 @@ export async function createCheckoutSession(
   }
 
   try {
-    const formattedDate = new Date(data.guessDate).toLocaleDateString("en-US", {
+    // `data.guessDate` is expected to be a YYYY-MM-DD in PT; render it in PT
+    const dateForFormat = (() => {
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(data.guessDate);
+      if (m) {
+        const y = Number(m[1]);
+        const mo = Number(m[2]);
+        const d = Number(m[3]);
+        return new Date(Date.UTC(y, mo - 1, d, 12, 0, 0));
+      }
+      return new Date(data.guessDate);
+    })();
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Los_Angeles",
       year: "numeric",
       month: "long",
       day: "numeric",
-    });
+    }).format(dateForFormat);
     const lbs = Math.floor(data.guessWeight / 16);
     const oz = Math.round(data.guessWeight % 16);
     const formattedWeight = `${lbs} lbs ${oz} oz`;
