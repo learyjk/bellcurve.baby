@@ -3,6 +3,7 @@ import { Tables } from "@/database.types";
 import { useMemo } from "react";
 import { DataTable } from "@/app/baby/data-table";
 import { ColumnDef } from "@tanstack/react-table";
+import { formatPacificDate } from "@/lib/helpers/date";
 import GuessScatterPlot, {
   Guess as BetGuess,
   ActualOutcome as BetActualOutcome,
@@ -99,9 +100,7 @@ export default function LockedPoolDisplay({
       accessorKey: "guessed_birth_date",
       header: "Guessed Date",
       cell: ({ row }) =>
-        new Date(
-          row.getValue("guessed_birth_date") as string
-        ).toLocaleDateString(),
+        formatPacificDate(row.getValue("guessed_birth_date") as string | null),
     },
     {
       accessorKey: "guessed_weight",

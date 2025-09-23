@@ -165,10 +165,19 @@ export function BabyPoolClient({
     const dueDate = new Date(year, month - 1, day);
     const guessDate = new Date(dueDate);
     guessDate.setDate(guessDate.getDate() + birthDateDeviation);
+
+    // Format the guess date as a Pacific Time absolute date (YYYY-MM-DD),
+    // so storage is consistent regardless of the user's local timezone.
+    const guessDatePacificYMD = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Los_Angeles",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(guessDate);
     return {
       poolId: pool.id,
       slug: pool.slug,
-      guessDate: guessDate.toISOString(),
+      guessDate: guessDatePacificYMD, // send as YYYY-MM-DD in PT
       guessWeight: weightGuessOunces,
       price: totalPrice,
       babyName: pool.baby_name || "the baby",

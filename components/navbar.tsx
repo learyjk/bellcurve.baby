@@ -29,6 +29,34 @@ export async function Navbar() {
     ? await hasFeatureAccess(user.id, FEATURES.CREATE_BABY_POOL)
     : false;
 
+  // Build menu items so we can align rows and set dynamic row-span
+  const menuItems: Array<{ href: string; title: string; desc: string }> = [];
+  if (canCreateBabyPool) {
+    menuItems.push(
+      { href: "/baby", title: "My Babies", desc: "See My Babies" },
+      {
+        href: "/baby/create",
+        title: "Create Baby Pool",
+        desc: "Create My Baby Pool",
+      }
+    );
+  }
+  menuItems.push(
+    {
+      href: "/announcement",
+      title: "Announcement",
+      desc: "Read our announcement",
+    },
+    {
+      href: "/guesses",
+      title: "My Guesses",
+      desc: "View all your submitted guesses",
+    }
+  );
+
+  // Tailwind needs static class names; choose between 2 and 4 rows
+  const brandRowSpanClass = canCreateBabyPool ? "row-span-4" : "row-span-2";
+
   return (
     <>
       <nav className="relative flex items-center w-full mx-auto px-4 py-2 border-b">
@@ -46,15 +74,18 @@ export async function Navbar() {
               <NavigationMenuItem>
                 <NavigationMenuTrigger>Menu</NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid gap-2 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                    <li className="row-span-3">
+                  <ul className="grid auto-rows-fr gap-2 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                    <li className={brandRowSpanClass}>
                       <NavigationMenuLink asChild>
                         <Link
                           className="from-muted/50 to-muted flex h-full w-full flex-col justify-end rounded-md bg-gradient-to-b p-6 no-underline outline-hidden select-none focus:shadow-md"
                           href="/"
                         >
-                          <div className="mt-4 mb-2 text-lg font-medium">
-                            bellcurve.baby
+                          <div className="mt-2 mb-2 flex flex-col gap-2">
+                            {/* <LogoOnly /> */}
+                            <div className="text-lg font-medium">
+                              bellcurve.baby
+                            </div>
                           </div>
                           <p className="text-muted-foreground text-sm leading-tight">
                             A Guessing Game for Expecting Parents and Friends
@@ -62,22 +93,15 @@ export async function Navbar() {
                         </Link>
                       </NavigationMenuLink>
                     </li>
-                    {canCreateBabyPool && (
-                      <ListItem href="/baby" title="My Babies">
-                        See My Babies
+                    {menuItems.map((item) => (
+                      <ListItem
+                        key={item.href}
+                        href={item.href}
+                        title={item.title}
+                      >
+                        {item.desc}
                       </ListItem>
-                    )}
-                    {canCreateBabyPool && (
-                      <ListItem href="/baby/create" title="Create Baby Pool">
-                        Create My Baby Pool
-                      </ListItem>
-                    )}
-                    <ListItem href="/announcement" title="Announcement">
-                      Read our announcement
-                    </ListItem>
-                    <ListItem href="/guesses" title="My Guesses">
-                      View all your submitted guesses
-                    </ListItem>
+                    ))}
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>

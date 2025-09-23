@@ -132,7 +132,8 @@ export default function HowItWorks() {
                   We don&rsquo;t account for the fact that there is a strong
                   correlation between birth weight and date, i.e. a premature
                   baby is more likely to weigh below average. A more accurate
-                  pricing curve would make higher weights cheaper <em>if</em>
+                  pricing curve would make higher weights cheaper{" "}
+                  <em>if&nbsp;</em>
                   you guess an earlier due date.
                 </li>
               </ul>

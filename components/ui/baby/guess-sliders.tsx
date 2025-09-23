@@ -140,7 +140,7 @@ export function GuessSliders({
                   computedPrice={dateComponentPrice}
                   width={280}
                   height={120}
-                  tooltipText="Mean is the due date. +/- 3 weeks captures ~99% of births."
+                  tooltipText="Mean is the due date. +/- 3 weeks captures ~99% of births. All guessed dates are interpreted in Pacific Time (PT)."
                 />
               </div>
               <div className="relative">
