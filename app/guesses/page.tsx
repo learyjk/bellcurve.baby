@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { formatPacificDate } from "@/lib/helpers/date";
+import { formatYmdForDisplay } from "@/lib/helpers/date";
+import LocalDate from "@/components/ui/local-date";
 import { Tables } from "@/database.types";
 import {
   Table,
@@ -97,7 +98,9 @@ export default async function MyGuessesPage() {
                       )}
                     </TableCell>
                     <TableCell>
-                      {formatPacificDate(guess.guessed_birth_date)}
+                      <LocalDate
+                        initial={formatYmdForDisplay(guess.guessed_birth_date)}
+                      />
                     </TableCell>
                     <TableCell>
                       {(() => {

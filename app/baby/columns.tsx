@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { Tables } from "@/database.types";
+import LocalDate from "@/components/ui/local-date";
+import { formatYmdForDisplay } from "@/lib/helpers/date";
 
 export const columns: ColumnDef<Tables<"pools">>[] = [
   {
@@ -44,8 +46,7 @@ export const columns: ColumnDef<Tables<"pools">>[] = [
     header: "Due Date",
     cell: ({ row }) => {
       const date = row.getValue("mu_due_date") as string;
-      const [year, month, day] = date.split("-").map(Number);
-      return <div>{new Date(year, month - 1, day).toLocaleDateString()}</div>;
+      return <LocalDate initial={formatYmdForDisplay(date)} />;
     },
   },
   {

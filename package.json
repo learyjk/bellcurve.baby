@@ -5,6 +5,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest",
     "supabase": "supabase start",
     "typegen": "npx supabase gen types typescript --project-id cmbchtbfgwqenbbpjvtj --schema public > database.types.ts",
     "stripe:webhook": "stripe listen --forward-to localhost:3000/api/stripe/webhook"
@@ -56,6 +57,7 @@
     "supabase": "^2.40.7",
     "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^1.0.0"
   }
 }

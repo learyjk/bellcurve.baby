@@ -3,7 +3,7 @@ import { Tables } from "@/database.types";
 import { useMemo } from "react";
 import { DataTable } from "@/app/baby/data-table";
 import { ColumnDef } from "@tanstack/react-table";
-import { formatPacificDate } from "@/lib/helpers/date";
+import { formatYmdForDisplay, ymdToUtcNoon } from "@/lib/helpers/date";
 import GuessScatterPlot, {
   Guess as BetGuess,
   ActualOutcome as BetActualOutcome,
@@ -46,11 +46,11 @@ export default function LockedPoolDisplay({
     )
       return [];
 
-    const actualDate = new Date(actualBirthDate).getTime();
+    const actualDate = ymdToUtcNoon(actualBirthDate).getTime();
     const actualWeight = Number(actualBirthWeight);
 
     const dateValues = safeGuesses.map((guess) =>
-      new Date(guess.guessed_birth_date).getTime()
+      ymdToUtcNoon(guess.guessed_birth_date).getTime()
     );
     dateValues.push(actualDate);
     const minDate = Math.min(...dateValues);
@@ -100,7 +100,11 @@ export default function LockedPoolDisplay({
       accessorKey: "guessed_birth_date",
       header: "Guessed Date",
       cell: ({ row }) =>
-        formatPacificDate(row.getValue("guessed_birth_date") as string | null),
+        // Use deterministic server-side string and client-localize to avoid
+        // hydration errors when user's locale differs.
+        formatYmdForDisplay(
+          row.getValue("guessed_birth_date") as string | null
+        ),
     },
     {
       accessorKey: "guessed_weight",
