@@ -40,7 +40,6 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import FloatingVideoPreview from "@/components/ui/floating-video-preview";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
