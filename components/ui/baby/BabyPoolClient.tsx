@@ -40,7 +40,6 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import FloatingVideoPreview from "@/components/ui/floating-video-preview";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -243,6 +242,30 @@ export function BabyPoolClient({
               </div>
             )}
           </div>
+          <div
+            style={{
+              position: "relative",
+              paddingBottom: "56.25%",
+              marginTop: "1.5rem",
+            }}
+            className="w-full rounded-lg overflow-hidden"
+          >
+            <iframe
+              src="https://www.youtube-nocookie.com/embed/wIBF0ZkuJpI?si=aGCQ6fcquvgJrwkE&rel=0"
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+              }}
+            ></iframe>
+          </div>
           {/* <p className="text-muted-foreground">
             Expected due date:{" "}
             {pool.mu_due_date
@@ -374,7 +397,7 @@ export function BabyPoolClient({
         </Card>
       </div>
       {/* Floating video preview */}
-      <FloatingVideoPreview />
+      {/* <FloatingVideoPreview /> */}
     </div>
   );
 }
