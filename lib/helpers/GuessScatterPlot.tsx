@@ -64,8 +64,6 @@ const BetScatterPlot: React.FC<BetPlotProps> = ({ guesses, actual }) => {
   // Sort guesses by distance to actual (best first)
   const sortedGuesses = [...guesses].sort((a, b) => a.distance - b.distance);
 
-
-
   const data: DataPoint[] = sortedGuesses.map((guess, index) => {
     const guessDate = ymdToUtcNoon(guess.guessDate).getTime();
 
@@ -166,88 +164,97 @@ const BetScatterPlot: React.FC<BetPlotProps> = ({ guesses, actual }) => {
   return (
     <div className="font-mono">
       <ResponsiveContainer width="100%" height={520}>
-      <ScatterChart margin={{ top: 40, right: 50, left: 90, bottom: 70 }}>
-        <XAxis
-          type="number"
-          dataKey="x"
-          domain={["auto", "auto"]}
-          tick={{
-            fontSize: "10px",
-            fontFamily: "JetBrains Mono, monospace",
-            fill: "#666"
-          }}
-          tickFormatter={(tick) => new Date(tick).toLocaleDateString()}
-        >
-          <Label
-            value="Birth Date"
-            offset={-20}
-            position="insideBottom"
-            style={{
-              textAnchor: "middle",
+        <ScatterChart margin={{ top: 40, right: 50, left: 90, bottom: 70 }}>
+          <XAxis
+            type="number"
+            dataKey="x"
+            domain={["auto", "auto"]}
+            tick={{
               fontSize: "10px",
               fontFamily: "JetBrains Mono, monospace",
-              fill: "#666"
+              fill: "#666",
+            }}
+            tickFormatter={(tick) => new Date(tick).toLocaleDateString()}
+          >
+            <Label
+              value="Birth Date"
+              offset={-20}
+              position="insideBottom"
+              style={{
+                textAnchor: "middle",
+                fontSize: "10px",
+                fontFamily: "JetBrains Mono, monospace",
+                fill: "#666",
+              }}
+            />
+          </XAxis>
+
+          <YAxis
+            type="number"
+            dataKey="y"
+            domain={["auto", "auto"]}
+            width={80}
+            tick={{
+              fontSize: "10px",
+              fontFamily: "JetBrains Mono, monospace",
+              fill: "#666",
+            }}
+            tickFormatter={(tick) => {
+              const pounds = Math.floor(tick / 16);
+              const ounces = Math.round(tick % 16);
+              if (ounces === 0) {
+                return `${pounds}lb`;
+              } else {
+                return `${pounds}lb${ounces}oz`;
+              }
+            }}
+            label={{
+              value: "Birth Weight",
+              angle: -90,
+              position: "insideLeft",
+              offset: 20,
+              style: {
+                textAnchor: "middle",
+                fontSize: "10px",
+                fontFamily: "JetBrains Mono, monospace",
+                fill: "#666",
+              },
             }}
           />
-        </XAxis>
 
-        <YAxis
-          type="number"
-          dataKey="y"
-          domain={["auto", "auto"]}
-          width={80}
-          tick={{
-            fontSize: "10px",
-            fontFamily: "JetBrains Mono, monospace",
-            fill: "#666"
-          }}
-          tickFormatter={(tick) => {
-            const pounds = Math.floor(tick / 16);
-            const ounces = Math.round(tick % 16);
-            if (ounces === 0) {
-              return `${pounds}lb`;
-            } else {
-              return `${pounds}lb${ounces}oz`;
-            }
-          }}
-          label={{
-            value: "Birth Weight",
-            angle: -90,
-            position: "insideLeft",
-            offset: 20,
-            style: {
-              textAnchor: "middle",
-              fontSize: "10px",
-              fontFamily: "JetBrains Mono, monospace",
-              fill: "#666"
-            },
-          }}
-        />
+          {/* Reference lines for actual birth date and weight */}
+          <ReferenceLine
+            x={actualPoint.x}
+            stroke="#f00"
+            strokeDasharray="3 3"
+          />
+          <ReferenceLine
+            y={actualPoint.y}
+            stroke="#f00"
+            strokeDasharray="3 3"
+          />
 
-        {/* Reference lines for actual birth date and weight */}
-        <ReferenceLine x={actualPoint.x} stroke="#f00" strokeDasharray="3 3" />
-        <ReferenceLine y={actualPoint.y} stroke="#f00" strokeDasharray="3 3" />
+          <Scatter
+            name="Guesses"
+            data={data}
+            shape={(props: unknown) => (
+              <CustomScatterShape {...(props as CustomScatterShapeProps)} />
+            )}
+          />
 
-        <Scatter
-          name="Guesses"
-          data={data}
-          shape={(props: unknown) => (
-            <CustomScatterShape {...(props as CustomScatterShapeProps)} />
-          )}
-        />
+          <Scatter
+            name="Actual"
+            data={[actualPoint]}
+            fill="#f00"
+            shape={(props: unknown) => (
+              <ActualShape {...(props as { cx: number; cy: number })} />
+            )}
+          />
 
-        <Scatter
-          name="Actual"
-          data={[actualPoint]}
-          fill="#f00"
-          shape={(props: unknown) => (
-            <ActualShape {...(props as { cx: number; cy: number })} />
-          )}
-        />
-
-        <Tooltip content={<CustomTooltip />} isAnimationActive={false} />
-      </ScatterChart>
-    </ResponsiveContainer>
+          <Tooltip content={<CustomTooltip />} isAnimationActive={false} />
+        </ScatterChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 
