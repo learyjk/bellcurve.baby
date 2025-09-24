@@ -175,7 +175,11 @@ export async function POST(req: NextRequest) {
 
   try {
     const s = getStripeClient();
-    event = s.webhooks.constructEvent(body, signatureHeader, webhookSecret as string);
+    event = s.webhooks.constructEvent(
+      body,
+      signatureHeader,
+      webhookSecret as string
+    );
     console.log("Webhook signature verification successful:", {
       eventType: event.type,
       eventId: event.id,
