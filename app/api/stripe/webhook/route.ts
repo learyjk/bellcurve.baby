@@ -4,9 +4,18 @@ import { headers } from "next/headers";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/database.types";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+let stripe: Stripe | null = null;
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+function getStripeClient() {
+  if (stripe) return stripe;
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    // Defer throwing until runtime handler so build-time (CI) won't fail when env is not set
+    throw new Error("Stripe secret key is not configured");
+  }
+  stripe = new Stripe(key);
+  return stripe;
+}
 
 type GuessInsert = Database["public"]["Tables"]["guesses"]["Insert"];
 
@@ -138,6 +147,8 @@ export async function POST(req: NextRequest) {
     .then((h) => h.get("stripe-signature"))
     .catch(() => null);
 
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
   console.log("Webhook received:", {
     bodyLength: body.length,
     hasSignature: !!signatureHeader,
@@ -155,12 +166,16 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event;
 
+  if (!webhookSecret) {
+    console.error("Stripe webhook secret not configured");
+    return new NextResponse("Webhook Error: webhook secret not configured", {
+      status: 500,
+    });
+  }
+
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signatureHeader,
-      webhookSecret
-    );
+    const s = getStripeClient();
+    event = s.webhooks.constructEvent(body, signatureHeader, webhookSecret as string);
     console.log("Webhook signature verification successful:", {
       eventType: event.type,
       eventId: event.id,
