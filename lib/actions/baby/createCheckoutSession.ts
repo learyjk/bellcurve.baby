@@ -56,19 +56,23 @@ export async function createCheckoutSession(
   }
 
   try {
-    // `data.guessDate` is expected to be a YYYY-MM-DD in PT; render it in PT
+    // `data.guessDate` is expected to be a YYYY-MM-DD string. Parse it to
+    // UTC-noon for stable formatting and do not force a specific timezone on
+    // the formatted string; let Intl format according to the server/runtime
+    // locale.
     const dateForFormat = (() => {
       const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(data.guessDate);
       if (m) {
         const y = Number(m[1]);
         const mo = Number(m[2]);
         const d = Number(m[3]);
+        // Use UTC noon to avoid timezone-based day shifts when converting
+        // to a Date and formatting.
         return new Date(Date.UTC(y, mo - 1, d, 12, 0, 0));
       }
       return new Date(data.guessDate);
     })();
     const formattedDate = new Intl.DateTimeFormat("en-US", {
-      timeZone: "America/Los_Angeles",
       year: "numeric",
       month: "long",
       day: "numeric",

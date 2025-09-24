@@ -10,6 +10,8 @@ export interface ActualOutcome {
   actualWeight: number;
 }
 
+import { ymdToUtcNoon } from "@/lib/helpers/date";
+
 export function rankGuessesByAccuracy(
   guesses: Guess[],
   actual: ActualOutcome
@@ -20,11 +22,11 @@ export function rankGuessesByAccuracy(
   distance: number;
   guess_id: string;
 }[] {
-  const actualDate = new Date(actual.actualBirthDate).getTime();
+  const actualDate = ymdToUtcNoon(actual.actualBirthDate).getTime();
 
   return guesses
     .map((guess) => {
-      const guessDateValue = new Date(guess.guessDate).getTime();
+      const guessDateValue = ymdToUtcNoon(guess.guessDate).getTime();
       const dateDiffDays =
         (guessDateValue - actualDate) / (1000 * 60 * 60 * 24);
 

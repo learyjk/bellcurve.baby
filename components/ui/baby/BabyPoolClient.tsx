@@ -34,11 +34,13 @@ import {
   createCheckoutSession,
   CreateCheckoutSessionState,
 } from "@/lib/actions/baby/createCheckoutSession";
+import { addDaysToYMD } from "@/lib/helpers/date";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import FloatingVideoPreview from "@/components/ui/floating-video-preview";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -161,23 +163,14 @@ export function BabyPoolClient({
       toast.error("Error: Due date is not set for this pool.");
       return null;
     }
-    const [year, month, day] = pool.mu_due_date.split("-").map(Number);
-    const dueDate = new Date(year, month - 1, day);
-    const guessDate = new Date(dueDate);
-    guessDate.setDate(guessDate.getDate() + birthDateDeviation);
-
-    // Format the guess date as a Pacific Time absolute date (YYYY-MM-DD),
-    // so storage is consistent regardless of the user's local timezone.
-    const guessDatePacificYMD = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "America/Los_Angeles",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(guessDate);
+    // Use UTC-safe helpers so the YMD does not shift based on client TZ.
+    const dueYmd = pool.mu_due_date as string;
+    const guessDateYmd = addDaysToYMD(dueYmd, birthDateDeviation);
+    const guessDateYMD = guessDateYmd; // already Y-M-D string
     return {
       poolId: pool.id,
       slug: pool.slug,
-      guessDate: guessDatePacificYMD, // send as YYYY-MM-DD in PT
+      guessDate: guessDateYMD, // send as YYYY-MM-DD
       guessWeight: weightGuessOunces,
       price: totalPrice,
       babyName: pool.baby_name || "the baby",
@@ -380,6 +373,10 @@ export function BabyPoolClient({
           </CardContent>
         </Card>
       </div>
+      {/* Floating video preview */}
+      <FloatingVideoPreview />
     </div>
   );
 }
+
+// (FloatingVideoPreview moved to its own file: components/ui/floating-video-preview.tsx)

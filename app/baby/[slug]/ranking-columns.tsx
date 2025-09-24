@@ -1,7 +1,8 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { RankingWithGuess } from "@/lib/data/rankings/getRankingsForPool";
-import { formatPacificDate } from "@/lib/helpers/date";
+import { formatYmdForDisplay } from "@/lib/helpers/date";
+import LocalDate from "@/components/ui/local-date";
 
 export const rankingColumns: ColumnDef<RankingWithGuess>[] = [
   {
@@ -16,8 +17,12 @@ export const rankingColumns: ColumnDef<RankingWithGuess>[] = [
   {
     accessorKey: "guesses.guessed_birth_date",
     header: "Guessed Date",
-    cell: ({ row }) =>
-      formatPacificDate(row.original.guesses?.guessed_birth_date ?? null),
+    cell: ({ row }) => {
+      const initial = formatYmdForDisplay(
+        row.original.guesses?.guessed_birth_date ?? null
+      );
+      return <LocalDate initial={initial} />;
+    },
   },
   {
     accessorKey: "guesses.guessed_weight",

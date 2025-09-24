@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
 import { Tables } from "@/database.types";
 import { DATE_DEVIATION_DAYS, WEIGHT_DEVIATION_OUNCES } from "@/lib/constants";
+import { addDaysToYMD, formatYmdShort } from "@/lib/helpers/date";
 import { pricingModelSigmas } from "@/lib/helpers/pricingModels";
 import { getGuessComponentPrice } from "@/lib/helpers/pricing";
 import FatBaby from "@/app/assets/FatBaby";
@@ -58,29 +59,19 @@ export function GuessSliders({
   const weightSigma =
     pool?.sigma_weight ?? pricingModelSigmas.standard.weightSigma;
 
-  const dueDate = pool?.mu_due_date
-    ? new Date(`${pool.mu_due_date}T00:00:00`)
+  // Interpret pool.mu_due_date as YYYY-MM-DD. Use UTC-safe helpers
+  // to compute labels so they don't shift in other timezones.
+  const dueYmd = pool?.mu_due_date ?? null;
+  const minYmd = dueYmd ? addDaysToYMD(dueYmd, -DATE_DEVIATION_DAYS) : null;
+  const maxYmd = dueYmd ? addDaysToYMD(dueYmd, DATE_DEVIATION_DAYS) : null;
+  const currentGuessYmd = dueYmd
+    ? addDaysToYMD(dueYmd, birthDateDeviation)
     : null;
 
-  const formatDate = (date: Date | null) => {
-    if (!date) return "";
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  };
-
-  const minDate = dueDate ? new Date(dueDate.getTime()) : null;
-  if (minDate) minDate.setDate(minDate.getDate() - DATE_DEVIATION_DAYS);
-
-  const maxDate = dueDate ? new Date(dueDate.getTime()) : null;
-  if (maxDate) maxDate.setDate(maxDate.getDate() + DATE_DEVIATION_DAYS);
-
-  const currentGuessDate = dueDate ? new Date(dueDate.getTime()) : null;
-  if (currentGuessDate)
-    currentGuessDate.setDate(currentGuessDate.getDate() + birthDateDeviation);
-
-  const minDateLabel = formatDate(minDate);
-  const maxDateLabel = formatDate(maxDate);
-  const meanDateLabel = formatDate(dueDate);
-  const currentGuessDateLabel = formatDate(currentGuessDate);
+  const minDateLabel = formatYmdShort(minYmd);
+  const maxDateLabel = formatYmdShort(maxYmd);
+  const meanDateLabel = formatYmdShort(dueYmd);
+  const currentGuessDateLabel = formatYmdShort(currentGuessYmd);
 
   // Precompute component prices so GaussianCurve and total match exactly
   const dateComponentPrice = getGuessComponentPrice({
@@ -140,7 +131,7 @@ export function GuessSliders({
                   computedPrice={dateComponentPrice}
                   width={280}
                   height={120}
-                  tooltipText="Mean is the due date. +/- 3 weeks captures ~99% of births. All guessed dates are interpreted in Pacific Time (PT)."
+                  tooltipText="Mean is the due date. +/- 3 weeks captures ~99% of births. Your guess is for the timezone where the baby will be born."
                 />
               </div>
               <div className="relative">

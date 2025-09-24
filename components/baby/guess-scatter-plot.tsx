@@ -9,6 +9,7 @@ import {
   Label,
   ReferenceLine,
 } from "recharts";
+import { ymdToUtcNoon } from "@/lib/helpers/date";
 
 // Helper to format weight from total ounces to lbs and oz
 const formatWeight = (totalOunces: number) => {
@@ -39,13 +40,13 @@ const GuessScatterPlot: React.FC<GuessScatterPlotProps> = ({
   guesses,
   actual,
 }) => {
-  const actualDate = new Date(actual.actualBirthDate).getTime();
+  const actualDate = ymdToUtcNoon(actual.actualBirthDate).getTime();
 
   // Sort guesses by distance to actual
   const sortedGuesses = [...guesses].sort((a, b) => a.distance - b.distance);
 
   const data = sortedGuesses.map((guess, index) => {
-    const guessDate = new Date(guess.guessed_birth_date).getTime();
+    const guessDate = ymdToUtcNoon(guess.guessed_birth_date).getTime();
     return {
       x: guessDate,
       y: guess.guessed_weight,
@@ -155,6 +156,7 @@ const GuessScatterPlot: React.FC<GuessScatterPlotProps> = ({
     <ResponsiveContainer width="100%" height={420}>
       <ScatterChart margin={{ top: 20, right: 30, left: 30, bottom: 40 }}>
         <XAxis
+          style={{ fontSize: 11 }}
           type="number"
           dataKey="x"
           domain={["auto", "auto"]}
@@ -162,7 +164,7 @@ const GuessScatterPlot: React.FC<GuessScatterPlotProps> = ({
         >
           <Label
             value="Birth Date"
-            offset={-10}
+            offset={-20}
             position="insideBottom"
             style={{ textAnchor: "middle" }}
           />
@@ -171,14 +173,23 @@ const GuessScatterPlot: React.FC<GuessScatterPlotProps> = ({
           type="number"
           dataKey="y"
           domain={["auto", "auto"]}
-          tickFormatter={(tick) => `${Math.floor(tick / 16)} lbs`}
+          tickFormatter={(tick) => {
+            const pounds = Math.floor(tick / 16);
+            const ounces = Math.round(tick % 16);
+            if (ounces === 0) {
+              return `${pounds} lbs`;
+            } else {
+              return `${pounds} lbs ${ounces} oz`;
+            }
+          }}
           label={{
             value: "Birth Weight",
             angle: -90,
             position: "insideLeft",
-            offset: 10,
+            offset: -20,
             style: { textAnchor: "middle" },
           }}
+          style={{ fontSize: 11 }}
         />
         <ReferenceLine x={actualPoint.x} stroke="#f00" strokeDasharray="3 3" />
         <ReferenceLine y={actualPoint.y} stroke="#f00" strokeDasharray="3 3" />
