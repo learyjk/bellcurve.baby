@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import videoPreview from "../../public/video_preview_square.gif";
 
 const STORAGE_KEY = "floatingVideoCollapsed";
 
@@ -90,7 +91,7 @@ export default function FloatingVideoPreview({
             style={{ pointerEvents: collapsed ? "none" : "auto" }}
           >
             <Image
-              src="/video_preview_square.gif"
+              src={videoPreview}
               alt="Preview video"
               width={size}
               height={size}
