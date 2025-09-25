@@ -11,7 +11,6 @@ export default function Home() {
         <MainHero />
         <section className="w-full max-w-2xl flex flex-col items-start gap-4 px-4 py-12">
           <HowItWorks />
-          {/* <SuperLogo width={150} /> */}
           <Card className="overflow-hidden shadow-none">
             <CardContent className="p-0">
               <Image

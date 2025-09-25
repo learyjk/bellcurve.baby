@@ -73,6 +73,9 @@ export default function MainHero() {
           prize determined by the pool creator.
         </p>
 
+        <h2 className="font-cherry-bomb text-3xl font-bold text-pretty tracking-wide mb-4 mt-4">
+          Example Pool
+        </h2>
         <GuessSliders
           birthDateDeviation={birthDateDeviation}
           weightGuessOunces={weightGuessOunces}
@@ -84,7 +87,7 @@ export default function MainHero() {
         <Card className="shadow-none w-full max-w-sm">
           <CardContent className="p-4 text-center">
             <div className="text-sm font-mono font-bold tracking-widest uppercase mb-2">
-              Total Guess Price
+              Total Guess Price (Example)
             </div>
             <div className="font-cherry-bomb text-5xl mb-4 text-foreground">
               {(() => {
