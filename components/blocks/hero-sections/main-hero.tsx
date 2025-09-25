@@ -73,6 +73,9 @@ export default function MainHero() {
           prize determined by the pool creator.
         </p>
 
+        <h2 className="font-cherry-bomb text-3xl font-bold text-pretty tracking-wide mb-4 mt-4">
+          Example Pool
+        </h2>
         <GuessSliders
           birthDateDeviation={birthDateDeviation}
           weightGuessOunces={weightGuessOunces}
