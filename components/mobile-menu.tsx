@@ -27,13 +27,13 @@ export function MobileMenu({ canCreateBabyPool, className }: MobileMenuProps) {
       {isOpen && (
         <div className="absolute top-full left-0 right-0 bg-background border-b border-border z-50">
           <div className="flex flex-col p-4 space-y-2">
-              <Link
-                href="/"
-                className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
-                onClick={() => setIsOpen(false)}
-              >
-                Home
-              </Link>
+            <Link
+              href="/"
+              className="block px-3 py-2 text-sm hover:bg-accent rounded-md"
+              onClick={() => setIsOpen(false)}
+            >
+              Home
+            </Link>
             {canCreateBabyPool && (
               <Link
                 href="/baby"
