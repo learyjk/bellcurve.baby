@@ -1,15 +1,16 @@
 bellcurve.baby
 TODO:
 
-[ ] video
 
 Post Launch:
-
+[ ] put guess table in scroll container 
 [ ] Stripe payout via Stripe connect
 [ ] Share a Baby
+[ ] Create own pool
 
 Done:
 
+[x] video
 [X] prizes
 [X] add announcement page
 [X] info icon with popup under avg weight "7 lbs 6 oz roughly the national average newborn weight"
