@@ -65,6 +65,22 @@ const GuessScatterPlot: React.FC<GuessScatterPlotProps> = ({
 }) => {
   const actualDate = ymdToUtcNoon(actual.actualBirthDate).getTime();
 
+  // Get computed CSS variable values for stroke colors (for SVG elements)
+  const [strokeColors, setStrokeColors] = useState({ hovered: "#000", normal: "#222" });
+
+  useEffect(() => {
+    // Compute CSS variable values on client side
+    const root = document.documentElement;
+    const computedStyle = getComputedStyle(root);
+    const foreground = computedStyle.getPropertyValue("--foreground").trim();
+    const mutedForeground = computedStyle.getPropertyValue("--muted-foreground").trim();
+
+    setStrokeColors({
+      hovered: foreground ? `hsl(${foreground})` : "#000",
+      normal: mutedForeground ? `hsl(${mutedForeground})` : "#222",
+    });
+  }, []);
+
   // Combine all guesses into a single array, sorted by place (lower place = better = render last = on top)
   // This ensures Recharts only includes the actual hovered point in the payload
   const allGuessesData = useMemo(() => {
@@ -130,7 +146,13 @@ const GuessScatterPlot: React.FC<GuessScatterPlotProps> = ({
     const baseRadius = payload.place <= 3 ? 6 : 4;
     const radius = payload.isHovered ? baseRadius + 3 : baseRadius;
     const strokeWidth = payload.isHovered ? 3 : payload.place <= 3 ? 1.5 : 0;
-    const strokeColor = payload.isHovered ? "#000" : "#222";
+    // Top 3 places (gold, silver, bronze) always use black stroke
+    // Other dots use theme-appropriate color
+    const strokeColor = payload.place <= 3
+      ? "#000"
+      : payload.isHovered
+        ? strokeColors.hovered
+        : strokeColors.normal;
 
     if (payload.place === 1) {
       // Gold (winner) - can be multiple if tied
@@ -169,13 +191,13 @@ const GuessScatterPlot: React.FC<GuessScatterPlotProps> = ({
         />
       );
     } else {
-      // Less prominent: smaller, gray, no outline
+      // Less prominent: smaller, darker gray to differentiate from silver (#C0C0C0)
       return (
         <circle
           cx={cx}
           cy={cy}
-          r={radius}
-          fill={payload.isHovered ? "#888" : "#bbb"}
+          r={radius * 0.7}
+          fill={payload.isHovered ? "#888" : "#999"}
           stroke={payload.isHovered ? strokeColor : "none"}
           strokeWidth={strokeWidth}
         />
@@ -225,10 +247,12 @@ const GuessScatterPlot: React.FC<GuessScatterPlotProps> = ({
       return (
         <div
           style={{
-            backgroundColor: "#fff",
-            border: "1px solid #ccc",
-            padding: 8,
+            backgroundColor: "hsl(var(--background))",
+            border: "1px solid hsl(var(--border))",
+            borderRadius: "0.375rem",
+            padding: "8px",
             boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            color: "hsl(var(--foreground))",
           }}
         >
           <div>
@@ -247,10 +271,12 @@ const GuessScatterPlot: React.FC<GuessScatterPlotProps> = ({
       return (
         <div
           style={{
-            backgroundColor: "#fff",
-            border: "1px solid #ccc",
-            padding: 8,
+            backgroundColor: "hsl(var(--background))",
+            border: "1px solid hsl(var(--border))",
+            borderRadius: "0.375rem",
+            padding: "8px",
             boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            color: "hsl(var(--foreground))",
           }}
         >
           <div>
@@ -330,12 +356,17 @@ const GuessScatterPlot: React.FC<GuessScatterPlotProps> = ({
             dataKey="x"
             domain={["auto", "auto"]}
             tickFormatter={(tick) => new Date(tick).toLocaleDateString()}
+            tick={{ fill: "hsl(var(--muted-foreground))" }}
+            axisLine={{ stroke: "hsl(var(--border))" }}
           >
             <Label
               value="Birth Date"
               offset={-20}
               position="insideBottom"
-              style={{ textAnchor: "middle" }}
+              style={{
+                textAnchor: "middle",
+                fill: "hsl(var(--foreground))",
+              }}
             />
           </XAxis>
           <YAxis
@@ -351,12 +382,17 @@ const GuessScatterPlot: React.FC<GuessScatterPlotProps> = ({
                 return `${pounds} lbs ${ounces} oz`;
               }
             }}
+            tick={{ fill: "hsl(var(--muted-foreground))" }}
+            axisLine={{ stroke: "hsl(var(--border))" }}
             label={{
               value: "Birth Weight",
               angle: -90,
               position: "insideLeft",
               offset: -20,
-              style: { textAnchor: "middle" },
+              style: {
+                textAnchor: "middle",
+                fill: "hsl(var(--foreground))",
+              },
             }}
             style={{ fontSize: 11 }}
           />
@@ -408,10 +444,12 @@ const GuessScatterPlot: React.FC<GuessScatterPlotProps> = ({
         >
           <div
             style={{
-              backgroundColor: "#fff",
-              border: "1px solid #ccc",
-              padding: 8,
+              backgroundColor: "hsl(var(--background))",
+              border: "1px solid hsl(var(--border))",
+              borderRadius: "0.375rem",
+              padding: "8px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+              color: "hsl(var(--foreground))",
             }}
           >
             <div>
