@@ -22,11 +22,15 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onRowHover?: (row: { original: TData }) => void;
+  onRowLeave?: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  onRowHover,
+  onRowLeave,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const table = useReactTable({
@@ -67,6 +71,8 @@ export function DataTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                onMouseEnter={() => onRowHover?.(row)}
+                onMouseLeave={() => onRowLeave?.()}
               >
                 {row.getVisibleCells().map((cell, i, arr) => {
                   // If this is the last cell, set style for min-content width
