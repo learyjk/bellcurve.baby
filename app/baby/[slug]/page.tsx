@@ -29,7 +29,11 @@ export default async function BabyPoolPage({
   } = await supabase.auth.getUser();
 
   if (pool.is_locked) {
-    return <LockedPoolDisplay pool={pool} guesses={guesses} />;
+    return (
+      <div className="w-full min-w-0 overflow-x-hidden">
+        <LockedPoolDisplay pool={pool} guesses={guesses} />
+      </div>
+    );
   }
 
   return (

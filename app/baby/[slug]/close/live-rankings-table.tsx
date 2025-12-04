@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { DataTable } from "@/app/baby/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { formatYmdForDisplay, ymdToUtcNoon } from "@/lib/helpers/date";
@@ -7,11 +7,16 @@ import GuessScatterPlot, {
   ActualOutcome as BetActualOutcome,
 } from "@/components/baby/guess-scatter-plot";
 
+const DISTANCE_DECIMAL_PLACES = 3;
+
 export type RankedGuess = {
   name: string;
   guessed_birth_date: string;
   guessed_weight: number;
   distance: number;
+  place: number;
+  placeDisplay: string;
+  id: string; // Unique identifier for hover interaction
 };
 
 export function LiveRankingsTable({
@@ -27,7 +32,7 @@ export function LiveRankingsTable({
   actualBirthDate: string;
   actualBirthWeight?: number;
 }) {
-  // Client-side ranking logic
+  // Client-side ranking logic with tie detection
   const ranked: RankedGuess[] = useMemo(() => {
     if (
       !actualBirthDate ||
@@ -55,7 +60,7 @@ export function LiveRankingsTable({
     // Normalize actual values
     const actualDateNorm = (actualDate - minDate) / dateRange;
     const actualWeightNorm = (actualWeight - minWeight) / weightRange;
-    return guesses
+    const guessesWithDistance = guesses
       .map((guess) => {
         const guessDateValue = new Date(guess.guessed_birth_date).getTime();
         const guessDateNorm = (guessDateValue - minDate) / dateRange;
@@ -74,9 +79,56 @@ export function LiveRankingsTable({
         };
       })
       .sort((a, b) => a.distance - b.distance);
+
+    // Calculate places with tie detection based on rounded distance
+    const rankedWithPlaces: RankedGuess[] = [];
+    let currentPlace = 1;
+    let i = 0;
+
+    while (i < guessesWithDistance.length) {
+      const currentDistance = Number(
+        guessesWithDistance[i].distance.toFixed(DISTANCE_DECIMAL_PLACES)
+      );
+      const tiedGroup: typeof guessesWithDistance = [guessesWithDistance[i]];
+      let j = i + 1;
+
+      // Find all guesses with the same rounded distance
+      while (
+        j < guessesWithDistance.length &&
+        Number(guessesWithDistance[j].distance.toFixed(DISTANCE_DECIMAL_PLACES)) ===
+        currentDistance
+      ) {
+        tiedGroup.push(guessesWithDistance[j]);
+        j++;
+      }
+
+      // Assign place to all tied guesses - all tied entries show the same place number
+      tiedGroup.forEach((guess) => {
+        // Create unique ID from name, date, and weight
+        const id = `${guess.name}-${guess.guessed_birth_date}-${guess.guessed_weight}`;
+        rankedWithPlaces.push({
+          ...guess,
+          place: currentPlace,
+          placeDisplay: `${currentPlace}`,
+          id,
+        });
+      });
+
+      // Move to next place: if 2 people tied for 2nd, next person is 3rd (not 4th)
+      // After assigning place N to K tied people, next place is N + 1
+      currentPlace = currentPlace + 1;
+      i = j;
+    }
+
+    return rankedWithPlaces;
   }, [guesses, actualBirthDate, actualBirthWeight]);
 
   const columns: ColumnDef<RankedGuess>[] = [
+    {
+      id: "place",
+      header: "Place",
+      cell: ({ row }) => row.original.placeDisplay,
+    },
     { accessorKey: "name", header: "Name" },
     {
       accessorKey: "guessed_birth_date",
@@ -101,9 +153,12 @@ export function LiveRankingsTable({
     {
       accessorKey: "distance",
       header: "Distance",
-      cell: ({ row }) => Number(row.getValue("distance")).toFixed(2),
+      cell: ({ row }) =>
+        Number(row.getValue("distance")).toFixed(DISTANCE_DECIMAL_PLACES),
     },
   ];
+
+  const [hoveredGuessId, setHoveredGuessId] = useState<string | null>(null);
 
   return (
     <div className="mt-8">
@@ -114,6 +169,8 @@ export function LiveRankingsTable({
             guessed_birth_date: r.guessed_birth_date,
             guessed_weight: r.guessed_weight,
             distance: r.distance,
+            place: r.place,
+            id: r.id,
           })) as BetGuess[]
         }
         actual={
@@ -122,8 +179,14 @@ export function LiveRankingsTable({
             actualWeight: Number(actualBirthWeight),
           } as BetActualOutcome
         }
+        hoveredGuessId={hoveredGuessId}
       />
-      <DataTable columns={columns} data={ranked} />
+      <DataTable
+        columns={columns}
+        data={ranked}
+        onRowHover={(row) => setHoveredGuessId(row.original.id)}
+        onRowLeave={() => setHoveredGuessId(null)}
+      />
       <div className="mt-8"></div>
     </div>
   );
