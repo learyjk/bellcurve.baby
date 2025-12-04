@@ -205,7 +205,6 @@ const GuessScatterPlot: React.FC<GuessScatterPlotProps> = ({
   const CustomTooltip = ({
     active,
     payload,
-    coordinate,
   }: CustomTooltipProps) => {
     // Prioritize chart hover over table hover
     // If actively hovering on chart with payload, use that
