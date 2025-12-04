@@ -1,12 +1,16 @@
 bellcurve.baby
 TODO:
 
-[ ] video
+[X] video
 
 Post Launch:
 
 [ ] Stripe payout via Stripe connect
 [ ] Share a Baby
+[ ] Get emails addresses for all guesses in pool
+[ ] Make sure close pool form works.
+[ ] Dev / prod DB
+
 
 Done:
 
