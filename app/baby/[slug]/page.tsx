@@ -10,10 +10,10 @@ export default async function BabyPoolPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ payment?: string }>;
+  searchParams: Promise<{ payment?: string; connect?: string }>;
 }) {
   const { slug } = await params;
-  const { payment } = await searchParams;
+  const { payment, connect } = await searchParams;
   const pool = await getPoolBySlug(slug);
 
   if (!pool) {
@@ -43,6 +43,7 @@ export default async function BabyPoolPage({
         guesses={guesses}
         user={user}
         paymentStatus={payment}
+        connectStatus={connect}
       />
     </div>
   );

@@ -244,6 +244,7 @@ export function GaussianCurve({
               stroke="hsl(var(--foreground))"
               strokeWidth="2"
               className="drop-shadow-sm"
+              suppressHydrationWarning
             />
 
             {/* Fill area under curve */}
@@ -253,6 +254,7 @@ export function GaussianCurve({
               } L ${userGuessX} ${height - graphBottomOffset} Z`}
               fill="none"
               fillOpacity="0.1"
+              suppressHydrationWarning
             />
 
             {/* User's guess indicator */}
@@ -277,6 +279,7 @@ export function GaussianCurve({
                 stroke="hsl(var(--foreground))"
                 strokeWidth="0"
                 className="drop-shadow-sm"
+                suppressHydrationWarning
               />
 
               {/* Label for user's guess */}

@@ -9,122 +9,50 @@ let stripe: Stripe | null = null;
 function getStripeClient() {
   if (stripe) return stripe;
   const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) {
-    // Defer throwing until runtime handler so build-time (CI) won't fail when env is not set
-    throw new Error("Stripe secret key is not configured");
-  }
+  if (!key) throw new Error("Stripe secret key is not configured");
   stripe = new Stripe(key);
   return stripe;
 }
 
-type GuessInsert = Database["public"]["Tables"]["guesses"]["Insert"];
-
-async function createGuess(guess: GuessInsert, paymentIntentId: string) {
-  console.log("🔑 createGuess called with service key check:", {
-    hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-    serviceKeyLength: process.env.SUPABASE_SERVICE_ROLE_KEY?.length || 0,
-  });
-
-  // Check if service role key is configured
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.error(
-      "SUPABASE_SERVICE_ROLE_KEY not configured - this will cause RLS permission errors"
-    );
-    throw new Error("Service role key not configured for webhook operations");
-  }
-
-  // Create service client that bypasses RLS for webhook operations
-  const supabase = createSupabaseClient(
+// Anon client — RLS is ON, all DB writes go through SECURITY DEFINER RPCs
+function getAnonClient() {
+  return createSupabaseClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
+}
 
-  // Add payment_id to the guess for tracking
-  const guessWithPaymentId = {
-    ...guess,
-    payment_id: paymentIntentId,
-  };
+async function createGuess(
+  poolId: string,
+  userId: string,
+  guessDate: string,
+  guessWeight: number,
+  price: number,
+  paymentIntentId: string,
+  name: string | null,
+  isAnonymous: boolean
+) {
+  const supabase = getAnonClient();
 
-  console.log("Attempting to create guess:", {
-    guess: guessWithPaymentId,
-    payment_id: paymentIntentId,
+  console.log("createGuess via RPC:", { poolId, userId, paymentIntentId });
+
+  const { data, error } = await supabase.rpc("create_guess_from_webhook", {
+    p_pool_id: poolId,
+    p_user_id: userId,
+    p_guessed_birth_date: guessDate,
+    p_guessed_weight: guessWeight,
+    p_calculated_price: price,
+    p_payment_id: paymentIntentId,
+    p_name: name ?? "",
+    p_is_anonymous: isAnonymous,
   });
-
-  // Check if a guess with this payment_id already exists (duplicate prevention)
-  const { data: existingGuess, error: existingError } = await supabase
-    .from("guesses")
-    .select("id, payment_id")
-    .eq("payment_id", paymentIntentId)
-    .single();
-
-  if (existingGuess && !existingError) {
-    console.log("Guess already exists for this payment:", {
-      existing_guess_id: existingGuess.id,
-      payment_id: paymentIntentId,
-    });
-    return existingGuess;
-  }
-
-  // First, let's verify the pool exists and user has access
-  const { data: poolCheck, error: poolError } = await supabase
-    .from("pools")
-    .select("id, user_id, is_locked")
-    .eq("id", guessWithPaymentId.pool_id)
-    .single();
-
-  if (poolError) {
-    console.error("Pool verification failed:", {
-      pool_id: guessWithPaymentId.pool_id,
-      error: poolError,
-    });
-    throw new Error(`Pool not found or inaccessible: ${poolError.message}`);
-  }
-
-  if (poolCheck.is_locked) {
-    console.error("Pool is locked:", {
-      pool_id: guessWithPaymentId.pool_id,
-    });
-    throw new Error("Cannot add guess to locked pool");
-  }
-
-  const { data, error } = await supabase
-    .from("guesses")
-    .insert(guessWithPaymentId)
-    .select()
-    .single();
 
   if (error) {
-    console.error("Error creating guess from webhook:", {
-      message: error.message,
-      details: error.details,
-      code: error.code,
-      hint: error.hint,
-      guess: guessWithPaymentId,
-      supabase_error_type: typeof error,
-      postgresql_code: error.code,
-    });
-
-    // Check for common error types
-    if (error.code === "23505") {
-      throw new Error(`Duplicate guess detected: ${error.message}`);
-    } else if (error.code === "23503") {
-      throw new Error(`Foreign key constraint violation: ${error.message}`);
-    } else if (error.code === "42501") {
-      throw new Error(`Permission denied (RLS policy): ${error.message}`);
-    } else {
-      throw new Error(
-        `Failed to create guess: ${error.message} (Code: ${error.code})`
-      );
-    }
+    console.error("RPC create_guess_from_webhook failed:", error);
+    throw new Error(`Failed to create guess: ${error.message}`);
   }
 
-  console.log("Successfully created guess:", {
-    guess_id: data.id,
-    pool_id: data.pool_id,
-    user_id: data.user_id,
-    payment_id: data.payment_id,
-  });
-
+  console.log("Guess created via RPC:", data);
   return data;
 }
 
@@ -154,7 +82,6 @@ export async function POST(req: NextRequest) {
     hasSignature: !!signatureHeader,
     signaturePreview: signatureHeader?.substring(0, 50) + "...",
     webhookSecretConfigured: !!webhookSecret,
-    serviceKeyConfigured: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
   });
 
   if (!signatureHeader) {
@@ -253,17 +180,14 @@ export async function POST(req: NextRequest) {
 
     try {
       await createGuess(
-        {
-          pool_id: poolId,
-          user_id: userId,
-          guessed_birth_date: guessDate,
-          guessed_weight: numericWeight,
-          calculated_price: numericPrice,
-          payment_status: "paid",
-          name: name || null,
-          is_anonymous: isAnonymous,
-        },
-        paymentIntentId
+        poolId,
+        userId,
+        guessDate,
+        numericWeight,
+        numericPrice,
+        paymentIntentId,
+        name || null,
+        isAnonymous
       );
 
       console.log(
@@ -321,6 +245,20 @@ export async function POST(req: NextRequest) {
           headers: { "Content-Type": "application/json" },
         }
       );
+    }
+  } else if (event.type === "account.updated") {
+    // Stripe Connect: sync onboarding status when an account becomes enabled
+    const account = event.data.object as Stripe.Account;
+    if (account.charges_enabled) {
+      const supabase = getAnonClient();
+      const { error } = await supabase.rpc("mark_pool_stripe_connected", {
+        p_stripe_account_id: account.id,
+      });
+      if (error) {
+        console.error("Failed to mark pool onboarding complete:", error);
+      } else {
+        console.log(`Marked pool(s) with account ${account.id} as onboarding complete`);
+      }
     }
   } else {
     console.log(`Received unhandled event type: ${event.type}`);
