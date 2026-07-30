@@ -178,30 +178,6 @@ export type Database = {
           }
         ];
       };
-      user_features: {
-        Row: {
-          feature: string;
-          granted_at: string | null;
-          granted_by: string | null;
-          id: string;
-          user_id: string;
-        };
-        Insert: {
-          feature: string;
-          granted_at?: string | null;
-          granted_by?: string | null;
-          id?: string;
-          user_id: string;
-        };
-        Update: {
-          feature?: string;
-          granted_at?: string | null;
-          granted_by?: string | null;
-          id?: string;
-          user_id?: string;
-        };
-        Relationships: [];
-      };
     };
     Views: {
       [_ in never]: never;

@@ -13,8 +13,6 @@ import {
 import { AuthButton } from "@/components/auth-button";
 import { MobileMenu } from "@/components/mobile-menu";
 import { createClient } from "@/lib/supabase/server";
-import { hasFeatureAccess } from "@/lib/features";
-import { FEATURES } from "@/lib/features/types";
 import { LogoOnly } from "./svg/logo-only";
 
 export async function Navbar() {
@@ -24,10 +22,8 @@ export async function Navbar() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Check if user has access to create baby pools
-  const canCreateBabyPool = user
-    ? await hasFeatureAccess(user.id, FEATURES.CREATE_BABY_POOL)
-    : false;
+  // All signed-in users can create baby pools
+  const canCreateBabyPool = !!user;
 
   // Build menu items so we can align rows and set dynamic row-span
   const menuItems: Array<{ href: string; title: string; desc: string }> = [];
