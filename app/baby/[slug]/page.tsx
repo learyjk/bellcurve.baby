@@ -20,7 +20,9 @@ export default async function BabyPoolPage({
     return notFound();
   }
 
-  const guesses = await getGuessesForPool(pool.id);
+  const guesses = await getGuessesForPool(pool.id, {
+    includeRefunded: true,
+  });
 
   // Get user on server side
   const supabase = await createClient();
