@@ -207,10 +207,18 @@ export function BabyPoolClient({
     weightGuess: weightGuessOunces,
   });
 
-  // Calculate total donations from all guesses
-  const totalDonations = guesses
-    .filter((guess) => guess.payment_status !== "refunded")
-    .reduce((sum, guess) => sum + (guess.calculated_price || 0), 0);
+  // Owners see every guess (including refunded ones, labeled); guests only
+  // see active (paid) guesses — a refunded donation isn't a donation.
+  const paidGuesses = guesses.filter(
+    (guess) => guess.payment_status !== "refunded"
+  );
+  const visibleGuesses = isOwner ? guesses : paidGuesses;
+
+  // Calculate total donations from paid guesses only
+  const totalDonations = paidGuesses.reduce(
+    (sum, guess) => sum + (guess.calculated_price || 0),
+    0
+  );
 
   const stripeConnected = Boolean(
     pool.stripe_account_id && pool.stripe_onboarding_complete
@@ -356,14 +364,14 @@ export function BabyPoolClient({
           <h2 className="text-xl font-semibold text-pretty tracking-tight mb-2">
             Previous Donations
           </h2>
-          {guesses.length === 0 ? (
+          {visibleGuesses.length === 0 ? (
             <div className="text-lg text-muted-foreground">
               No results - be the first!
             </div>
           ) : (
             <DataTable
               columns={isOwner ? ownerGuessColumns : guessColumns}
-              data={guesses}
+              data={visibleGuesses}
             />
           )}
         </div>
@@ -379,7 +387,8 @@ export function BabyPoolClient({
                 {`$${totalDonations.toFixed(0)} donated`}
               </div>
               <div className="text-sm text-muted-foreground">
-                {guesses.length} donation{guesses.length !== 1 ? "s" : ""}
+                {paidGuesses.length} donation
+                {paidGuesses.length !== 1 ? "s" : ""}
               </div>
             </div>
             <form
