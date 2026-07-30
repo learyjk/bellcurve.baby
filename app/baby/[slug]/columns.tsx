@@ -5,6 +5,7 @@ import { formatYmdForDisplay } from "@/lib/helpers/date";
 import LocalDate from "@/components/ui/local-date";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RefundCell } from "./refund-cell";
 
 function SortableHeader({
   label,
@@ -80,5 +81,16 @@ export const guessColumns: ColumnDef<Tables<"guesses">>[] = [
       const price = row.getValue("calculated_price");
       return Number(price || 0).toFixed(2);
     },
+  },
+];
+
+// Owner-only columns: adds the refund action. Spread over guessColumns
+// where the viewer is the pool owner.
+export const ownerGuessColumns: ColumnDef<Tables<"guesses">>[] = [
+  ...guessColumns,
+  {
+    id: "actions",
+    header: "",
+    cell: ({ row }) => <RefundCell guess={row.original} />,
   },
 ];
