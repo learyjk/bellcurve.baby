@@ -11,7 +11,7 @@ import { guessColumns } from "@/app/baby/[slug]/columns";
 import { getGuessPrice } from "@/lib/helpers/pricing";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
-import { AlertCircle, ExternalLink } from "lucide-react";
+import { AlertCircle, ExternalLink, Pencil } from "lucide-react";
 
 // Small, dependency-free renderer for basic spacing and simple lists.
 // - Preserves paragraphs (double newlines)
@@ -241,9 +241,22 @@ export function BabyPoolClient({
       {/* Left Column - Content Area */}
       <div className="space-y-6">
         <div>
-          <h2 className="text-4xl text-pretty font-semibold tracking-tighter mb-1">
-            Guess and donate for {pool.baby_name || "the Baby"}&apos;s Arrival!
-          </h2>
+          <div className="flex items-start justify-between gap-4">
+            <h2 className="text-4xl text-pretty font-semibold tracking-tighter mb-1">
+              Guess and donate for {pool.baby_name || "the Baby"}&apos;s Arrival!
+            </h2>
+            {isOwner && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(`/baby/${pool.slug}/edit`)}
+                className="flex-shrink-0 mt-2"
+              >
+                <Pencil className="h-4 w-4 mr-1" />
+                Edit Pool
+              </Button>
+            )}
+          </div>
           <p className="text-muted-foreground text-sm mb-6">
             Organized by {pool.organized_by}
           </p>
