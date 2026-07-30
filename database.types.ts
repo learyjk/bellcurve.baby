@@ -83,7 +83,10 @@ export type Database = {
           sigma_days: number | null;
           sigma_weight: number | null;
           slug: string;
+          stripe_account_id: string | null;
+          stripe_onboarding_complete: boolean;
           user_id: string;
+          video_url: string | null;
         };
         Insert: {
           actual_birth_date?: string | null;
@@ -103,7 +106,10 @@ export type Database = {
           sigma_days?: number | null;
           sigma_weight?: number | null;
           slug: string;
+          stripe_account_id?: string | null;
+          stripe_onboarding_complete?: boolean;
           user_id: string;
+          video_url?: string | null;
         };
         Update: {
           actual_birth_date?: string | null;
@@ -123,7 +129,10 @@ export type Database = {
           sigma_days?: number | null;
           sigma_weight?: number | null;
           slug?: string;
+          stripe_account_id?: string | null;
+          stripe_onboarding_complete?: boolean;
           user_id?: string;
+          video_url?: string | null;
         };
         Relationships: [];
       };
@@ -198,7 +207,27 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      create_guess_from_webhook: {
+        Args: {
+          p_pool_id: string;
+          p_user_id: string;
+          p_guessed_birth_date: string;
+          p_guessed_weight: number;
+          p_calculated_price: number;
+          p_payment_id: string;
+          p_name: string;
+          p_is_anonymous: boolean;
+        };
+        Returns: Json;
+      };
+      mark_pool_stripe_connected: {
+        Args: { p_stripe_account_id: string };
+        Returns: undefined;
+      };
+      get_pool_connect_info: {
+        Args: { p_pool_id: string };
+        Returns: { slug: string; stripe_account_id: string | null }[];
+      };
     };
     Enums: {
       [_ in never]: never;

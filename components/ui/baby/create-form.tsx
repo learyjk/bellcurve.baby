@@ -9,6 +9,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import clsx from "clsx";
 import { formatSlug, generateSlugSuggestions } from "@/lib/helpers/slug";
 import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
+import { DatePicker } from "@/components/ui/date-picker";
 import { createPool, CreatePoolState } from "@/lib/actions/create/createPool";
 import { pricingModelSigmas } from "@/lib/helpers/pricingModels";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -21,6 +22,7 @@ export function CreateBabyPoolForm() {
   const [slug, setSlug] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [description, setDescription] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [organizedBy, setOrganizedBy] = useState("");
   const [organizerImagePreview, setOrganizerImagePreview] = useState<
@@ -473,6 +475,31 @@ export function CreateBabyPoolForm() {
             </div>
           </div>
 
+          {/* Optional video embed (YouTube/Vimeo) */}
+          <div>
+            <Label
+              htmlFor="video_url"
+              className="text-base font-semibold tracking-tight"
+            >
+              Video (optional)
+            </Label>
+            <Input
+              id="video_url"
+              name="video_url"
+              type="url"
+              inputMode="url"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=..."
+              className="rounded mt-2"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Add a YouTube or Vimeo link and it will be embedded on your pool
+              page. The video stays hosted there — we don&apos;t store or host
+              any video files.
+            </p>
+          </div>
+
           {/* Price Range Configuration */}
           <div className="space-y-6 pt-6 border-t border-gray-200">
             <div>
@@ -492,15 +519,17 @@ export function CreateBabyPoolForm() {
                 >
                   Expected Due Date
                 </Label>
-                <Input
+                <DatePicker
                   id="due_date"
-                  name="due_date"
-                  type="date"
                   value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  required
-                  className="rounded mt-2"
+                  onChange={setDueDate}
+                  placeholder="Select the expected due date"
+                  className="mt-2"
                 />
+                {/* Submitted with the form; value format matches the old
+                    input[type=date] (yyyy-mm-dd) so the server action is
+                    unchanged. `required` preserves native validation. */}
+                <input type="hidden" name="due_date" value={dueDate} required />
               </div>
               <div className="flex-1">
                 <Label className="text-base font-semibold tracking-tight">

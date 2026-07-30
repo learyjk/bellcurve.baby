@@ -1,6 +1,7 @@
 "use server";
 import { TablesInsert } from "@/database.types";
 import { pricingModelSigmas, PricingModel } from "@/lib/helpers/pricingModels";
+import { getVideoEmbed } from "@/lib/helpers/videoEmbed";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -28,6 +29,21 @@ export async function createPool(
     10
   );
   const description = formData.get("description") as string | null;
+  const video_url_raw = (formData.get("video_url") as string | null)?.trim();
+  // Optional external video — validated server-side; we only persist URLs we
+  // can convert into a YouTube/Vimeo embed, never arbitrary iframe sources.
+  let video_url: string | null = null;
+  if (video_url_raw) {
+    if (getVideoEmbed(video_url_raw)) {
+      video_url = video_url_raw;
+    } else {
+      return {
+        message:
+          "We couldn't recognize that video link. Please paste a YouTube or Vimeo URL (e.g. https://www.youtube.com/watch?v=...), or leave the field blank.",
+        errors: { video_url: ["Unrecognized video URL"] },
+      };
+    }
+  }
   const imageFile = formData.get("image") as File | null;
   const organizerImageFile = formData.get("organizer_image") as File | null;
   const supabase = await createClient();
@@ -162,6 +178,7 @@ export async function createPool(
     mu_weight: mu_weight_ounces, // store as ounces
     sigma_weight,
     description: description || null,
+    video_url,
     image_url,
     organizer_image_url,
   };
@@ -180,7 +197,7 @@ export async function createPool(
 
   if (newPool) {
     revalidatePath(`/baby/${newPool.slug}`);
-    redirect(`/baby/${newPool.slug}`);
+    redirect(`/baby/${newPool.slug}/connect`);
   }
 
   return {
