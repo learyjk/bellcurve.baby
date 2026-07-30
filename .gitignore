@@ -44,3 +44,4 @@ next-env.d.ts
 # Supabase credentials (local dev)
 .supabase-pat
 .supabase-project-key
+.vercel-token
