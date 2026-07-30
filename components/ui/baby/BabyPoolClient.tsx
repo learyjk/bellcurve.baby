@@ -7,7 +7,10 @@ import { GuessSliders } from "@/components/ui/baby/guess-sliders";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/app/baby/data-table";
-import { guessColumns } from "@/app/baby/[slug]/columns";
+import {
+  guessColumns,
+  ownerGuessColumns,
+} from "@/app/baby/[slug]/columns";
 import { getGuessPrice } from "@/lib/helpers/pricing";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
@@ -358,7 +361,10 @@ export function BabyPoolClient({
               No results - be the first!
             </div>
           ) : (
-            <DataTable columns={guessColumns} data={guesses} />
+            <DataTable
+              columns={isOwner ? ownerGuessColumns : guessColumns}
+              data={guesses}
+            />
           )}
         </div>
       </div>
