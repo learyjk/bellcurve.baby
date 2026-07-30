@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
 import { LiveRankingsTable } from "./live-rankings-table";
 
 export default function ClosePoolForm({
@@ -41,13 +42,21 @@ export default function ClosePoolForm({
       <form action={formAction} className="space-y-8">
         <div>
           <Label htmlFor="actual_birth_date">Actual Birth Date</Label>
-          <Input
-            type="date"
+          <DatePicker
             id="actual_birth_date"
-            name="actual_birth_date"
-            required
             value={actualBirthDate}
-            onChange={(e) => setActualBirthDate(e.target.value)}
+            onChange={setActualBirthDate}
+            placeholder="Select the actual birth date"
+            className="mt-2"
+          />
+          {/* Submitted with the form; value format matches the old
+              input[type=date] (yyyy-mm-dd) so the server action is
+              unchanged. */}
+          <input
+            type="hidden"
+            name="actual_birth_date"
+            value={actualBirthDate}
+            required
           />
         </div>
         <div>

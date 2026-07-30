@@ -11,6 +11,7 @@ import { guessColumns } from "@/app/baby/[slug]/columns";
 import { getGuessPrice } from "@/lib/helpers/pricing";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
+import { AlertCircle, ExternalLink, Pencil } from "lucide-react";
 
 // Small, dependency-free renderer for basic spacing and simple lists.
 // - Preserves paragraphs (double newlines)
@@ -34,6 +35,7 @@ import {
   createCheckoutSession,
   CreateCheckoutSessionState,
 } from "@/lib/actions/baby/createCheckoutSession";
+import { getVideoEmbed } from "@/lib/helpers/videoEmbed";
 import { addDaysToYMD } from "@/lib/helpers/date";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Image from "next/image";
@@ -50,11 +52,13 @@ export function BabyPoolClient({
   guesses,
   user,
   paymentStatus,
+  connectStatus,
 }: {
   pool: Tables<"pools">;
   guesses: Tables<"guesses">[];
   user: User | null;
   paymentStatus?: string;
+  connectStatus?: string;
 }) {
   const [name, setName] = useState<string>("");
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -70,6 +74,10 @@ export function BabyPoolClient({
   }, [user]);
 
   const isLoggedIn = !!user;
+  const isOwner = user?.id === pool.user_id;
+
+  // Optional embedded video (YouTube/Vimeo) configured at pool creation.
+  const videoEmbed = getVideoEmbed(pool.video_url);
 
   // Handle payment status messages
   useEffect(() => {
@@ -91,8 +99,6 @@ export function BabyPoolClient({
       }
     };
 
-    // Try immediate first (for normal client flow), but also schedule a fallback after
-    // a short delay in case the Toaster hasn't mounted yet during hydration.
     try {
       showToasts();
     } catch (err) {
@@ -100,7 +106,6 @@ export function BabyPoolClient({
     }
 
     timer = setTimeout(() => {
-      console.log("Fallback payment toast attempt after delay");
       try {
         showToasts();
       } catch (err) {
@@ -112,6 +117,16 @@ export function BabyPoolClient({
       if (timer) clearTimeout(timer);
     };
   }, [paymentStatus]);
+
+  // Handle Stripe Connect status messages
+  useEffect(() => {
+    if (connectStatus === "success") {
+      toast.success(
+        "🎉 Stripe connected! Your pool is now accepting payments.",
+        { duration: 5000 }
+      );
+    }
+  }, [connectStatus]);
 
   const [birthDateDeviation, setBirthDateDeviation] = useState(0);
 
@@ -141,6 +156,10 @@ export function BabyPoolClient({
   useEffect(() => {
     if (state.error) {
       toast.error(state.error);
+      // If the pool owner hasn't connected Stripe, offer to take them there
+      if (state.connectRequired && isOwner) {
+        router.push(`/baby/${pool.slug}/connect`);
+      }
     }
     if (state.sessionId) {
       const handleRedirect = async () => {
@@ -191,14 +210,56 @@ export function BabyPoolClient({
     0
   );
 
+  const stripeConnected = Boolean(
+    pool.stripe_account_id && pool.stripe_onboarding_complete
+  );
+
+  const needsStripeConnect = isOwner && !stripeConnected;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-24">
+      {/* Stripe Connect banner — only shown to the pool owner */}
+      {needsStripeConnect && (
+        <div className="lg:col-span-2 flex items-start gap-3 rounded-lg bg-yellow-50 border border-yellow-200 p-4">
+          <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-yellow-800">
+              Connect Stripe to enable payments
+            </p>
+            <p className="text-sm text-yellow-700 mt-1">
+              Your pool is live but guesses are disabled until you connect your
+              Stripe account. This lets you receive payments directly.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => router.push(`/baby/${pool.slug}/connect`)}
+            className="flex-shrink-0"
+          >
+            <ExternalLink className="h-4 w-4 mr-1" />
+            Connect Stripe
+          </Button>
+        </div>
+      )}
       {/* Left Column - Content Area */}
       <div className="space-y-6">
         <div>
-          <h2 className="text-4xl text-pretty font-semibold tracking-tighter mb-1">
-            Guess and donate for {pool.baby_name || "the Baby"}&apos;s Arrival!
-          </h2>
+          <div className="flex items-start justify-between gap-4">
+            <h2 className="text-4xl text-pretty font-semibold tracking-tighter mb-1">
+              Guess and donate for {pool.baby_name || "the Baby"}&apos;s Arrival!
+            </h2>
+            {isOwner && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(`/baby/${pool.slug}/edit`)}
+                className="flex-shrink-0 mt-2"
+              >
+                <Pencil className="h-4 w-4 mr-1" />
+                Edit Pool
+              </Button>
+            )}
+          </div>
           <p className="text-muted-foreground text-sm mb-6">
             Organized by {pool.organized_by}
           </p>
@@ -223,11 +284,11 @@ export function BabyPoolClient({
               </div>
             )}
             {/* OrganizerImage */}
-            {pool.image_url && (
+            {pool.organizer_image_url && (
               <div className="relative w-40 mb-4 max-w-40 h-40 bg-white p-2 shadow-lg transform rotate-6 -translate-x-4 translate-y-4 overflow-hidden">
                 <div className="relative w-full h-full overflow-hidden">
                   <Image
-                    src={pool.organizer_image_url || pool.image_url}
+                    src={pool.organizer_image_url}
                     alt={
                       pool.baby_name
                         ? `${pool.baby_name} pool`
@@ -242,30 +303,32 @@ export function BabyPoolClient({
               </div>
             )}
           </div>
-          <div
-            style={{
-              position: "relative",
-              paddingBottom: "56.25%",
-              marginTop: "1.5rem",
-            }}
-            className="w-full rounded-lg overflow-hidden"
-          >
-            <iframe
-              src="https://www.youtube-nocookie.com/embed/wIBF0ZkuJpI?si=aGCQ6fcquvgJrwkE&rel=0"
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
+          {videoEmbed && (
+            <div
               style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
+                position: "relative",
+                paddingBottom: "56.25%",
+                marginTop: "1.5rem",
               }}
-            ></iframe>
-          </div>
+              className="w-full rounded-lg overflow-hidden"
+            >
+              <iframe
+                src={videoEmbed.embedUrl}
+                title="Pool video"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                }}
+              ></iframe>
+            </div>
+          )}
           {/* <p className="text-muted-foreground">
             Expected due date:{" "}
             {pool.mu_due_date
@@ -368,20 +431,28 @@ export function BabyPoolClient({
               </div>
               <div className="text-center mt-4">
                 {isLoggedIn ? (
-                  <Button
-                    type="submit"
-                    disabled={isPending || isRedirecting}
-                    className="w-full h-12 text-lg flex items-center justify-center"
-                  >
-                    {isPending || isRedirecting ? (
-                      <>
-                        <LoadingSpinner />
-                        Processing...
-                      </>
-                    ) : (
-                      `Place Guess for $${totalPrice.toFixed(2)}`
+                  <>
+                    <Button
+                      type="submit"
+                      disabled={isPending || isRedirecting || !stripeConnected}
+                      className="w-full h-12 text-lg flex items-center justify-center"
+                    >
+                      {isPending || isRedirecting ? (
+                        <>
+                          <LoadingSpinner />
+                          Processing...
+                        </>
+                      ) : (
+                        `Place Guess for $${totalPrice.toFixed(2)}`
+                      )}
+                    </Button>
+                    {!stripeConnected && !isOwner && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        This pool isn&apos;t accepting guesses yet — the owner
+                        hasn&apos;t finished setting up payments.
+                      </p>
                     )}
-                  </Button>
+                  </>
                 ) : (
                   <Button
                     type="button"

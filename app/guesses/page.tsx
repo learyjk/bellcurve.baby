@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import ThinBaby from "@/app/assets/ThinBaby";
 
 // Type for the joined query result
 type GuessWithPool = Tables<"guesses"> & {
@@ -126,9 +127,15 @@ export default async function MyGuessesPage() {
           </Table>
         </div>
       ) : (
-        <p className="text-muted-foreground">
-          You have not submitted any guesses yet.
-        </p>
+        <div className="flex flex-col items-center text-center mt-16 md:mt-24">
+          <div className="text-muted-foreground/70 mb-6">
+            <ThinBaby width={140} height={140} />
+          </div>
+          <p className="text-xl text-muted-foreground max-w-md text-pretty">
+            No guesses yet — find a baby pool and make your pick before the
+            big day arrives.
+          </p>
+        </div>
       )}
     </div>
   );

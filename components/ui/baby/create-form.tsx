@@ -8,9 +8,18 @@ import { toast } from "sonner";
 import { useEffect, useState, useRef, useCallback } from "react";
 import clsx from "clsx";
 import { formatSlug, generateSlugSuggestions } from "@/lib/helpers/slug";
+import { getVideoEmbed } from "@/lib/helpers/videoEmbed";
 import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
+import { DatePicker } from "@/components/ui/date-picker";
 import { createPool, CreatePoolState } from "@/lib/actions/create/createPool";
 import { pricingModelSigmas } from "@/lib/helpers/pricingModels";
+import {
+  DEFAULT_PRICE_CEILING,
+  DEFAULT_PRICE_FLOOR,
+  MAX_PRICE_CEILING,
+  MIN_PRICE_FLOOR,
+  PLATFORM_FEE_PERCENT,
+} from "@/lib/constants";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Image from "next/image";
 
@@ -21,14 +30,24 @@ export function CreateBabyPoolForm() {
   const [slug, setSlug] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [description, setDescription] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoTouched, setVideoTouched] = useState(false);
+  const trimmedVideoUrl = videoUrl.trim();
+  const videoEmbed = trimmedVideoUrl ? getVideoEmbed(trimmedVideoUrl) : null;
+  const videoUrlValid = trimmedVideoUrl === "" || videoEmbed !== null;
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [organizedBy, setOrganizedBy] = useState("");
   const [organizerImagePreview, setOrganizerImagePreview] = useState<
     string | null
   >(null);
+  const [imageDragActive, setImageDragActive] = useState(false);
+  const [organizerDragActive, setOrganizerDragActive] = useState(false);
+  const [imageProcessing, setImageProcessing] = useState(false);
+  const [organizerImageProcessing, setOrganizerImageProcessing] =
+    useState(false);
   // Pricing
-  const [minPrice, setMinPrice] = useState<number | "">(5);
-  const [maxPrice, setMaxPrice] = useState<number | "">(50);
+  const [minPrice, setMinPrice] = useState<number | "">(DEFAULT_PRICE_FLOOR);
+  const [maxPrice, setMaxPrice] = useState<number | "">(DEFAULT_PRICE_CEILING);
   const [pricingModel, setPricingModel] =
     useState<keyof typeof pricingModelSigmas>("standard");
   // Weight/date
@@ -57,8 +76,16 @@ export function CreateBabyPoolForm() {
         return;
       }
 
+      setImageProcessing(true);
       const reader = new FileReader();
-      reader.onload = (e) => setImagePreview(e.target?.result as string);
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+        setImageProcessing(false);
+      };
+      reader.onerror = () => {
+        toast.error("Failed to read image file. Please try another image.");
+        setImageProcessing(false);
+      };
       reader.readAsDataURL(file);
     } else {
       setImagePreview(null);
@@ -77,9 +104,16 @@ export function CreateBabyPoolForm() {
         return;
       }
 
+      setOrganizerImageProcessing(true);
       const reader = new FileReader();
-      reader.onload = (e) =>
+      reader.onload = (e) => {
         setOrganizerImagePreview(e.target?.result as string);
+        setOrganizerImageProcessing(false);
+      };
+      reader.onerror = () => {
+        toast.error("Failed to read image file. Please try another image.");
+        setOrganizerImageProcessing(false);
+      };
       reader.readAsDataURL(file);
     } else {
       setOrganizerImagePreview(null);
@@ -92,6 +126,24 @@ export function CreateBabyPoolForm() {
     createPool,
     initialState
   );
+
+  // All fields are required except images and video. Weight and pricing
+  // model always have valid defaults, so they don't need checks here.
+  const pricesValid =
+    typeof minPrice === "number" &&
+    typeof maxPrice === "number" &&
+    maxPrice > minPrice;
+  const isFormValid =
+    babyName.trim() !== "" &&
+    organizedBy.trim() !== "" &&
+    slug.trim() !== "" &&
+    slugAvailable === true &&
+    description.trim() !== "" &&
+    dueDate !== "" &&
+    pricesValid &&
+    videoUrlValid;
+  const isSubmitDisabled =
+    isPending || imageProcessing || organizerImageProcessing || !isFormValid;
 
   // --- Effects ---
   // Toast error on state.message
@@ -167,6 +219,10 @@ export function CreateBabyPoolForm() {
   return (
     <form
       action={(formData) => {
+        if (!isFormValid) {
+          toast.error("Please fill out all required fields.");
+          return;
+        }
         // Ensure we have valid price values before submission
         // Prevent submit if min/max relationship is invalid
         if (
@@ -179,12 +235,6 @@ export function CreateBabyPoolForm() {
           return;
         }
 
-        if (minPrice === "") {
-          formData.set("price_floor", "1");
-        }
-        if (maxPrice === "") {
-          formData.set("price_ceiling", "50");
-        }
         formAction(formData);
       }}
     >
@@ -298,19 +348,40 @@ export function CreateBabyPoolForm() {
             <div
               className={clsx(
                 "border-2 border-dashed rounded-md p-4 mt-2 flex flex-col items-center justify-center cursor-pointer transition",
-                imagePreview
-                  ? "border-green-400"
-                  : "border-gray-300 hover:border-blue-400"
+                imageDragActive
+                  ? "border-blue-400 bg-blue-50"
+                  : imagePreview
+                    ? "border-green-400"
+                    : "border-gray-300 hover:border-blue-400"
               )}
               onDragOver={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
+              onDragEnter={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setImageDragActive(true);
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setImageDragActive(false);
+              }}
               onDrop={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                setImageDragActive(false);
                 const file = e.dataTransfer.files[0];
                 if (file && file.type.startsWith("image/")) {
+                  const input = document.getElementById(
+                    "image_upload"
+                  ) as HTMLInputElement | null;
+                  if (input) {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    input.files = dt.files;
+                  }
                   onImageChange(file);
                 } else if (file && !file.type.startsWith("image/")) {
                   toast.error("Please select a valid image file.");
@@ -361,6 +432,12 @@ export function CreateBabyPoolForm() {
                 }}
               />
             </div>
+            {imageProcessing && (
+              <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                <LoadingSpinner />
+                Processing image...
+              </div>
+            )}
             <p className="text-xs text-gray-500 mt-1">
               Optional. Recommended size: square, under 400kB.
             </p>
@@ -377,19 +454,40 @@ export function CreateBabyPoolForm() {
             <div
               className={clsx(
                 "border-2 border-dashed rounded-md p-4 mt-2 flex flex-col items-center justify-center cursor-pointer transition",
-                organizerImagePreview
-                  ? "border-green-400"
-                  : "border-gray-300 hover:border-blue-400"
+                organizerDragActive
+                  ? "border-blue-400 bg-blue-50"
+                  : organizerImagePreview
+                    ? "border-green-400"
+                    : "border-gray-300 hover:border-blue-400"
               )}
               onDragOver={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
+              onDragEnter={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setOrganizerDragActive(true);
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setOrganizerDragActive(false);
+              }}
               onDrop={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                setOrganizerDragActive(false);
                 const file = e.dataTransfer.files[0];
                 if (file && file.type.startsWith("image/")) {
+                  const input = document.getElementById(
+                    "organizer_image_upload"
+                  ) as HTMLInputElement | null;
+                  if (input) {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    input.files = dt.files;
+                  }
                   onOrganizerImageChange(file);
                 } else if (file && !file.type.startsWith("image/")) {
                   toast.error("Please select a valid image file.");
@@ -440,6 +538,12 @@ export function CreateBabyPoolForm() {
                 }}
               />
             </div>
+            {organizerImageProcessing && (
+              <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                <LoadingSpinner />
+                Processing image...
+              </div>
+            )}
             <p className="text-xs text-gray-500 mt-1">
               Optional. Photo of the organizer(s). Recommended size: square,
               under 400kB.
@@ -473,6 +577,52 @@ export function CreateBabyPoolForm() {
             </div>
           </div>
 
+          {/* Optional video embed (YouTube/Vimeo) */}
+          <div>
+            <Label
+              htmlFor="video_url"
+              className="text-base font-semibold tracking-tight"
+            >
+              Video (optional)
+            </Label>
+            <Input
+              id="video_url"
+              name="video_url"
+              type="url"
+              inputMode="url"
+              value={videoUrl}
+              onChange={(e) => {
+                setVideoUrl(e.target.value);
+                setVideoTouched(true);
+              }}
+              placeholder="https://www.youtube.com/watch?v=..."
+              className={clsx(
+                "rounded mt-2",
+                !videoUrlValid && "border-red-400 focus-visible:ring-red-400"
+              )}
+              aria-invalid={!videoUrlValid}
+            />
+            {!videoUrlValid && (
+              <p className="text-xs text-red-500 mt-1">
+                We can&apos;t recognize that link. Paste a YouTube or Vimeo URL
+                (e.g. https://www.youtube.com/watch?v=...) or leave it blank.
+              </p>
+            )}
+            {videoUrlValid && videoEmbed && (
+              <p className="text-xs text-green-600 mt-1">
+                ✓ {videoEmbed.provider === "youtube" ? "YouTube" : "Vimeo"}{" "}
+                video recognized — it will be embedded on your pool page.
+              </p>
+            )}
+            {!(videoTouched && trimmedVideoUrl) && (
+              <p className="text-xs text-gray-500 mt-1">
+                Add a YouTube or Vimeo link and it will be embedded on your
+                pool page. The video stays hosted there — we don&apos;t store
+                or host any video files.
+              </p>
+            )}
+          </div>
+
           {/* Price Range Configuration */}
           <div className="space-y-6 pt-6 border-t border-gray-200">
             <div>
@@ -492,15 +642,17 @@ export function CreateBabyPoolForm() {
                 >
                   Expected Due Date
                 </Label>
-                <Input
+                <DatePicker
                   id="due_date"
-                  name="due_date"
-                  type="date"
                   value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  required
-                  className="rounded mt-2"
+                  onChange={setDueDate}
+                  placeholder="Select the expected due date"
+                  className="mt-2"
                 />
+                {/* Submitted with the form; value format matches the old
+                    input[type=date] (yyyy-mm-dd) so the server action is
+                    unchanged. `required` preserves native validation. */}
+                <input type="hidden" name="due_date" value={dueDate} required />
               </div>
               <div className="flex-1">
                 <Label className="text-base font-semibold tracking-tight">
@@ -574,10 +726,10 @@ export function CreateBabyPoolForm() {
                   id="price_floor"
                   name="price_floor"
                   type="number"
-                  min={1}
+                  min={MIN_PRICE_FLOOR}
                   max={
                     typeof maxPrice === "number"
-                      ? Math.max(1, maxPrice - 1)
+                      ? Math.max(MIN_PRICE_FLOOR, maxPrice - 1)
                       : undefined
                   }
                   step="1"
@@ -589,7 +741,10 @@ export function CreateBabyPoolForm() {
                     } else {
                       const numValue = Number(value);
                       if (!isNaN(numValue) && numValue >= 0) {
-                        const newMin = Math.max(1, Math.floor(numValue));
+                        const newMin = Math.max(
+                          MIN_PRICE_FLOOR,
+                          Math.floor(numValue)
+                        );
                         // If max is set and would be <= newMin, bump max to newMin + 1
                         if (
                           typeof maxPrice === "number" &&
@@ -605,7 +760,7 @@ export function CreateBabyPoolForm() {
                   onBlur={(e) => {
                     // If field is empty on blur, set to default
                     if (e.target.value === "") {
-                      setMinPrice(1);
+                      setMinPrice(DEFAULT_PRICE_FLOOR);
                     }
                     // Validate relationship on blur
                     if (
@@ -640,6 +795,7 @@ export function CreateBabyPoolForm() {
                   name="price_ceiling"
                   type="number"
                   min={typeof minPrice === "number" ? minPrice + 1 : 1}
+                  max={MAX_PRICE_CEILING}
                   step="1"
                   value={maxPrice}
                   onChange={(e) => {
@@ -649,7 +805,10 @@ export function CreateBabyPoolForm() {
                     } else {
                       const numValue = Number(value);
                       if (!isNaN(numValue) && numValue >= 0) {
-                        const newMax = Math.max(1, Math.floor(numValue));
+                        const newMax = Math.min(
+                          MAX_PRICE_CEILING,
+                          Math.max(1, Math.floor(numValue))
+                        );
                         // If min is set and would be >= newMax, lower min (but not below 1)
                         if (
                           typeof minPrice === "number" &&
@@ -665,7 +824,7 @@ export function CreateBabyPoolForm() {
                   onBlur={(e) => {
                     // If field is empty on blur, set to default
                     if (e.target.value === "") {
-                      setMaxPrice(50);
+                      setMaxPrice(DEFAULT_PRICE_CEILING);
                     }
                     // Validate relationship on blur
                     if (
@@ -690,6 +849,13 @@ export function CreateBabyPoolForm() {
                 )}
               </div>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Minimum ${MIN_PRICE_FLOOR}, maximum ${MAX_PRICE_CEILING}. You
+              keep {Math.round((1 - PLATFORM_FEE_PERCENT) * 100)}% of every
+              guess — bellcurve.baby takes a{" "}
+              {Math.round(PLATFORM_FEE_PERCENT * 100)}% platform fee, and
+              standard card processing applies.
+            </p>
           </div>
           {/* Pricing Model Selection */}
           <div>
@@ -774,7 +940,7 @@ export function CreateBabyPoolForm() {
                   mean={muWeight}
                   min={Number((muWeight - 3).toFixed(1))}
                   max={Number((muWeight + 3).toFixed(1))}
-                  minPrice={getSafeMinPrice()}
+                  minPrice={getSafeMinPrice() / 2}
                   maxPrice={getSafeMaxPrice() / 2}
                   title={`Weight Price Curve (${pricingModel})`}
                   meanLabel={formatWeightLabel(muWeight)}
@@ -793,23 +959,34 @@ export function CreateBabyPoolForm() {
         <input type="hidden" name="pricingModel" value={pricingModel} />
         <input type="hidden" name="slug" value={slug} />
       </CardContent>
-      <CardFooter className="p-8 pt-0">
+      <CardFooter className="p-8 pt-0 flex-col items-stretch">
         <Button
           type="submit"
           size="lg"
           className="w-full text-lg"
-          disabled={isPending}
-          aria-disabled={isPending}
+          disabled={isSubmitDisabled}
+          aria-disabled={isSubmitDisabled}
         >
           {isPending ? (
             <>
               <LoadingSpinner />
               Creating Pool...
             </>
+          ) : imageProcessing || organizerImageProcessing ? (
+            <>
+              <LoadingSpinner />
+              Processing image...
+            </>
           ) : (
             "Create Pool"
           )}
         </Button>
+        {!isFormValid && (
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            Fill out all required fields (including an available pool URL) to
+            create your pool.
+          </p>
+        )}
       </CardFooter>
     </form>
   );

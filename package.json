@@ -1,14 +1,16 @@
 {
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev -H 0.0.0.0 -p 8000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest",
+    "test": "vitest run",
     "supabase": "supabase start",
     "typegen": "npx supabase gen types typescript --project-id cmbchtbfgwqenbbpjvtj --schema public > database.types.ts",
-    "stripe:webhook": "stripe listen --forward-to localhost:3000/api/stripe/webhook"
+    "stripe:webhook": "stripe listen --forward-to localhost:3000/api/stripe/webhook",
+    "test:watch": "vitest",
+    "test:smoke": "./scripts/smoke-test.sh"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.10",

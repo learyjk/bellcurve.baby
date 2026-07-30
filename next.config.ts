@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: [
+    'bellcurve-baby.exe.xyz',
+    'bellcurve-baby.exe.xyz:3000',
+  ],
   images: {
     remotePatterns: [
       {

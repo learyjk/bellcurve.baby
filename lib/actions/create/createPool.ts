@@ -1,7 +1,9 @@
 "use server";
 import { TablesInsert } from "@/database.types";
 import { pricingModelSigmas, PricingModel } from "@/lib/helpers/pricingModels";
+import { getVideoEmbed } from "@/lib/helpers/videoEmbed";
 import { createClient } from "@/lib/supabase/server";
+import { MAX_PRICE_CEILING, MIN_PRICE_FLOOR } from "@/lib/constants";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
@@ -28,6 +30,21 @@ export async function createPool(
     10
   );
   const description = formData.get("description") as string | null;
+  const video_url_raw = (formData.get("video_url") as string | null)?.trim();
+  // Optional external video — validated server-side; we only persist URLs we
+  // can convert into a YouTube/Vimeo embed, never arbitrary iframe sources.
+  let video_url: string | null = null;
+  if (video_url_raw) {
+    if (getVideoEmbed(video_url_raw)) {
+      video_url = video_url_raw;
+    } else {
+      return {
+        message:
+          "We couldn't recognize that video link. Please paste a YouTube or Vimeo URL (e.g. https://www.youtube.com/watch?v=...), or leave the field blank.",
+        errors: { video_url: ["Unrecognized video URL"] },
+      };
+    }
+  }
   const imageFile = formData.get("image") as File | null;
   const organizerImageFile = formData.get("organizer_image") as File | null;
   const supabase = await createClient();
@@ -139,9 +156,13 @@ export async function createPool(
     };
   }
 
-  if (price_floor < 0.01 || price_ceiling < 0.01) {
+  if (
+    price_floor < MIN_PRICE_FLOOR ||
+    price_ceiling > MAX_PRICE_CEILING ||
+    price_ceiling < 1
+  ) {
     return {
-      message: "Prices must be at least $0.01.",
+      message: `Guess prices must be between $${MIN_PRICE_FLOOR} and $${MAX_PRICE_CEILING}.`,
       errors: {},
     };
   }
@@ -149,6 +170,19 @@ export async function createPool(
   // Set sigma values based on pricingModel
   const { dateSigma: sigma_days, weightSigma: sigma_weight } =
     pricingModelSigmas[pricingModel ?? "standard"];
+
+  // Reuse an existing Stripe Connect account if this user has already
+  // completed onboarding on any of their other pools — a connected account
+  // represents the person (bank + identity), not the individual pool, so
+  // there is no reason to make them onboard again per pool.
+  const { data: previousConnection } = await supabase
+    .from("pools")
+    .select("stripe_account_id")
+    .eq("user_id", user_id)
+    .eq("stripe_onboarding_complete", true)
+    .not("stripe_account_id", "is", null)
+    .limit(1)
+    .maybeSingle();
 
   const poolData: TablesInsert<"pools"> = {
     baby_name,
@@ -162,8 +196,15 @@ export async function createPool(
     mu_weight: mu_weight_ounces, // store as ounces
     sigma_weight,
     description: description || null,
+    video_url,
     image_url,
     organizer_image_url,
+    ...(previousConnection?.stripe_account_id
+      ? {
+          stripe_account_id: previousConnection.stripe_account_id,
+          stripe_onboarding_complete: true,
+        }
+      : {}),
   };
   const { data: newPool, error } = await supabase
     .from("pools")
@@ -180,7 +221,12 @@ export async function createPool(
 
   if (newPool) {
     revalidatePath(`/baby/${newPool.slug}`);
-    redirect(`/baby/${newPool.slug}`);
+    // Skip the Stripe onboarding step entirely if we inherited a working
+    // connection from one of the user's other pools.
+    if (newPool.stripe_onboarding_complete && newPool.stripe_account_id) {
+      redirect(`/baby/${newPool.slug}`);
+    }
+    redirect(`/baby/${newPool.slug}/connect`);
   }
 
   return {

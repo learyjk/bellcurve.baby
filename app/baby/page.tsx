@@ -2,6 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { Tables } from "@/database.types";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import CryingBaby from "@/app/assets/CryingBaby";
 
 export const metadata = {
   title: "My Babies - Create Your Baby Pool",
@@ -37,9 +40,17 @@ export default async function BabyPage() {
       {data.length > 0 ? (
         <DataTable columns={columns} data={data} />
       ) : (
-        <p className="text-muted-foreground">
-          You have not created any baby pools yet.
-        </p>
+        <div className="flex flex-col items-center text-center mt-16 md:mt-24">
+          <div className="text-muted-foreground/70 mb-6">
+            <CryingBaby width={140} height={140} />
+          </div>
+          <p className="text-xl text-muted-foreground max-w-md text-pretty">
+            No babies yet — this little one is crying out for a pool.
+          </p>
+          <Button asChild size="lg" className="mt-8">
+            <Link href="/baby/create">Create your first pool</Link>
+          </Button>
+        </div>
       )}
     </div>
   );

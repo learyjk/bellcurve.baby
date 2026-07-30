@@ -36,7 +36,10 @@ export default function MainHero() {
     sigma_weight: pricingModelSigmas.standard.weightSigma,
     is_locked: null,
     slug: "demo",
+    stripe_account_id: null,
+    stripe_onboarding_complete: false,
     user_id: "demo-user-id",
+    video_url: null,
   };
   const [birthDateDeviation, setBirthDateDeviation] = useState(0);
   const initialWeightInOz = demoPool.mu_weight ?? 118.4;
