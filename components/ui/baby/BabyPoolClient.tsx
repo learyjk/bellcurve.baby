@@ -210,8 +210,11 @@ export function BabyPoolClient({
     0
   );
 
-  const needsStripeConnect =
-    isOwner && (!pool.stripe_account_id || !pool.stripe_onboarding_complete);
+  const stripeConnected = Boolean(
+    pool.stripe_account_id && pool.stripe_onboarding_complete
+  );
+
+  const needsStripeConnect = isOwner && !stripeConnected;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-24">
@@ -428,20 +431,28 @@ export function BabyPoolClient({
               </div>
               <div className="text-center mt-4">
                 {isLoggedIn ? (
-                  <Button
-                    type="submit"
-                    disabled={isPending || isRedirecting}
-                    className="w-full h-12 text-lg flex items-center justify-center"
-                  >
-                    {isPending || isRedirecting ? (
-                      <>
-                        <LoadingSpinner />
-                        Processing...
-                      </>
-                    ) : (
-                      `Place Guess for $${totalPrice.toFixed(2)}`
+                  <>
+                    <Button
+                      type="submit"
+                      disabled={isPending || isRedirecting || !stripeConnected}
+                      className="w-full h-12 text-lg flex items-center justify-center"
+                    >
+                      {isPending || isRedirecting ? (
+                        <>
+                          <LoadingSpinner />
+                          Processing...
+                        </>
+                      ) : (
+                        `Place Guess for $${totalPrice.toFixed(2)}`
+                      )}
+                    </Button>
+                    {!stripeConnected && !isOwner && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        This pool isn&apos;t accepting guesses yet — the owner
+                        hasn&apos;t finished setting up payments.
+                      </p>
                     )}
-                  </Button>
+                  </>
                 ) : (
                   <Button
                     type="button"
