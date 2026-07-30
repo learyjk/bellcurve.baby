@@ -115,6 +115,23 @@ export function CreateBabyPoolForm() {
     initialState
   );
 
+  // All fields are required except images and video. Weight and pricing
+  // model always have valid defaults, so they don't need checks here.
+  const pricesValid =
+    typeof minPrice === "number" &&
+    typeof maxPrice === "number" &&
+    maxPrice > minPrice;
+  const isFormValid =
+    babyName.trim() !== "" &&
+    organizedBy.trim() !== "" &&
+    slug.trim() !== "" &&
+    slugAvailable === true &&
+    description.trim() !== "" &&
+    dueDate !== "" &&
+    pricesValid;
+  const isSubmitDisabled =
+    isPending || imageProcessing || organizerImageProcessing || !isFormValid;
+
   // --- Effects ---
   // Toast error on state.message
   useEffect(() => {
@@ -189,6 +206,10 @@ export function CreateBabyPoolForm() {
   return (
     <form
       action={(formData) => {
+        if (!isFormValid) {
+          toast.error("Please fill out all required fields.");
+          return;
+        }
         // Ensure we have valid price values before submission
         // Prevent submit if min/max relationship is invalid
         if (
@@ -201,12 +222,6 @@ export function CreateBabyPoolForm() {
           return;
         }
 
-        if (minPrice === "") {
-          formData.set("price_floor", "1");
-        }
-        if (maxPrice === "") {
-          formData.set("price_ceiling", "50");
-        }
         formAction(formData);
       }}
     >
@@ -901,10 +916,8 @@ export function CreateBabyPoolForm() {
           type="submit"
           size="lg"
           className="w-full text-lg"
-          disabled={isPending || imageProcessing || organizerImageProcessing}
-          aria-disabled={
-            isPending || imageProcessing || organizerImageProcessing
-          }
+          disabled={isSubmitDisabled}
+          aria-disabled={isSubmitDisabled}
         >
           {isPending ? (
             <>
@@ -920,6 +933,12 @@ export function CreateBabyPoolForm() {
             "Create Pool"
           )}
         </Button>
+        {!isFormValid && (
+          <p className="text-sm text-muted-foreground text-center mt-3">
+            Fill out all required fields (including an available pool URL) to
+            create your pool.
+          </p>
+        )}
       </CardFooter>
     </form>
   );
