@@ -25,6 +25,8 @@ export function EditPoolForm({ pool }: { pool: Tables<"pools"> }) {
   >(null);
   const [removeImage, setRemoveImage] = useState(false);
   const [removeOrganizerImage, setRemoveOrganizerImage] = useState(false);
+  const [imageDragActive, setImageDragActive] = useState(false);
+  const [organizerDragActive, setOrganizerDragActive] = useState(false);
 
   // --- Image upload handlers ---
   const onImageChange = useCallback((file: File | null) => {
@@ -144,17 +146,30 @@ export function EditPoolForm({ pool }: { pool: Tables<"pools"> }) {
             <div
               className={clsx(
                 "border-2 border-dashed rounded-md p-4 mt-2 flex flex-col items-center justify-center cursor-pointer transition",
-                shownBabyImage
-                  ? "border-green-400"
-                  : "border-gray-300 hover:border-blue-400"
+                imageDragActive
+                  ? "border-blue-400 bg-blue-50"
+                  : shownBabyImage
+                    ? "border-green-400"
+                    : "border-gray-300 hover:border-blue-400"
               )}
               onDragOver={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
+              onDragEnter={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setImageDragActive(true);
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setImageDragActive(false);
+              }}
               onDrop={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                setImageDragActive(false);
                 const file = e.dataTransfer.files[0];
                 if (file && file.type.startsWith("image/")) {
                   onImageChange(file);
@@ -236,17 +251,30 @@ export function EditPoolForm({ pool }: { pool: Tables<"pools"> }) {
             <div
               className={clsx(
                 "border-2 border-dashed rounded-md p-4 mt-2 flex flex-col items-center justify-center cursor-pointer transition",
-                shownOrganizerImage
-                  ? "border-green-400"
-                  : "border-gray-300 hover:border-blue-400"
+                organizerDragActive
+                  ? "border-blue-400 bg-blue-50"
+                  : shownOrganizerImage
+                    ? "border-green-400"
+                    : "border-gray-300 hover:border-blue-400"
               )}
               onDragOver={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
+              onDragEnter={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setOrganizerDragActive(true);
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setOrganizerDragActive(false);
+              }}
               onDrop={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                setOrganizerDragActive(false);
                 const file = e.dataTransfer.files[0];
                 if (file && file.type.startsWith("image/")) {
                   onOrganizerImageChange(file);

@@ -28,6 +28,8 @@ export function CreateBabyPoolForm() {
   const [organizerImagePreview, setOrganizerImagePreview] = useState<
     string | null
   >(null);
+  const [imageDragActive, setImageDragActive] = useState(false);
+  const [organizerDragActive, setOrganizerDragActive] = useState(false);
   // Pricing
   const [minPrice, setMinPrice] = useState<number | "">(5);
   const [maxPrice, setMaxPrice] = useState<number | "">(50);
@@ -300,17 +302,30 @@ export function CreateBabyPoolForm() {
             <div
               className={clsx(
                 "border-2 border-dashed rounded-md p-4 mt-2 flex flex-col items-center justify-center cursor-pointer transition",
-                imagePreview
-                  ? "border-green-400"
-                  : "border-gray-300 hover:border-blue-400"
+                imageDragActive
+                  ? "border-blue-400 bg-blue-50"
+                  : imagePreview
+                    ? "border-green-400"
+                    : "border-gray-300 hover:border-blue-400"
               )}
               onDragOver={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
+              onDragEnter={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setImageDragActive(true);
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setImageDragActive(false);
+              }}
               onDrop={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                setImageDragActive(false);
                 const file = e.dataTransfer.files[0];
                 if (file && file.type.startsWith("image/")) {
                   onImageChange(file);
@@ -379,17 +394,30 @@ export function CreateBabyPoolForm() {
             <div
               className={clsx(
                 "border-2 border-dashed rounded-md p-4 mt-2 flex flex-col items-center justify-center cursor-pointer transition",
-                organizerImagePreview
-                  ? "border-green-400"
-                  : "border-gray-300 hover:border-blue-400"
+                organizerDragActive
+                  ? "border-blue-400 bg-blue-50"
+                  : organizerImagePreview
+                    ? "border-green-400"
+                    : "border-gray-300 hover:border-blue-400"
               )}
               onDragOver={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
+              onDragEnter={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setOrganizerDragActive(true);
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setOrganizerDragActive(false);
+              }}
               onDrop={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                setOrganizerDragActive(false);
                 const file = e.dataTransfer.files[0];
                 if (file && file.type.startsWith("image/")) {
                   onOrganizerImageChange(file);
