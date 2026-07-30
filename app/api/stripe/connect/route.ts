@@ -55,11 +55,35 @@ export async function POST(req: NextRequest) {
   if (!accountId) {
     // Create a new Express account
     try {
+      // Load pool details to pre-fill the connected account's business
+      // profile, so onboarding doesn't ask users (who are typically
+      // individuals, not businesses) for a website or business description.
+      const { data: poolDetails } = await supabase
+        .from("pools")
+        .select("baby_name, slug, description")
+        .eq("id", poolId)
+        .single();
+
       const account = await stripe.accounts.create({
         type: "express",
         capabilities: {
           card_payments: { requested: true },
           transfers: { requested: true },
+        },
+        business_type: "individual",
+        business_profile: {
+          // Pool creators collect money from friends & family guessing on
+          // their baby — this URL points Stripe at the pool itself, so the
+          // user isn't asked for their own website.
+          url: `${getBaseUrl()}/baby/${poolDetails?.slug ?? pool.slug}`,
+          product_description:
+            `Collection of guesses (bets) from friends and family on a baby pool` +
+            (poolDetails?.baby_name ? ` for ${poolDetails.baby_name}` : "") +
+            ". Organized by an individual for personal, non-commercial use.",
+          // MCC 7995 = "Betting, including Lottery Tickets, Casino Gaming
+          // Chips, Off-Track Betting, Wagers" — closest match for friendly
+          // baby pools. Adjust if Stripe support suggests otherwise.
+          mcc: "7995",
         },
         metadata: {
           pool_id: poolId,
