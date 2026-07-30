@@ -6,8 +6,7 @@ How to verify the app is ready for friends to use. Three layers:
 2. [Keegan's manual pass](#keegans-manual-pass) — ~20 min, covers Stripe money flow
 3. [Wife's test script](#wifes-test-script) — ~10 min, fresh-eyes UX pass
 
-The dev site is at **https://bellcurve-baby.exe.xyz:3000** (or `:8000` for the
-other dev server). Stripe is in **test mode** — use test cards, never real ones.
+The dev site is at **https://bellcurve-baby.exe.xyz**. Stripe is in **test mode** — use test cards, never real ones.
 
 ---
 
@@ -46,7 +45,7 @@ Do this in order — each step builds on the last. ~20 minutes. Keep
 `docs/stripe-connect-testing.md` handy; it has the deep dive.
 
 ### 0. Prep (1 min)
-- [ ] Dev server is running and reachable at https://bellcurve-baby.exe.xyz:3000
+- [ ] Dev server is running and reachable at https://bellcurve-baby.exe.xyz
 - [ ] Stripe webhook listener is running (`stripe listen --forward-to ...`) —
       check the `webhook` tmux session, or restart per the Stripe guide
 - [ ] Run the automated tests above; all green
@@ -99,7 +98,7 @@ Send her this as-is. No Stripe knowledge needed — the card number is fake.
 
 > **Hey! Can you test my baby-pool app? Takes ~10 min.**
 >
-> 1. Open **https://bellcurve-baby.exe.xyz:3000** on your phone (or laptop)
+> 1. Open **https://bellcurve-baby.exe.xyz** on your phone (or laptop)
 > 2. Sign up with your email (check spam for the confirmation link)
 > 3. Create a pool for a fake baby — make up any name and due date.
 >    When it asks you to "Connect Stripe", click it and fill everything in with
