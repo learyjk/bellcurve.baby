@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { PLATFORM_FEE_PERCENT } from "@/lib/constants";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -8,28 +9,23 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 // Helper function to get the base URL with proper protocol
 function getBaseUrl() {
   if (process.env.NEXT_PUBLIC_BASE_URL) {
-    // If it already has a protocol, use it as is
     if (process.env.NEXT_PUBLIC_BASE_URL.startsWith("http")) {
       return process.env.NEXT_PUBLIC_BASE_URL;
     }
-    // Otherwise, add https for production-like URLs or http for localhost
     const isLocalhost = process.env.NEXT_PUBLIC_BASE_URL.includes("localhost");
     const protocol = isLocalhost ? "http://" : "https://";
     return `${protocol}${process.env.NEXT_PUBLIC_BASE_URL}`;
   }
-
-  // Fallback logic
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
-
-  // Development fallback
   return "http://localhost:3000";
 }
 
 export type CreateCheckoutSessionState = {
   sessionId?: string;
   error?: string;
+  connectRequired?: boolean; // pool owner hasn't connected Stripe yet
 };
 
 export async function createCheckoutSession(
@@ -55,20 +51,32 @@ export async function createCheckoutSession(
     return { error: "You must be logged in to make a guess." };
   }
 
+  // Fetch pool to get Stripe Connect account info
+  const { data: pool, error: poolError } = await supabase
+    .from("pools")
+    .select("stripe_account_id, stripe_onboarding_complete")
+    .eq("id", data.poolId)
+    .single();
+
+  if (poolError || !pool) {
+    return { error: "Pool not found." };
+  }
+
+  if (!pool.stripe_account_id || !pool.stripe_onboarding_complete) {
+    return {
+      error:
+        "This pool isn\u2019t accepting payments yet \u2014 the organizer needs to connect their Stripe account.",
+      connectRequired: true,
+    };
+  }
+
   try {
-    // `data.guessDate` is expected to be a YYYY-MM-DD string. Parse it to
-    // UTC-noon for stable formatting and do not force a specific timezone on
-    // the formatted string; let Intl format according to the server/runtime
-    // locale.
     const dateForFormat = (() => {
       const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(data.guessDate);
       if (m) {
-        const y = Number(m[1]);
-        const mo = Number(m[2]);
-        const d = Number(m[3]);
-        // Use UTC noon to avoid timezone-based day shifts when converting
-        // to a Date and formatting.
-        return new Date(Date.UTC(y, mo - 1, d, 12, 0, 0));
+        return new Date(
+          Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0)
+        );
       }
       return new Date(data.guessDate);
     })();
@@ -99,6 +107,16 @@ export async function createCheckoutSession(
       mode: "payment",
       success_url: `${getBaseUrl()}/baby/${data.slug}?payment=success`,
       cancel_url: `${getBaseUrl()}/baby/${data.slug}?payment=cancelled`,
+      // Route funds directly to the pool creator's connected Stripe account,
+      // keeping the platform fee (creator takes home 90% of each guess).
+      payment_intent_data: {
+        application_fee_amount: Math.round(
+          data.price * 100 * PLATFORM_FEE_PERCENT
+        ),
+        transfer_data: {
+          destination: pool.stripe_account_id,
+        },
+      },
       metadata: {
         poolId: data.poolId,
         slug: data.slug,
@@ -108,6 +126,7 @@ export async function createCheckoutSession(
         price: data.price.toString(),
         name: data.name || user.user_metadata?.name || "",
         isAnonymous: data.isAnonymous?.toString() || "false",
+        stripeAccountId: pool.stripe_account_id,
       },
     });
 

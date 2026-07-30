@@ -3,6 +3,7 @@ import { TablesInsert } from "@/database.types";
 import { pricingModelSigmas, PricingModel } from "@/lib/helpers/pricingModels";
 import { getVideoEmbed } from "@/lib/helpers/videoEmbed";
 import { createClient } from "@/lib/supabase/server";
+import { MAX_PRICE_CEILING, MIN_PRICE_FLOOR } from "@/lib/constants";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
@@ -155,9 +156,13 @@ export async function createPool(
     };
   }
 
-  if (price_floor < 0.01 || price_ceiling < 0.01) {
+  if (
+    price_floor < MIN_PRICE_FLOOR ||
+    price_ceiling > MAX_PRICE_CEILING ||
+    price_ceiling < 1
+  ) {
     return {
-      message: "Prices must be at least $0.01.",
+      message: `Guess prices must be between $${MIN_PRICE_FLOOR} and $${MAX_PRICE_CEILING}.`,
       errors: {},
     };
   }

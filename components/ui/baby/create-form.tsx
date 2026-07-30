@@ -13,6 +13,13 @@ import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
 import { DatePicker } from "@/components/ui/date-picker";
 import { createPool, CreatePoolState } from "@/lib/actions/create/createPool";
 import { pricingModelSigmas } from "@/lib/helpers/pricingModels";
+import {
+  DEFAULT_PRICE_CEILING,
+  DEFAULT_PRICE_FLOOR,
+  MAX_PRICE_CEILING,
+  MIN_PRICE_FLOOR,
+  PLATFORM_FEE_PERCENT,
+} from "@/lib/constants";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Image from "next/image";
 
@@ -39,8 +46,8 @@ export function CreateBabyPoolForm() {
   const [organizerImageProcessing, setOrganizerImageProcessing] =
     useState(false);
   // Pricing
-  const [minPrice, setMinPrice] = useState<number | "">(5);
-  const [maxPrice, setMaxPrice] = useState<number | "">(50);
+  const [minPrice, setMinPrice] = useState<number | "">(DEFAULT_PRICE_FLOOR);
+  const [maxPrice, setMaxPrice] = useState<number | "">(DEFAULT_PRICE_CEILING);
   const [pricingModel, setPricingModel] =
     useState<keyof typeof pricingModelSigmas>("standard");
   // Weight/date
@@ -719,10 +726,10 @@ export function CreateBabyPoolForm() {
                   id="price_floor"
                   name="price_floor"
                   type="number"
-                  min={1}
+                  min={MIN_PRICE_FLOOR}
                   max={
                     typeof maxPrice === "number"
-                      ? Math.max(1, maxPrice - 1)
+                      ? Math.max(MIN_PRICE_FLOOR, maxPrice - 1)
                       : undefined
                   }
                   step="1"
@@ -734,7 +741,10 @@ export function CreateBabyPoolForm() {
                     } else {
                       const numValue = Number(value);
                       if (!isNaN(numValue) && numValue >= 0) {
-                        const newMin = Math.max(1, Math.floor(numValue));
+                        const newMin = Math.max(
+                          MIN_PRICE_FLOOR,
+                          Math.floor(numValue)
+                        );
                         // If max is set and would be <= newMin, bump max to newMin + 1
                         if (
                           typeof maxPrice === "number" &&
@@ -750,7 +760,7 @@ export function CreateBabyPoolForm() {
                   onBlur={(e) => {
                     // If field is empty on blur, set to default
                     if (e.target.value === "") {
-                      setMinPrice(1);
+                      setMinPrice(DEFAULT_PRICE_FLOOR);
                     }
                     // Validate relationship on blur
                     if (
@@ -785,6 +795,7 @@ export function CreateBabyPoolForm() {
                   name="price_ceiling"
                   type="number"
                   min={typeof minPrice === "number" ? minPrice + 1 : 1}
+                  max={MAX_PRICE_CEILING}
                   step="1"
                   value={maxPrice}
                   onChange={(e) => {
@@ -794,7 +805,10 @@ export function CreateBabyPoolForm() {
                     } else {
                       const numValue = Number(value);
                       if (!isNaN(numValue) && numValue >= 0) {
-                        const newMax = Math.max(1, Math.floor(numValue));
+                        const newMax = Math.min(
+                          MAX_PRICE_CEILING,
+                          Math.max(1, Math.floor(numValue))
+                        );
                         // If min is set and would be >= newMax, lower min (but not below 1)
                         if (
                           typeof minPrice === "number" &&
@@ -810,7 +824,7 @@ export function CreateBabyPoolForm() {
                   onBlur={(e) => {
                     // If field is empty on blur, set to default
                     if (e.target.value === "") {
-                      setMaxPrice(50);
+                      setMaxPrice(DEFAULT_PRICE_CEILING);
                     }
                     // Validate relationship on blur
                     if (
@@ -835,6 +849,13 @@ export function CreateBabyPoolForm() {
                 )}
               </div>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Minimum ${MIN_PRICE_FLOOR}, maximum ${MAX_PRICE_CEILING}. You
+              keep {Math.round((1 - PLATFORM_FEE_PERCENT) * 100)}% of every
+              guess — bellcurve.baby takes a{" "}
+              {Math.round(PLATFORM_FEE_PERCENT * 100)}% platform fee, and
+              standard card processing applies.
+            </p>
           </div>
           {/* Pricing Model Selection */}
           <div>
