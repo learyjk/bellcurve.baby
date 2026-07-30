@@ -127,7 +127,8 @@ const faqs: Faq[] = [
       <p>
         If you made a guess by mistake, contact the pool creator — they can
         refund any guess on their pool straight from their pool page (it&apos;s
-        instant and irreversible). Pool creators: open your pool, find the
+        instant and irreversible). You always get 100% of your donation back,
+        including the platform fee. Pool creators: open your pool, find the
         guess in the table, and hit Refund.
       </p>
     ),
