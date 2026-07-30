@@ -30,6 +30,9 @@ export function CreateBabyPoolForm() {
   >(null);
   const [imageDragActive, setImageDragActive] = useState(false);
   const [organizerDragActive, setOrganizerDragActive] = useState(false);
+  const [imageProcessing, setImageProcessing] = useState(false);
+  const [organizerImageProcessing, setOrganizerImageProcessing] =
+    useState(false);
   // Pricing
   const [minPrice, setMinPrice] = useState<number | "">(5);
   const [maxPrice, setMaxPrice] = useState<number | "">(50);
@@ -61,8 +64,16 @@ export function CreateBabyPoolForm() {
         return;
       }
 
+      setImageProcessing(true);
       const reader = new FileReader();
-      reader.onload = (e) => setImagePreview(e.target?.result as string);
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+        setImageProcessing(false);
+      };
+      reader.onerror = () => {
+        toast.error("Failed to read image file. Please try another image.");
+        setImageProcessing(false);
+      };
       reader.readAsDataURL(file);
     } else {
       setImagePreview(null);
@@ -81,9 +92,16 @@ export function CreateBabyPoolForm() {
         return;
       }
 
+      setOrganizerImageProcessing(true);
       const reader = new FileReader();
-      reader.onload = (e) =>
+      reader.onload = (e) => {
         setOrganizerImagePreview(e.target?.result as string);
+        setOrganizerImageProcessing(false);
+      };
+      reader.onerror = () => {
+        toast.error("Failed to read image file. Please try another image.");
+        setOrganizerImageProcessing(false);
+      };
       reader.readAsDataURL(file);
     } else {
       setOrganizerImagePreview(null);
@@ -386,6 +404,12 @@ export function CreateBabyPoolForm() {
                 }}
               />
             </div>
+            {imageProcessing && (
+              <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                <LoadingSpinner />
+                Processing image...
+              </div>
+            )}
             <p className="text-xs text-gray-500 mt-1">
               Optional. Recommended size: square, under 400kB.
             </p>
@@ -486,6 +510,12 @@ export function CreateBabyPoolForm() {
                 }}
               />
             </div>
+            {organizerImageProcessing && (
+              <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                <LoadingSpinner />
+                Processing image...
+              </div>
+            )}
             <p className="text-xs text-gray-500 mt-1">
               Optional. Photo of the organizer(s). Recommended size: square,
               under 400kB.
@@ -871,13 +901,20 @@ export function CreateBabyPoolForm() {
           type="submit"
           size="lg"
           className="w-full text-lg"
-          disabled={isPending}
-          aria-disabled={isPending}
+          disabled={isPending || imageProcessing || organizerImageProcessing}
+          aria-disabled={
+            isPending || imageProcessing || organizerImageProcessing
+          }
         >
           {isPending ? (
             <>
               <LoadingSpinner />
               Creating Pool...
+            </>
+          ) : imageProcessing || organizerImageProcessing ? (
+            <>
+              <LoadingSpinner />
+              Processing image...
             </>
           ) : (
             "Create Pool"
