@@ -911,7 +911,7 @@ export function CreateBabyPoolForm() {
         <input type="hidden" name="pricingModel" value={pricingModel} />
         <input type="hidden" name="slug" value={slug} />
       </CardContent>
-      <CardFooter className="p-8 pt-0">
+      <CardFooter className="p-8 pt-0 flex-col items-stretch">
         <Button
           type="submit"
           size="lg"
@@ -934,7 +934,7 @@ export function CreateBabyPoolForm() {
           )}
         </Button>
         {!isFormValid && (
-          <p className="text-sm text-muted-foreground text-center mt-3">
+          <p className="text-xs text-muted-foreground text-center mt-2">
             Fill out all required fields (including an available pool URL) to
             create your pool.
           </p>
