@@ -12,7 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import ThinBaby from "@/app/assets/ThinBaby";
 
 // Type for the joined query result
@@ -136,9 +135,6 @@ export default async function MyGuessesPage() {
             No guesses yet — find a baby pool and make your pick before the
             big day arrives.
           </p>
-          <Button asChild size="lg" className="mt-8">
-            <Link href="/">Find a pool to guess on</Link>
-          </Button>
         </div>
       )}
     </div>
