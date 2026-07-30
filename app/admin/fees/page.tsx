@@ -18,6 +18,8 @@ type FeeRow = {
   id: string;
   created: number;
   amount: number;
+  amountRefunded: number;
+  refunded: boolean;
   chargeAmount: number | null;
   account: string;
 };
@@ -43,6 +45,8 @@ async function getFees(): Promise<FeeRow[]> {
         id: fee.id,
         created: fee.created,
         amount: fee.amount,
+        amountRefunded: fee.amount_refunded ?? 0,
+        refunded: fee.refunded ?? false,
         chargeAmount,
         account: typeof fee.account === "string" ? fee.account : fee.account.id,
       };
@@ -70,8 +74,16 @@ export default async function AdminFeesPage() {
   }
 
   const fees = await getFees();
-  const totalCents = fees.reduce((sum, f) => sum + f.amount, 0);
-  const grossCents = fees.reduce((sum, f) => sum + (f.chargeAmount ?? 0), 0);
+  // Only count money we actually kept: refunded fees were clawed back by
+  // Stripe when the underlying charge was refunded.
+  const totalCents = fees.reduce(
+    (sum, f) => sum + (f.amount - f.amountRefunded),
+    0
+  );
+  const grossCents = fees.reduce(
+    (sum, f) => sum + (f.refunded ? 0 : (f.chargeAmount ?? 0)),
+    0
+  );
 
   return (
     <div className="max-w-4xl mx-auto mt-10 px-4 py-12">
@@ -106,22 +118,43 @@ export default async function AdminFeesPage() {
                 <TableHead>Date</TableHead>
                 <TableHead>Guess amount</TableHead>
                 <TableHead>Your fee</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Connected account</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {fees.map((fee) => (
-                <TableRow key={fee.id}>
+                <TableRow
+                  key={fee.id}
+                  className={fee.refunded ? "opacity-60" : undefined}
+                >
                   <TableCell>
                     {new Date(fee.created * 1000).toLocaleString()}
                   </TableCell>
                   <TableCell>
-                    {fee.chargeAmount !== null
-                      ? `$${(fee.chargeAmount / 100).toFixed(2)}`
-                      : "-"}
+                    {fee.chargeAmount !== null ? (
+                      <span
+                        className={fee.refunded ? "line-through" : undefined}
+                      >
+                        ${(fee.chargeAmount / 100).toFixed(2)}
+                      </span>
+                    ) : (
+                      "-"
+                    )}
                   </TableCell>
                   <TableCell className="font-medium">
-                    ${(fee.amount / 100).toFixed(2)}
+                    <span className={fee.refunded ? "line-through" : undefined}>
+                      ${(fee.amount / 100).toFixed(2)}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    {fee.refunded ? (
+                      <span className="text-xs font-medium text-orange-600">
+                        Refunded
+                      </span>
+                    ) : (
+                      <span className="text-xs text-green-600">Collected</span>
+                    )}
                   </TableCell>
                   <TableCell className="font-mono text-xs">
                     {fee.account}
