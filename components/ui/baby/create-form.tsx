@@ -774,7 +774,7 @@ export function CreateBabyPoolForm() {
                   mean={muWeight}
                   min={Number((muWeight - 3).toFixed(1))}
                   max={Number((muWeight + 3).toFixed(1))}
-                  minPrice={getSafeMinPrice()}
+                  minPrice={getSafeMinPrice() / 2}
                   maxPrice={getSafeMaxPrice() / 2}
                   title={`Weight Price Curve (${pricingModel})`}
                   meanLabel={formatWeightLabel(muWeight)}
