@@ -166,6 +166,19 @@ export async function createPool(
   const { dateSigma: sigma_days, weightSigma: sigma_weight } =
     pricingModelSigmas[pricingModel ?? "standard"];
 
+  // Reuse an existing Stripe Connect account if this user has already
+  // completed onboarding on any of their other pools — a connected account
+  // represents the person (bank + identity), not the individual pool, so
+  // there is no reason to make them onboard again per pool.
+  const { data: previousConnection } = await supabase
+    .from("pools")
+    .select("stripe_account_id")
+    .eq("user_id", user_id)
+    .eq("stripe_onboarding_complete", true)
+    .not("stripe_account_id", "is", null)
+    .limit(1)
+    .maybeSingle();
+
   const poolData: TablesInsert<"pools"> = {
     baby_name,
     organized_by,
@@ -181,6 +194,12 @@ export async function createPool(
     video_url,
     image_url,
     organizer_image_url,
+    ...(previousConnection?.stripe_account_id
+      ? {
+          stripe_account_id: previousConnection.stripe_account_id,
+          stripe_onboarding_complete: true,
+        }
+      : {}),
   };
   const { data: newPool, error } = await supabase
     .from("pools")
@@ -197,6 +216,11 @@ export async function createPool(
 
   if (newPool) {
     revalidatePath(`/baby/${newPool.slug}`);
+    // Skip the Stripe onboarding step entirely if we inherited a working
+    // connection from one of the user's other pools.
+    if (newPool.stripe_onboarding_complete && newPool.stripe_account_id) {
+      redirect(`/baby/${newPool.slug}`);
+    }
     redirect(`/baby/${newPool.slug}/connect`);
   }
 
