@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useEffect, useState, useRef, useCallback } from "react";
 import clsx from "clsx";
 import { formatSlug, generateSlugSuggestions } from "@/lib/helpers/slug";
+import { getVideoEmbed } from "@/lib/helpers/videoEmbed";
 import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
 import { DatePicker } from "@/components/ui/date-picker";
 import { createPool, CreatePoolState } from "@/lib/actions/create/createPool";
@@ -23,6 +24,10 @@ export function CreateBabyPoolForm() {
   const [dueDate, setDueDate] = useState("");
   const [description, setDescription] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
+  const [videoTouched, setVideoTouched] = useState(false);
+  const trimmedVideoUrl = videoUrl.trim();
+  const videoEmbed = trimmedVideoUrl ? getVideoEmbed(trimmedVideoUrl) : null;
+  const videoUrlValid = trimmedVideoUrl === "" || videoEmbed !== null;
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [organizedBy, setOrganizedBy] = useState("");
   const [organizerImagePreview, setOrganizerImagePreview] = useState<
@@ -128,7 +133,8 @@ export function CreateBabyPoolForm() {
     slugAvailable === true &&
     description.trim() !== "" &&
     dueDate !== "" &&
-    pricesValid;
+    pricesValid &&
+    videoUrlValid;
   const isSubmitDisabled =
     isPending || imageProcessing || organizerImageProcessing || !isFormValid;
 
@@ -578,15 +584,36 @@ export function CreateBabyPoolForm() {
               type="url"
               inputMode="url"
               value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
+              onChange={(e) => {
+                setVideoUrl(e.target.value);
+                setVideoTouched(true);
+              }}
               placeholder="https://www.youtube.com/watch?v=..."
-              className="rounded mt-2"
+              className={clsx(
+                "rounded mt-2",
+                !videoUrlValid && "border-red-400 focus-visible:ring-red-400"
+              )}
+              aria-invalid={!videoUrlValid}
             />
-            <p className="text-xs text-gray-500 mt-1">
-              Add a YouTube or Vimeo link and it will be embedded on your pool
-              page. The video stays hosted there — we don&apos;t store or host
-              any video files.
-            </p>
+            {!videoUrlValid && (
+              <p className="text-xs text-red-500 mt-1">
+                We can&apos;t recognize that link. Paste a YouTube or Vimeo URL
+                (e.g. https://www.youtube.com/watch?v=...) or leave it blank.
+              </p>
+            )}
+            {videoUrlValid && videoEmbed && (
+              <p className="text-xs text-green-600 mt-1">
+                ✓ {videoEmbed.provider === "youtube" ? "YouTube" : "Vimeo"}{" "}
+                video recognized — it will be embedded on your pool page.
+              </p>
+            )}
+            {!(videoTouched && trimmedVideoUrl) && (
+              <p className="text-xs text-gray-500 mt-1">
+                Add a YouTube or Vimeo link and it will be embedded on your
+                pool page. The video stays hosted there — we don&apos;t store
+                or host any video files.
+              </p>
+            )}
           </div>
 
           {/* Price Range Configuration */}
