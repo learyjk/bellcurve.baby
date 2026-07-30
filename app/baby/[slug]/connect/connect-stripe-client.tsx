@@ -15,6 +15,10 @@ interface Props {
   status?: string; // 'incomplete' | 'refresh' | undefined
 }
 
+const isTestMode = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.startsWith(
+  "pk_test_"
+);
+
 export default function ConnectStripeClient({
   poolId,
   poolSlug,
@@ -110,10 +114,13 @@ export default function ConnectStripeClient({
             <li>Payments go <strong>directly to you</strong> — not through us</li>
             <li>Stripe handles all payment processing securely</li>
             <li>You can use an existing Stripe account or create a new one</li>
-            <li>
-              In test mode, use SSN <code className="bg-muted px-1 rounded">000-00-0000</code> and
-              routing <code className="bg-muted px-1 rounded">110000000</code>
-            </li>
+            {isTestMode && (
+              <li>
+                In test mode, use SSN{" "}
+                <code className="bg-muted px-1 rounded">000-00-0000</code> and
+                routing <code className="bg-muted px-1 rounded">110000000</code>
+              </li>
+            )}
           </ul>
         </div>
 
