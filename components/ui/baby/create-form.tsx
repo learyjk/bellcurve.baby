@@ -328,6 +328,14 @@ export function CreateBabyPoolForm() {
                 setImageDragActive(false);
                 const file = e.dataTransfer.files[0];
                 if (file && file.type.startsWith("image/")) {
+                  const input = document.getElementById(
+                    "image_upload"
+                  ) as HTMLInputElement | null;
+                  if (input) {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    input.files = dt.files;
+                  }
                   onImageChange(file);
                 } else if (file && !file.type.startsWith("image/")) {
                   toast.error("Please select a valid image file.");
@@ -420,6 +428,14 @@ export function CreateBabyPoolForm() {
                 setOrganizerDragActive(false);
                 const file = e.dataTransfer.files[0];
                 if (file && file.type.startsWith("image/")) {
+                  const input = document.getElementById(
+                    "organizer_image_upload"
+                  ) as HTMLInputElement | null;
+                  if (input) {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    input.files = dt.files;
+                  }
                   onOrganizerImageChange(file);
                 } else if (file && !file.type.startsWith("image/")) {
                   toast.error("Please select a valid image file.");

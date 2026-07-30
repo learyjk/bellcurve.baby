@@ -284,11 +284,11 @@ export function BabyPoolClient({
               </div>
             )}
             {/* OrganizerImage */}
-            {pool.image_url && (
+            {pool.organizer_image_url && (
               <div className="relative w-40 mb-4 max-w-40 h-40 bg-white p-2 shadow-lg transform rotate-6 -translate-x-4 translate-y-4 overflow-hidden">
                 <div className="relative w-full h-full overflow-hidden">
                   <Image
-                    src={pool.organizer_image_url || pool.image_url}
+                    src={pool.organizer_image_url}
                     alt={
                       pool.baby_name
                         ? `${pool.baby_name} pool`
