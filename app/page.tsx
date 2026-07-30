@@ -1,4 +1,5 @@
 import HowItWorks from "@/components/blocks/hero-sections/how_it_works_component";
+import Faq from "@/components/blocks/faq";
 import Image from "next/image";
 import MainHero from "@/components/blocks/hero-sections/main-hero";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +24,7 @@ export default function Home() {
             </CardContent>
           </Card>
         </section>
+        <Faq />
       </div>
     </main>
   );
