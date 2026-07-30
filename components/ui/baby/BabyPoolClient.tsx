@@ -205,10 +205,9 @@ export function BabyPoolClient({
   });
 
   // Calculate total donations from all guesses
-  const totalDonations = guesses.reduce(
-    (sum, guess) => sum + (guess.calculated_price || 0),
-    0
-  );
+  const totalDonations = guesses
+    .filter((guess) => guess.payment_status !== "refunded")
+    .reduce((sum, guess) => sum + (guess.calculated_price || 0), 0);
 
   const stripeConnected = Boolean(
     pool.stripe_account_id && pool.stripe_onboarding_complete

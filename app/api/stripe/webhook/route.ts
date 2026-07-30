@@ -260,6 +260,34 @@ export async function POST(req: NextRequest) {
         console.log(`Marked pool(s) with account ${account.id} as onboarding complete`);
       }
     }
+  } else if (event.type === "charge.refunded") {
+    // Refund processed (in the Stripe dashboard or via API): mark the guess
+    // as refunded so it no longer counts in totals/rankings. The row stays
+    // for audit history.
+    const charge = event.data.object as Stripe.Charge;
+    const paymentIntentId =
+      typeof charge.payment_intent === "string"
+        ? charge.payment_intent
+        : charge.payment_intent?.id;
+
+    if (!paymentIntentId) {
+      console.error("charge.refunded without payment_intent:", charge.id);
+    } else {
+      const supabase = getAnonClient();
+      const { error } = await supabase.rpc("mark_guess_refunded", {
+        p_payment_id: paymentIntentId,
+      });
+      if (error) {
+        // Not finding a guess just means the charge wasn't one of ours
+        // (e.g. a test charge) — log but still 200 so Stripe doesn't retry.
+        console.warn(
+          `Could not mark guess refunded for ${paymentIntentId}:`,
+          error.message
+        );
+      } else {
+        console.log(`Marked guess refunded for payment ${paymentIntentId}`);
+      }
+    }
   } else {
     console.log(`Received unhandled event type: ${event.type}`);
   }
