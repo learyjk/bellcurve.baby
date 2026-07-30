@@ -125,10 +125,10 @@ const faqs: Faq[] = [
     q: "What if I need a refund?",
     a: (
       <p>
-        Payments settle directly to the pool creator, so refunds aren&apos;t
-        self-serve yet. If something went wrong — a duplicate charge, a guess
-        you didn&apos;t mean to make — contact us and we&apos;ll sort it out
-        with the creator.
+        If you made a guess by mistake, contact the pool creator — they can
+        refund any guess on their pool straight from their pool page (it&apos;s
+        instant and irreversible). Pool creators: open your pool, find the
+        guess in the table, and hit Refund.
       </p>
     ),
   },
