@@ -11,6 +11,11 @@ import { formatSlug, generateSlugSuggestions } from "@/lib/helpers/slug";
 import { getVideoEmbed } from "@/lib/helpers/videoEmbed";
 import { GaussianCurve } from "@/components/ui/baby/gaussian-curve";
 import { DatePicker } from "@/components/ui/date-picker";
+import {
+  WeightSexSelector,
+  SEX_WEIGHT_PRESETS,
+  type BabySexGuess,
+} from "@/components/ui/baby/weight-sex-selector";
 import { createPool, CreatePoolState } from "@/lib/actions/create/createPool";
 import { pricingModelSigmas } from "@/lib/helpers/pricingModels";
 import {
@@ -52,6 +57,7 @@ export function CreateBabyPoolForm() {
     useState<keyof typeof pricingModelSigmas>("standard");
   // Weight/date
   const [muWeight, setMuWeight] = useState(7.4);
+  const [sexGuess, setSexGuess] = useState<BabySexGuess | null>(null);
   const [muDate] = useState(0); // 0 deviation from due date (in days)
 
   // Slug validation
@@ -658,6 +664,14 @@ export function CreateBabyPoolForm() {
                 <Label className="text-base font-semibold tracking-tight">
                   Expected Weight
                 </Label>
+                <WeightSexSelector
+                  className="mt-2 max-w-sm"
+                  value={sexGuess}
+                  onChange={(sex) => {
+                    setSexGuess(sex);
+                    setMuWeight(SEX_WEIGHT_PRESETS[sex]);
+                  }}
+                />
                 <div className="flex gap-4 items-center mt-2">
                   <div className="flex items-center gap-2">
                     <Input

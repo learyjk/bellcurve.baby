@@ -7,6 +7,11 @@ import { useActionState, useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import clsx from "clsx";
 import { DatePicker } from "@/components/ui/date-picker";
+import {
+  WeightSexSelector,
+  SEX_WEIGHT_PRESETS,
+  type BabySexGuess,
+} from "@/components/ui/baby/weight-sex-selector";
 import { updatePool, UpdatePoolState } from "@/lib/actions/edit/updatePool";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Tables } from "@/database.types";
@@ -19,6 +24,7 @@ export function EditPoolForm({ pool }: { pool: Tables<"pools"> }) {
   const [description, setDescription] = useState(pool.description ?? "");
   const [videoUrl, setVideoUrl] = useState(pool.video_url ?? "");
   const [muWeight, setMuWeight] = useState(initialOz / 16); // lbs for the UI
+  const [sexGuess, setSexGuess] = useState<BabySexGuess | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [organizerImagePreview, setOrganizerImagePreview] = useState<
     string | null
@@ -466,6 +472,14 @@ export function EditPoolForm({ pool }: { pool: Tables<"pools"> }) {
               <Label className="text-base font-semibold tracking-tight">
                 Expected Weight
               </Label>
+              <WeightSexSelector
+                className="mt-2 max-w-sm"
+                value={sexGuess}
+                onChange={(sex) => {
+                  setSexGuess(sex);
+                  setMuWeight(SEX_WEIGHT_PRESETS[sex]);
+                }}
+              />
               <div className="flex gap-4 items-center mt-2">
                 <div className="flex items-center gap-2">
                   <Input
