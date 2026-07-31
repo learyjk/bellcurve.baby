@@ -3,6 +3,7 @@
 import { useCurrentUserImage } from "@/hooks/use-current-user-image";
 import { useCurrentUserName } from "@/hooks/use-current-user-name";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { NameAvatar } from "@/components/ui/name-avatar";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 
@@ -35,6 +36,9 @@ export const CurrentUserAvatar = ({
           .toUpperCase()
       : "?";
 
+  // Deterministic emoji for users without a photo or usable name
+  const emojiSeed = name && name !== "?" ? name : (userProp?.email ?? "?");
+
   // Reset error state when image URL changes
   useEffect(() => {
     if (profileImage) {
@@ -58,7 +62,7 @@ export const CurrentUserAvatar = ({
         />
       )}
       <AvatarFallback className="text-xs font-medium">
-        {initials}
+        {initials === "?" ? <NameAvatar name={emojiSeed} /> : initials}
       </AvatarFallback>
     </Avatar>
   );

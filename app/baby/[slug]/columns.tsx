@@ -6,6 +6,7 @@ import LocalDate from "@/components/ui/local-date";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RefundCell } from "./refund-cell";
+import { NameAvatar } from "@/components/ui/name-avatar";
 
 function SortableHeader({
   label,
@@ -43,7 +44,13 @@ export const guessColumns: ColumnDef<Tables<"guesses">>[] = [
     cell: ({ row }) => {
       const isAnonymous = row.original.is_anonymous;
       const name: string = row.getValue("name");
-      return isAnonymous ? "Anonymous" : name || "Anonymous";
+      const display = isAnonymous ? "Anonymous" : name || "Anonymous";
+      return (
+        <span className="flex items-center gap-2">
+          <NameAvatar name={isAnonymous ? "anonymous" : display} />
+          <span>{display}</span>
+        </span>
+      );
     },
   },
   {

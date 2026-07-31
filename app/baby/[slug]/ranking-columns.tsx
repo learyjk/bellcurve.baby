@@ -3,6 +3,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { RankingWithGuess } from "@/lib/data/rankings/getRankingsForPool";
 import { formatYmdForDisplay } from "@/lib/helpers/date";
 import LocalDate from "@/components/ui/local-date";
+import { NameAvatar } from "@/components/ui/name-avatar";
 
 export const rankingColumns: ColumnDef<RankingWithGuess>[] = [
   {
@@ -12,7 +13,15 @@ export const rankingColumns: ColumnDef<RankingWithGuess>[] = [
   {
     accessorKey: "guesses.name",
     header: "Name",
-    cell: ({ row }) => row.original.guesses?.name || "Anonymous",
+    cell: ({ row }) => {
+      const name = row.original.guesses?.name || "Anonymous";
+      return (
+        <span className="flex items-center gap-2">
+          <NameAvatar name={name} />
+          <span>{name}</span>
+        </span>
+      );
+    },
   },
   {
     accessorKey: "guesses.guessed_birth_date",
