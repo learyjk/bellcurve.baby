@@ -178,14 +178,16 @@ otp_length = 6
 otp_expiry = 3600
 
 # Use a production-ready SMTP server
-# [auth.email.smtp]
-# enabled = true
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+# Resend (https://resend.com) — password is the API key, read from env at push time:
+#   export SUPABASE_AUTH_SMTP_PASS=$(cat ~/.resend-token)
+[auth.email.smtp]
+enabled = true
+host = "smtp.resend.com"
+port = 465
+user = "resend"
+pass = "env(SUPABASE_AUTH_SMTP_PASS)"
+admin_email = "hello@bellcurve.baby"
+sender_name = "bellcurve.baby"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
