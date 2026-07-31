@@ -186,8 +186,8 @@ host = "smtp.resend.com"
 port = 465
 user = "resend"
 pass = "env(SUPABASE_AUTH_SMTP_PASS)"
-admin_email = "hello@bellcurve.baby"
-sender_name = "bellcurve.baby"
+admin_email = "hk@bellcurve.baby"
+sender_name = "Heather & Keegan"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
