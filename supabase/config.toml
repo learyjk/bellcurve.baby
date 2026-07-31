@@ -107,7 +107,7 @@ file_size_limit = "50MiB"
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "https://bellcurve-baby.exe.xyz:3000"
+site_url = "https://bellcurve.baby"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 additional_redirect_urls = [
   "https://bellcurve-baby.exe.xyz:3000",
@@ -178,19 +178,27 @@ otp_length = 6
 otp_expiry = 3600
 
 # Use a production-ready SMTP server
-# [auth.email.smtp]
-# enabled = true
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+# Resend (https://resend.com) — password is the API key, read from env at push time:
+#   export SUPABASE_AUTH_SMTP_PASS=$(cat ~/.resend-token)
+[auth.email.smtp]
+enabled = true
+host = "smtp.resend.com"
+port = 465
+user = "resend"
+pass = "env(SUPABASE_AUTH_SMTP_PASS)"
+admin_email = "hk@bellcurve.baby"
+sender_name = "Heather & Keegan"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"
 # content_path = "./supabase/templates/invite.html"
+
+# Signup confirmation email. NOTE: the hosted project needs the same template
+# applied via Authentication > Emails (dashboard) until config push supports it.
+[auth.email.template.confirmation]
+subject = "Confirm your bellcurve.baby signup"
+content_path = "./supabase/templates/confirm.html"
 
 [auth.sms]
 # Allow/disallow new user signups via SMS to your project.
