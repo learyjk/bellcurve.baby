@@ -1,3 +1,4 @@
+import { ResendConfirmationForm } from "@/components/resend-confirmation-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function Page({
@@ -17,16 +18,22 @@ export default async function Page({
                 Sorry, something went wrong.
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col gap-4">
               {params?.error ? (
                 <p className="text-sm text-muted-foreground">
-                  Code error: {params.error}
+                  {params.error}.
                 </p>
               ) : (
                 <p className="text-sm text-muted-foreground">
                   An unspecified error occurred.
                 </p>
               )}
+              <p className="text-sm text-muted-foreground">
+                Confirmation links can only be used once, and they expire
+                after 24 hours. If yours isn&apos;t working, we can send you a
+                fresh one:
+              </p>
+              <ResendConfirmationForm />
             </CardContent>
           </Card>
         </div>
