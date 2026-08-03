@@ -26,7 +26,11 @@ export function WeightSexSelector({
   className?: string;
 }) {
   return (
-    <div className={clsx("flex gap-2", className)} role="radiogroup" aria-label="Baby's sex (sets average weight)">
+    <div
+      className={clsx("flex flex-wrap gap-2", className)}
+      role="radiogroup"
+      aria-label="Baby's sex (sets average weight)"
+    >
       {OPTIONS.map((opt) => {
         const selected = value === opt.value;
         return (
@@ -37,16 +41,16 @@ export function WeightSexSelector({
             aria-checked={selected}
             onClick={() => onChange(opt.value)}
             className={clsx(
-              "flex-1 rounded-full border px-3 py-2 text-sm font-medium transition-colors",
+              "inline-flex h-9 items-baseline gap-1.5 rounded-full border px-3.5 text-sm font-medium transition-colors",
               selected
                 ? "border-[#FF8C7A] bg-[#FF8C7A]/10 text-foreground"
                 : "border-input bg-background text-muted-foreground hover:border-[#FF8C7A]/60 hover:text-foreground"
             )}
           >
-            <span className="block leading-tight">{opt.label}</span>
+            <span className="leading-none">{opt.label}</span>
             <span
               className={clsx(
-                "block text-xs leading-tight",
+                "text-xs leading-none",
                 selected ? "text-[#e07363]" : "text-muted-foreground"
               )}
             >
