@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { getFeeCents } from "@/lib/constants";
-import { getStripe } from "@/lib/stripe";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -19,55 +18,18 @@ export const metadata = { title: "Platform Fees - Admin" };
 // item), so there is no Stripe application_fee object to list. The source of
 // truth for platform earnings is therefore our own guesses table.
 //
-// Dev and prod share one Supabase DB but use different Stripe keys (test vs
-// live), and Stripe payment ids share the pi_3... prefix, so the only way to
-// tell a sandbox payment from a real one is the charge's `livemode` flag.
-type GuessRow = {
+// Dev and prod share one Supabase DB but use different Stripe keys. Each
+// guess's `livemode` (recorded at webhook time) separates real (live) from
+// sandbox (test-mode) payments; NULL means it predates the column ("unknown").
+type FeeRow = {
   id: string;
   created_at: string | null;
   calculated_price: number; // dollars, the guess amount the creator received
   payment_status: string | null;
-  payment_id: string | null;
+  livemode: boolean | null;
   pool_id: string;
   pools: { slug: string } | null;
 };
-
-type FeeRow = GuessRow & {
-  /** true = real money, false = sandbox, null = couldn't determine. */
-  livemode: boolean | null;
-};
-
-// Resolve livemode per payment by looking at its Stripe charge. Batched with
-// a small concurrency cap so a large page doesn't hammer the Stripe API.
-async function withLivemode(rows: GuessRow[]): Promise<FeeRow[]> {
-  const stripe = getStripe();
-  const CONCURRENCY = 5;
-  const out: FeeRow[] = new Array(rows.length);
-  let i = 0;
-  async function worker() {
-    while (i < rows.length) {
-      const idx = i++;
-      const row = rows[idx];
-      let livemode: boolean | null = null;
-      if (row.payment_id) {
-        try {
-          const pi = await stripe.paymentIntents.retrieve(row.payment_id, {
-            expand: ["latest_charge"],
-          });
-          const charge = pi.latest_charge;
-          if (charge && typeof charge !== "string") {
-            livemode = charge.livemode;
-          }
-        } catch {
-          livemode = null;
-        }
-      }
-      out[idx] = { ...row, livemode };
-    }
-  }
-  await Promise.all(Array.from({ length: CONCURRENCY }, worker));
-  return out;
-}
 
 export default async function AdminFeesPage() {
   const supabase = await createClient();
@@ -91,20 +53,21 @@ export default async function AdminFeesPage() {
   const { data: rows, error } = await supabase
     .from("guesses")
     .select(
-      "id, created_at, calculated_price, payment_status, payment_id, pool_id, pools(slug)"
+      "id, created_at, calculated_price, payment_status, livemode, pool_id, pools(slug)"
     )
     .in("payment_status", ["paid", "refunded"])
     .order("created_at", { ascending: false })
-    .limit(100)
-    .returns<GuessRow[]>();
+    .limit(200)
+    .returns<FeeRow[]>();
 
   if (error) {
     console.error("Failed to load platform fees:", error);
   }
-  const fees = await withLivemode(rows ?? []);
+  const fees = rows ?? [];
 
   const isPaid = (f: FeeRow) => f.payment_status === "paid";
   const isLive = (f: FeeRow) => f.livemode === true;
+  const isTest = (f: FeeRow) => f.livemode === false;
   const guessCents = (f: FeeRow) => Math.round(f.calculated_price * 100);
   const feeCentsFor = (f: FeeRow) => getFeeCents(guessCents(f));
 
@@ -113,9 +76,11 @@ export default async function AdminFeesPage() {
   const liveFeeCents = liveFees.reduce((s, f) => s + feeCentsFor(f), 0);
   const liveGrossCents = liveFees.reduce((s, f) => s + guessCents(f), 0);
   // Sandbox totals, shown separately so they don't inflate the real numbers.
-  const testFees = fees.filter((f) => isPaid(f) && f.livemode === false);
+  const testFees = fees.filter((f) => isPaid(f) && isTest(f));
   const testFeeCents = testFees.reduce((s, f) => s + feeCentsFor(f), 0);
   const testGrossCents = testFees.reduce((s, f) => s + guessCents(f), 0);
+  // Pre-livemode rows (unknown) — call out if any need backfilling.
+  const unknownCount = fees.filter((f) => isPaid(f) && f.livemode === null).length;
 
   return (
     <div className="max-w-4xl mx-auto mt-10 px-4 py-12">
@@ -142,19 +107,27 @@ export default async function AdminFeesPage() {
         </div>
       </div>
 
-      {testFees.length > 0 && (
-        <p className="text-center text-xs text-muted-foreground mb-8">
-          Plus{" "}
-          <span className="font-medium">
-            ${(testFeeCents / 100).toFixed(2)}
-          </span>{" "}
-          in fees on{" "}
-          <span className="font-medium">
-            ${(testGrossCents / 100).toFixed(2)}
-          </span>{" "}
-          of sandbox (test-mode) guesses — not real money.
-        </p>
-      )}
+      <div className="text-center text-xs text-muted-foreground mb-8 space-y-1">
+        {testFees.length > 0 && (
+          <p>
+            Plus{" "}
+            <span className="font-medium">
+              ${(testFeeCents / 100).toFixed(2)}
+            </span>{" "}
+            in fees on{" "}
+            <span className="font-medium">
+              ${(testGrossCents / 100).toFixed(2)}
+            </span>{" "}
+            of sandbox (test-mode) guesses — not real money.
+          </p>
+        )}
+        {unknownCount > 0 && (
+          <p>
+            {unknownCount} older {unknownCount === 1 ? "guess" : "guesses"}{" "}
+            predate test/live tracking and are excluded from both totals.
+          </p>
+        )}
+      </div>
 
       {fees.length === 0 ? (
         <p className="text-center text-muted-foreground">
@@ -202,7 +175,7 @@ export default async function AdminFeesPage() {
                       ) : fee.livemode === false ? (
                         <Badge variant="secondary">Test</Badge>
                       ) : (
-                        <Badge variant="outline">—</Badge>
+                        <Badge variant="outline">Unknown</Badge>
                       )}
                     </TableCell>
                     <TableCell>
