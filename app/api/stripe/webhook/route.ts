@@ -30,7 +30,8 @@ async function createGuess(
   price: number,
   paymentIntentId: string,
   name: string | null,
-  isAnonymous: boolean
+  isAnonymous: boolean,
+  livemode: boolean | null
 ) {
   const supabase = getAnonClient();
 
@@ -45,6 +46,7 @@ async function createGuess(
     p_payment_id: paymentIntentId,
     p_name: name ?? "",
     p_is_anonymous: isAnonymous,
+    p_livemode: livemode,
   });
 
   if (error) {
@@ -187,7 +189,11 @@ export async function POST(req: NextRequest) {
         numericPrice,
         paymentIntentId,
         name || null,
-        isAnonymous
+        isAnonymous,
+        // The Stripe event carries livemode (true = real money, false =
+        // sandbox); record it so /admin/fees can separate test vs live
+        // without a Stripe lookup per row.
+        session.livemode ?? null
       );
 
       console.log(

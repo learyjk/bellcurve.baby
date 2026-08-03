@@ -22,6 +22,7 @@ export type Database = {
           guessed_weight: number
           id: string
           is_anonymous: boolean
+          livemode: boolean | null
           name: string | null
           payment_id: string | null
           payment_status: string | null
@@ -35,6 +36,7 @@ export type Database = {
           guessed_weight: number
           id?: string
           is_anonymous?: boolean
+          livemode?: boolean | null
           name?: string | null
           payment_id?: string | null
           payment_status?: string | null
@@ -48,6 +50,7 @@ export type Database = {
           guessed_weight?: number
           id?: string
           is_anonymous?: boolean
+          livemode?: boolean | null
           name?: string | null
           payment_id?: string | null
           payment_status?: string | null
@@ -204,6 +207,7 @@ export type Database = {
           p_guessed_birth_date: string
           p_guessed_weight: number
           p_is_anonymous: boolean
+          p_livemode?: boolean | null
           p_name: string
           p_payment_id: string
           p_pool_id: string
