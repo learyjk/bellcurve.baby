@@ -45,7 +45,7 @@ export function WeightSexSelector({
             type="button"
             role="radio"
             aria-checked={selected}
-            title={`${label} — pre-fills the US average of ${hint}`}
+            title={`${label} — pre-fills the global average of ${hint}`}
             onClick={() => onChange(optValue)}
             className={clsx(
               "inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors",
