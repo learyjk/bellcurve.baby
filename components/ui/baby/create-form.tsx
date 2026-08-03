@@ -85,6 +85,15 @@ export function CreateBabyPoolForm() {
   const [sexGuess, setSexGuess] = useState<BabySexGuess | null>(null);
   const [muDate] = useState(0); // 0 deviation from due date (in days)
 
+  // Editing the lbs/oz inputs by hand deselects the preset pill if the value
+  // no longer matches it, so the pills always reflect the actual weight.
+  const setWeight = (weight: number) => {
+    setMuWeight(weight);
+    setSexGuess((prev) =>
+      prev && Math.abs(SEX_WEIGHT_PRESETS[prev] - weight) < 1e-9 ? prev : null
+    );
+  };
+
   // Slug validation
   const [slugAvailable, setSlugAvailable] = useState<null | boolean>(null);
   const [slugChecking, setSlugChecking] = useState(false);
@@ -1038,7 +1047,7 @@ export function CreateBabyPoolForm() {
                           0,
                           Math.min(20, Number(e.target.value))
                         );
-                        setMuWeight(lbs + (muWeight % 1));
+                        setWeight(lbs + (muWeight % 1));
                       }}
                       className="rounded w-20 px-3 text-center"
                       required
@@ -1058,7 +1067,7 @@ export function CreateBabyPoolForm() {
                           0,
                           Math.min(15, Number(e.target.value))
                         );
-                        setMuWeight(Math.floor(muWeight) + oz / 16);
+                        setWeight(Math.floor(muWeight) + oz / 16);
                       }}
                       className="rounded w-20 px-3 text-center"
                       required
