@@ -81,8 +81,8 @@ export function CreateBabyPoolForm() {
   const [pricingModel, setPricingModel] =
     useState<keyof typeof pricingModelSigmas>("standard");
   // Weight/date
-  const [muWeight, setMuWeight] = useState(7.4);
-  const [sexGuess, setSexGuess] = useState<BabySexGuess | null>(null);
+  const [muWeight, setMuWeight] = useState(SEX_WEIGHT_PRESETS.girl);
+  const [sexGuess, setSexGuess] = useState<BabySexGuess | null>("girl");
   const [muDate] = useState(0); // 0 deviation from due date (in days)
 
   // Editing the lbs/oz inputs by hand deselects the preset pill if the value
@@ -495,7 +495,7 @@ export function CreateBabyPoolForm() {
               placeholder="e.g. Baby Smith"
               required
               className={clsx(
-                "rounded mt-2",
+                "rounded-md mt-2",
                 getVisibleError("baby_name") && invalidInputClass
               )}
               aria-invalid={!!getVisibleError("baby_name")}
@@ -525,7 +525,7 @@ export function CreateBabyPoolForm() {
               placeholder="e.g. Heather & Keegan"
               required
               className={clsx(
-                "rounded mt-2",
+                "rounded-md mt-2",
                 getVisibleError("organized_by") && invalidInputClass
               )}
               aria-invalid={!!getVisibleError("organized_by")}
@@ -571,7 +571,7 @@ export function CreateBabyPoolForm() {
               placeholder="e.g. babymario"
               required
               className={clsx(
-                "rounded",
+                "rounded-md",
                 (getVisibleError("slug") ||
                   (touched.slug && slug && slugAvailable === false)) &&
                   invalidInputClass
@@ -933,7 +933,7 @@ export function CreateBabyPoolForm() {
               onBlur={() => markTouched("video_url")}
               placeholder="https://www.youtube.com/watch?v=..."
               className={clsx(
-                "rounded mt-2",
+                "rounded-md mt-2",
                 getVisibleError("video_url") && invalidInputClass
               )}
               aria-invalid={!!getVisibleError("video_url")}
@@ -982,8 +982,7 @@ export function CreateBabyPoolForm() {
                   <RequiredMark />
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  This is the center of the date price curve — guesses cost
-                  the most right around the due date.
+                  Guesses cost the most right around the due date.
                 </p>
                 <div
                   ref={(el) => {
@@ -1022,17 +1021,8 @@ export function CreateBabyPoolForm() {
                   <RequiredMark />
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Use the buttons below to pre-fill US national averages, or
-                  enter your own.
+                  US national averages, or enter your own.
                 </p>
-                <WeightSexSelector
-                  className="mt-2 max-w-sm"
-                  value={sexGuess}
-                  onChange={(sex) => {
-                    setSexGuess(sex);
-                    setMuWeight(SEX_WEIGHT_PRESETS[sex]);
-                  }}
-                />
                 <div className="flex gap-4 items-center mt-2">
                   <div className="flex items-center gap-2">
                     <Input
@@ -1049,7 +1039,7 @@ export function CreateBabyPoolForm() {
                         );
                         setWeight(lbs + (muWeight % 1));
                       }}
-                      className="rounded w-20 px-3 text-center"
+                      className="rounded-md w-20 px-3 text-center"
                       required
                     />
                     <span className="text-sm text-muted-foreground">lbs</span>
@@ -1069,12 +1059,20 @@ export function CreateBabyPoolForm() {
                         );
                         setWeight(Math.floor(muWeight) + oz / 16);
                       }}
-                      className="rounded w-20 px-3 text-center"
+                      className="rounded-md w-20 px-3 text-center"
                       required
                     />
                     <span className="text-sm text-muted-foreground">oz</span>
                   </div>
                 </div>
+                <WeightSexSelector
+                  className="mt-2"
+                  value={sexGuess}
+                  onChange={(sex) => {
+                    setSexGuess(sex);
+                    setMuWeight(SEX_WEIGHT_PRESETS[sex]);
+                  }}
+                />
                 {/* Hidden input for ounces for backend */}
                 <input
                   type="hidden"
@@ -1158,7 +1156,7 @@ export function CreateBabyPoolForm() {
                   placeholder="5"
                   required
                   className={clsx(
-                    "rounded mt-2 px-4",
+                    "rounded-md mt-2 px-4",
                     getVisibleError("price_floor") && invalidInputClass
                   )}
                   aria-invalid={!!getVisibleError("price_floor")}
@@ -1240,7 +1238,7 @@ export function CreateBabyPoolForm() {
                   placeholder="50"
                   required
                   className={clsx(
-                    "rounded mt-2 w-full",
+                    "rounded-md mt-2 w-full",
                     getVisibleError("price_ceiling") && invalidInputClass
                   )}
                   aria-invalid={!!getVisibleError("price_ceiling")}
