@@ -5,28 +5,36 @@ import {
   PLATFORM_FEE_PERCENT,
 } from "../lib/constants";
 
-describe("donor-pays fee math", () => {
-  it("adds the fee on top so the creator receives 100% of the guess", () => {
-    // $100 guess: donor pays $111.11, creator gets $100.00
-    expect(getFeeCents(10000)).toBe(1111);
-    expect(getTotalCents(10000)).toBe(11111);
+describe("donor-pays fee math (additive surcharge)", () => {
+  it("adds an additive 10% surcharge on top of the base donation", () => {
+    // $100 base: fee = $10.00, total = $110.00
+    expect(getFeeCents(10000)).toBe(1000);
+    expect(getTotalCents(10000)).toBe(11000);
   });
 
-  it("the fee line is exactly PLATFORM_FEE_PERCENT of the total charge", () => {
+  it("the fee is exactly PLATFORM_FEE_PERCENT of the BASE donation", () => {
     for (const guessCents of [1000, 1500, 4267, 4500, 10000, 20000]) {
       const fee = getFeeCents(guessCents);
-      const total = guessCents + fee;
-      // fee should be ~10% of total (within a rounding cent)
-      expect(Math.abs(fee - total * PLATFORM_FEE_PERCENT)).toBeLessThanOrEqual(1);
+      expect(fee).toBe(Math.round(guessCents * PLATFORM_FEE_PERCENT));
     }
   });
 
-  it("round-trips: total minus fee equals the guess", () => {
+  it("total charge = base + fee", () => {
     for (const guessCents of [1000, 1710, 3333, 9999]) {
-      expect(getTotalCents(guessCents) - getFeeCents(guessCents)).toBe(
-        guessCents
+      expect(getTotalCents(guessCents)).toBe(
+        guessCents + getFeeCents(guessCents)
       );
     }
+  });
+
+  it("platform nets fee minus Stripe processing (2.9% + 30c of gross)", () => {
+    // $100 example from the spec: Stripe takes $3.49, platform nets $6.51
+    const guessCents = 10000;
+    const total = getTotalCents(guessCents);
+    const fee = getFeeCents(guessCents);
+    const stripeFee = Math.round(total * 0.029) + 30;
+    expect(stripeFee).toBe(349);
+    expect(fee - stripeFee).toBe(651);
   });
 
   it("fee is always positive and monotonic in the guess price", () => {
@@ -36,16 +44,5 @@ describe("donor-pays fee math", () => {
       expect(fee).toBeGreaterThan(prev);
       prev = fee;
     }
-  });
-
-  it("platform nets the fee minus Stripe processing (2.9% + 30c of total)", () => {
-    const guessCents = 10000;
-    const total = getTotalCents(guessCents);
-    const fee = getFeeCents(guessCents);
-    const stripeProcessing = Math.round(total * 0.029) + 30;
-    const platformNet = fee - stripeProcessing;
-    // On a $100 guess the platform should net roughly $7.59
-    expect(platformNet).toBeGreaterThan(700);
-    expect(platformNet).toBeLessThan(800);
   });
 });

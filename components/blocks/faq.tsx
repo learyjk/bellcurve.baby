@@ -42,7 +42,7 @@ const faqs: Faq[] = [
         <p>
           Guessers pay a {PLATFORM_PERCENT}% platform + Stripe processing fee
           on top of their guess, shown as its own line at checkout. Example: a
-          $45.00 guess charges the guesser $50.00 total; the family receives
+          $45.00 guess charges the guesser $49.50 total; the family receives
           the full $45.00.
         </p>
       </>

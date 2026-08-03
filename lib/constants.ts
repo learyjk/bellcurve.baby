@@ -15,16 +15,16 @@ export const DEFAULT_PRICE_FLOOR = 15;
 export const DEFAULT_PRICE_CEILING = 60;
 
 /**
- * Donor-pays-fee model: the donor is charged the guess price plus a fee on
- * top, so the pool creator receives 100% of their guess. The fee line shown
- * at checkout is PLATFORM_FEE_PERCENT of the TOTAL charge, so it must be
- * computed from the guess price as p/(1-r) - p (equivalently total = p/(1-r)).
+ * Donor-pays-fee model: the donor is charged the guess price plus a simple,
+ * additive 10% surcharge on top, so the pool creator receives 100% of the
+ * guess. No margin math — the fee is calculated directly on the base amount.
  *
- * Example ($100 guess, 10%): total = $111.11, fee = $11.11 (= 10% of total),
- * Stripe processing ($3.52) comes out of the fee; platform nets the rest.
+ * Example ($100 guess, 10%): fee = $10.00, total = $110.00. Stripe
+ * processing (2.9% + 30c of the total) comes out of the fee; the platform
+ * nets the rest ($6.51 in the example).
  */
 export function getFeeCents(guessCents: number): number {
-  return Math.round(guessCents / (1 - PLATFORM_FEE_PERCENT)) - guessCents;
+  return Math.round(guessCents * PLATFORM_FEE_PERCENT);
 }
 
 export function getTotalCents(guessCents: number): number {
