@@ -99,8 +99,6 @@ export function CreateBabyPoolForm() {
   const [slugChecking, setSlugChecking] = useState(false);
   const [slugSuggestions, setSlugSuggestions] = useState<string[]>([]);
   const [slugError, setSlugError] = useState("");
-  // Price validation
-  const [priceError, setPriceError] = useState<string | null>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // --- Validation state ---
@@ -166,11 +164,24 @@ export function CreateBabyPoolForm() {
     ]
   );
 
-  // Cross-field: max price must exceed min price. Shown once, under the
-  // ceiling input, on blur of either price field.
+  // Price validation. We no longer auto-correct the *other* field (that was
+  // silently rewriting what the user typed, e.g. resetting min to $5); we
+  // just validate and report. Each field reports its own range error; the
+  // cross-field "max must exceed min" rule is reported once, under the
+  // ceiling input.
+  const priceFloorRangeError =
+    typeof minPrice === "number" && minPrice < MIN_PRICE_FLOOR
+      ? `Minimum price must be at least $${MIN_PRICE_FLOOR}.`
+      : null;
+  const priceCeilingRangeError =
+    typeof maxPrice === "number" && maxPrice > MAX_PRICE_CEILING
+      ? `Maximum price must be $${MAX_PRICE_CEILING} or less.`
+      : null;
   const priceRelationError =
     typeof minPrice === "number" &&
     typeof maxPrice === "number" &&
+    !priceFloorRangeError &&
+    !priceCeilingRangeError &&
     maxPrice <= minPrice
       ? "Maximum price must be greater than minimum price."
       : null;
@@ -185,13 +196,18 @@ export function CreateBabyPoolForm() {
       if (field === "price_ceiling")
         return (
           clientFieldError("price_ceiling") ||
+          priceCeilingRangeError ||
           priceRelationError ||
-          priceError ||
           serverErrors.price_ceiling ||
           null
         );
       if (field === "price_floor")
-        return clientFieldError("price_floor") || serverErrors.price_floor || null;
+        return (
+          clientFieldError("price_floor") ||
+          priceFloorRangeError ||
+          serverErrors.price_floor ||
+          null
+        );
       if (field === "image") return serverErrors.image || null;
       if (field === "organizer_image")
         return serverErrors.organizer_image || null;
@@ -202,8 +218,9 @@ export function CreateBabyPoolForm() {
       touched,
       clientFieldError,
       slugError,
+      priceCeilingRangeError,
+      priceFloorRangeError,
       priceRelationError,
-      priceError,
       serverErrors,
     ]
   );
@@ -224,10 +241,14 @@ export function CreateBabyPoolForm() {
   ).forEach((field) => {
     const err =
       field === "price_ceiling"
-        ? clientFieldError("price_ceiling") || priceRelationError
-        : field === "slug"
-          ? slugError || serverErrors.slug
-          : clientFieldError(field);
+        ? clientFieldError("price_ceiling") ||
+          priceCeilingRangeError ||
+          priceRelationError
+        : field === "price_floor"
+          ? clientFieldError("price_floor") || priceFloorRangeError
+          : field === "slug"
+            ? slugError || serverErrors.slug
+            : clientFieldError(field);
     if (err) formErrors[field] = err;
   });
   // A slug that hasn't been confirmed available blocks submission, but the
@@ -1103,12 +1124,6 @@ export function CreateBabyPoolForm() {
                   id="price_floor"
                   name="price_floor"
                   type="number"
-                  min={MIN_PRICE_FLOOR}
-                  max={
-                    typeof maxPrice === "number"
-                      ? Math.max(MIN_PRICE_FLOOR, maxPrice - 1)
-                      : undefined
-                  }
                   step="1"
                   value={minPrice}
                   onChange={(e) => {
@@ -1118,42 +1133,18 @@ export function CreateBabyPoolForm() {
                     } else {
                       const numValue = Number(value);
                       if (!isNaN(numValue) && numValue >= 0) {
-                        const newMin = Math.max(
-                          MIN_PRICE_FLOOR,
-                          Math.floor(numValue)
-                        );
-                        // If max is set and would be <= newMin, bump max to newMin + 1
-                        if (
-                          typeof maxPrice === "number" &&
-                          maxPrice <= newMin
-                        ) {
-                          setMaxPrice(newMin + 1);
-                          setPriceError(null);
-                        }
-                        setMinPrice(newMin);
+                        setMinPrice(Math.floor(numValue));
                       }
                     }
                   }}
                   onBlur={(e) => {
                     markTouched("price_floor");
-                    // If field is empty on blur, set to default
+                    // If field is empty on blur, restore the default
                     if (e.target.value === "") {
                       setMinPrice(DEFAULT_PRICE_FLOOR);
                     }
-                    // Validate relationship on blur
-                    if (
-                      typeof minPrice === "number" &&
-                      typeof maxPrice === "number"
-                    ) {
-                      if (maxPrice <= minPrice) {
-                        setMaxPrice(minPrice + 1);
-                        setPriceError(null);
-                      } else {
-                        setPriceError(null);
-                      }
-                    }
                   }}
-                  placeholder="5"
+                  placeholder="15"
                   required
                   className={clsx(
                     "rounded-md mt-2 px-4",
@@ -1189,8 +1180,6 @@ export function CreateBabyPoolForm() {
                   id="price_ceiling"
                   name="price_ceiling"
                   type="number"
-                  min={typeof minPrice === "number" ? minPrice + 1 : 1}
-                  max={MAX_PRICE_CEILING}
                   step="1"
                   value={maxPrice}
                   onChange={(e) => {
@@ -1200,42 +1189,18 @@ export function CreateBabyPoolForm() {
                     } else {
                       const numValue = Number(value);
                       if (!isNaN(numValue) && numValue >= 0) {
-                        const newMax = Math.min(
-                          MAX_PRICE_CEILING,
-                          Math.max(1, Math.floor(numValue))
-                        );
-                        // If min is set and would be >= newMax, lower min (but not below 1)
-                        if (
-                          typeof minPrice === "number" &&
-                          minPrice >= newMax
-                        ) {
-                          setMinPrice(Math.max(1, newMax - 1));
-                          setPriceError(null);
-                        }
-                        setMaxPrice(newMax);
+                        setMaxPrice(Math.floor(numValue));
                       }
                     }
                   }}
                   onBlur={(e) => {
                     markTouched("price_ceiling");
-                    // If field is empty on blur, set to default
+                    // If field is empty on blur, restore the default
                     if (e.target.value === "") {
                       setMaxPrice(DEFAULT_PRICE_CEILING);
                     }
-                    // Validate relationship on blur
-                    if (
-                      typeof minPrice === "number" &&
-                      typeof maxPrice === "number"
-                    ) {
-                      if (maxPrice <= minPrice) {
-                        setMinPrice(Math.max(1, maxPrice - 1));
-                        setPriceError(null);
-                      } else {
-                        setPriceError(null);
-                      }
-                    }
                   }}
-                  placeholder="50"
+                  placeholder="60"
                   required
                   className={clsx(
                     "rounded-md mt-2 w-full",
