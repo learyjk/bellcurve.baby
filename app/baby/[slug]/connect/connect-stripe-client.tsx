@@ -108,12 +108,16 @@ export default function ConnectStripeClient({
         <div className="space-y-3 text-sm text-muted-foreground">
           <p>
             To collect the money from <strong>{babyName}</strong>&apos;s pool,
-            you need to connect a Stripe account. This takes about 2 minutes.
+            you&apos;ll set up how you get paid with Stripe, our secure payment
+            partner. It takes about 2 minutes.
           </p>
           <ul className="list-disc list-inside space-y-1">
             <li>Payments go <strong>directly to you</strong> — not through us</li>
             <li>Stripe handles all payment processing securely</li>
-            <li>You can use an existing Stripe account or create a new one</li>
+            <li>
+              <strong>No Stripe account yet?</strong> Just enter your email on
+              the next screen to create one as you go
+            </li>
             {isTestMode && (
               <li>
                 In test mode, use SSN{" "}
@@ -122,6 +126,14 @@ export default function ConnectStripeClient({
               </li>
             )}
           </ul>
+        </div>
+
+        <div className="rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">
+          <strong className="text-foreground">Heads up:</strong> the next page
+          is Stripe&apos;s secure setup, and your email will be pre-filled. Its
+          heading may say “Sign in,” but if you don&apos;t have a Stripe account,
+          continuing from there creates one as you go — no separate sign-up
+          needed.
         </div>
 
         {error && (
@@ -138,9 +150,9 @@ export default function ConnectStripeClient({
           {loading ? (
             <><LoadingSpinner /> Connecting...</>
           ) : isIncomplete ? (
-            <><RefreshCw className="h-4 w-4 mr-2" /> Resume Stripe Onboarding</>
+            <><RefreshCw className="h-4 w-4 mr-2" /> Resume Stripe setup</>
           ) : (
-            <><ExternalLink className="h-4 w-4 mr-2" /> Connect with Stripe</>
+            <><ExternalLink className="h-4 w-4 mr-2" /> Set up payments with Stripe</>
           )}
         </Button>
 

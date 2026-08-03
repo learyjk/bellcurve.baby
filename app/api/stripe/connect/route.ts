@@ -66,6 +66,12 @@ export async function POST(req: NextRequest) {
 
       const account = await stripe.accounts.create({
         type: "express",
+        // Pre-fill the organizer's email so Stripe's hosted onboarding skips
+        // the bare "Sign in to Express" prompt and binds onboarding to this
+        // email/account from the start. This also avoids a fork where a user
+        // with a *different* pre-existing Stripe account completes onboarding
+        // under that account while we've stored this new account's id.
+        email: user.email ?? undefined,
         capabilities: {
           card_payments: { requested: true },
           transfers: { requested: true },
