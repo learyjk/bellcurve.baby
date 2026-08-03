@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
-import Stripe from "stripe";
+import { getStripe } from "@/lib/stripe";
 import {
   Table,
   TableBody,
@@ -11,8 +11,6 @@ import {
 } from "@/components/ui/table";
 
 export const metadata = { title: "Platform Fees - Admin" };
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 type FeeRow = {
   id: string;
@@ -25,6 +23,7 @@ type FeeRow = {
 };
 
 async function getFees(): Promise<FeeRow[]> {
+  const stripe = getStripe();
   const fees = await stripe.applicationFees.list({ limit: 50 });
   return Promise.all(
     fees.data.map(async (fee) => {

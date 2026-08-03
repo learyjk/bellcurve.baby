@@ -2,9 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { PLATFORM_FEE_PERCENT } from "@/lib/constants";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+import { getStripe } from "@/lib/stripe";
 
 // Helper function to get the base URL with proper protocol
 function getBaseUrl() {
@@ -89,7 +87,7 @@ export async function createCheckoutSession(
     const oz = Math.round(data.guessWeight % 16);
     const formattedWeight = `${lbs} lbs ${oz} oz`;
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
         {
