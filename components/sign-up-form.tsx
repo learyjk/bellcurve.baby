@@ -50,7 +50,7 @@ export function SignUpForm({
 
     try {
       // Server-side: set display name in user_metadata ("data" is used for user_metadata in Supabase)
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -64,6 +64,19 @@ export function SignUpForm({
         },
       });
       if (error) throw error;
+
+      // Supabase returns no error for an existing email when email
+      // confirmations are enabled (to avoid leaking which emails are
+      // registered). Detect that case: a brand-new user has exactly one
+      // identity, while an existing user re-signing up has none.
+      const identities = data.user?.identities;
+      if (data.user && Array.isArray(identities) && identities.length === 0) {
+        setError(
+          "An account with this email already exists. Try logging in instead."
+        );
+        return;
+      }
+
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
