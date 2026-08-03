@@ -1,11 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import Stripe from "stripe";
+import { getStripe } from "@/lib/stripe";
 import { requireAdmin } from "@/lib/admin/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export type AdminDeletePoolResult = {
   error?: string;
@@ -59,7 +57,7 @@ export async function adminDeletePool(
   const failures: string[] = [];
   for (const guess of paid) {
     try {
-      await stripe.refunds.create({
+      await getStripe().refunds.create({
         payment_intent: guess.payment_id!,
         refund_application_fee: true,
       });

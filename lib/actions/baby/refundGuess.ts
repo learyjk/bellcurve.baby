@@ -2,9 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { getStripe } from "@/lib/stripe";
 import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export type RefundGuessState = {
   error?: string;
@@ -62,7 +61,7 @@ export async function refundGuess(
   }
 
   try {
-    await stripe.refunds.create({
+    await getStripe().refunds.create({
       payment_intent: guess.payment_id,
       // Return the platform's application fee as well, so the guesser is
       // refunded 100% of their donation. The platform eats Stripe's
