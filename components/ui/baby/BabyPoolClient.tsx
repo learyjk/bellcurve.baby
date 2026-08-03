@@ -12,6 +12,7 @@ import {
   ownerGuessColumns,
 } from "@/app/baby/[slug]/columns";
 import { getGuessPrice } from "@/lib/helpers/pricing";
+import { getFeeCents, getTotalCents } from "@/lib/constants";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
 import { AlertCircle, ExternalLink, Pencil } from "lucide-react";
@@ -206,6 +207,9 @@ export function BabyPoolClient({
     // For pricing, use ounces directly
     weightGuess: weightGuessOunces,
   });
+  const guessCents = Math.round(totalPrice * 100);
+  const feeDisplay = getFeeCents(guessCents) / 100;
+  const checkoutTotalDisplay = getTotalCents(guessCents) / 100;
 
   // Owners see every guess (including refunded ones, labeled); guests only
   // see active (paid) guesses — a refunded donation isn't a donation.
@@ -428,6 +432,15 @@ export function BabyPoolClient({
                         <span>{`$${weightPrice.toFixed(2)}`}</span>
                       </div>
                     </div>
+                    <p className="text-xs text-muted-foreground mt-4 border-t pt-3">
+                      At checkout you&apos;ll pay{" "}
+                      <strong className="text-foreground">
+                        ${checkoutTotalDisplay.toFixed(2)}
+                      </strong>{" "}
+                      — your guess plus a ${feeDisplay.toFixed(2)} platform +
+                      processing fee (10%). The family receives 100% of your
+                      guess.
+                    </p>
                   </CardContent>
                 </Card>
               </div>

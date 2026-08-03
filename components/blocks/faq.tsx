@@ -6,7 +6,6 @@ import {
   PLATFORM_FEE_PERCENT,
 } from "@/lib/constants";
 
-const CREATOR_KEEP_PERCENT = Math.round((1 - PLATFORM_FEE_PERCENT) * 100);
 const PLATFORM_PERCENT = Math.round(PLATFORM_FEE_PERCENT * 100);
 
 type Faq = { q: string; a: React.ReactNode };
@@ -36,15 +35,15 @@ const faqs: Faq[] = [
     a: (
       <>
         <p>
-          Creating a pool is free. Guessers pay the price shown on the sliders
-          — and that&apos;s exactly what they pay, nothing added on top.
+          Creating a pool is free, and{" "}
+          <strong>creators keep 100% of every guess</strong> — the full amount
+          on the slider goes to the family.
         </p>
         <p>
-          Creators keep exactly {CREATOR_KEEP_PERCENT}% of every guess —
-          that&apos;s a flat rate with no other deductions. We take a{" "}
-          {PLATFORM_PERCENT}% platform fee and cover the card processing costs
-          out of our share. Example: on a $45 guess, the creator receives
-          exactly $40.50.
+          Guessers pay a {PLATFORM_PERCENT}% platform + Stripe processing fee
+          on top of their guess, shown as its own line at checkout. Example: a
+          $45.00 guess charges the guesser $50.00 total; the family receives
+          the full $45.00.
         </p>
       </>
     ),

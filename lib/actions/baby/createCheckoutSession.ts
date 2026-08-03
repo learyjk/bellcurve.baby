@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { PLATFORM_FEE_PERCENT } from "@/lib/constants";
+import { getFeeCents } from "@/lib/constants";
 import { getStripe } from "@/lib/stripe";
 
 // Helper function to get the base URL with proper protocol
@@ -87,6 +87,11 @@ export async function createCheckoutSession(
     const oz = Math.round(data.guessWeight % 16);
     const formattedWeight = `${lbs} lbs ${oz} oz`;
 
+    // Donor-pays-fee model: the guess price goes to the creator in full;
+    // the fee is added on top and shown as its own line item at checkout.
+    const guessCents = Math.round(data.price * 100);
+    const feeCents = getFeeCents(guessCents);
+
     const session = await getStripe().checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
@@ -97,7 +102,17 @@ export async function createCheckoutSession(
               name: `Guess on ${data.babyName}`,
               description: `Your guess: ${formattedDate} at ${formattedWeight}`,
             },
-            unit_amount: Math.round(data.price * 100),
+            unit_amount: guessCents,
+          },
+          quantity: 1,
+        },
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: "bellcurve.baby platform + Stripe processing fee (10%)",
+            },
+            unit_amount: feeCents,
           },
           quantity: 1,
         },
@@ -105,14 +120,12 @@ export async function createCheckoutSession(
       mode: "payment",
       success_url: `${getBaseUrl()}/baby/${data.slug}?payment=success`,
       cancel_url: `${getBaseUrl()}/baby/${data.slug}?payment=cancelled`,
-      // Route funds directly to the pool creator's connected Stripe account,
-      // keeping the platform fee (creator takes home 90% of each guess).
+      // The creator receives exactly the guess price (100%); the platform
+      // keeps the fee line item to cover Stripe processing + our cut.
       payment_intent_data: {
-        application_fee_amount: Math.round(
-          data.price * 100 * PLATFORM_FEE_PERCENT
-        ),
         transfer_data: {
           destination: pool.stripe_account_id,
+          amount: guessCents,
         },
       },
       metadata: {
