@@ -61,13 +61,15 @@ export async function refundGuess(
   }
 
   try {
-    // Refunds the full charge (guess + fee), so the donor is made 100%
-    // whole. The platform eats Stripe's processing fee on refunds — that's
-    // our cost of doing business, not the guesser's or creator's problem.
-    // (No application_fee reversal needed: in the donor-pays-fee model the
-    // platform never took an application_fee_amount.)
+    // Full refund: donor gets back 100% of the total charge (guess + fee).
+    // reverse_transfer claws the base donation back from the creator's
+    // connected account; refund_application_fee returns any platform fee
+    // retained on the charge. The platform absorbs the original,
+    // non-refundable Stripe processing fee as an operational loss.
     await getStripe().refunds.create({
       payment_intent: guess.payment_id,
+      reverse_transfer: true,
+      refund_application_fee: true,
     });
     // The charge.refunded webhook flips payment_status to 'refunded'
     // (usually within a second). Revalidate so the table updates.
