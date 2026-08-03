@@ -1021,7 +1021,7 @@ export function CreateBabyPoolForm() {
                   <RequiredMark />
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  US national averages, or enter your own.
+                  Global averages, or enter your own.
                 </p>
                 <div className="flex gap-4 items-center mt-2">
                   <div className="flex items-center gap-2">
