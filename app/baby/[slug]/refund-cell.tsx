@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Tables } from "@/database.types";
 import { refundGuess } from "@/lib/actions/baby/refundGuess";
+import { getTotalCents } from "@/lib/constants";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +34,9 @@ export function RefundCell({ guess }: { guess: Tables<"guesses"> }) {
   }
 
   const price = Number(guess.calculated_price ?? 0);
+  // Donors were charged the guess plus the platform fee on top, so a full
+  // refund returns that larger amount.
+  const chargeTotal = getTotalCents(Math.round(price * 100)) / 100;
   const name = guess.is_anonymous ? "Anonymous" : guess.name || "Anonymous";
 
   const handleRefund = () => {
@@ -60,7 +64,10 @@ export function RefundCell({ guess }: { guess: Tables<"guesses"> }) {
           <AlertDialogTitle>Issue a refund?</AlertDialogTitle>
           <AlertDialogDescription>
             This will refund{" "}
-            <strong className="text-foreground">${price.toFixed(2)}</strong> to{" "}
+            <strong className="text-foreground">
+              ${chargeTotal.toFixed(2)}
+            </strong>{" "}
+            (the ${price.toFixed(2)} guess plus platform fee) to{" "}
             <strong className="text-foreground">{name}</strong>&apos;s card.
             This action is <strong>irreversible</strong> — the money goes back
             immediately and cannot be reclaimed.
@@ -80,7 +87,7 @@ export function RefundCell({ guess }: { guess: Tables<"guesses"> }) {
                 <LoadingSpinner /> Refunding...
               </>
             ) : (
-              `Yes, refund $${price.toFixed(2)}`
+              `Yes, refund $${chargeTotal.toFixed(2)}`
             )}
           </AlertDialogAction>
         </AlertDialogFooter>
