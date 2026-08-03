@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>Reset your bellcurve.baby password</title>
+  <!--[if mso]>
+  <style>table,td{font-family:Arial,sans-serif !important;}</style>
+  <![endif]-->
+  <style>
+    /* Layer 1: clients honoring prefers-color-scheme (Apple Mail iOS/macOS) */
+    @media (prefers-color-scheme: dark) {
+      .dm-body    { background-color:#161412 !important; }
+      .dm-card    { background-color:#26221F !important; box-shadow:none !important; }
+      .dm-heading { color:#F5F0EC !important; }
+      .dm-text    { color:#C9C0B9 !important; }
+      .dm-muted   { color:#8A8179 !important; }
+      .dm-note    { background-color:#3A2A25 !important; }
+      .dm-note-txt{ color:#E0A596 !important; }
+      .dm-btn     { background-color:#FF8C7A !important; color:#161412 !important; }
+      .dm-link    { color:#FF9E8E !important; }
+    }
+    /* Layer 2: Outlook.com forced dark mode hooks */
+    [data-ogsc] .dm-body    { background-color:#161412 !important; }
+    [data-ogsc] .dm-card    { background-color:#26221F !important; box-shadow:none !important; }
+    [data-ogsc] .dm-heading { color:#F5F0EC !important; }
+    [data-ogsc] .dm-text    { color:#C9C0B9 !important; }
+    [data-ogsc] .dm-muted   { color:#8A8179 !important; }
+    [data-ogsc] .dm-note    { background-color:#3A2A25 !important; }
+    [data-ogsc] .dm-note-txt{ color:#E0A596 !important; }
+    [data-ogsc] .dm-btn     { background-color:#FF8C7A !important; color:#161412 !important; }
+    [data-ogsc] .dm-link    { color:#FF9E8E !important; }
+    /* Layer 3: everything else (Gmail, desktop Outlook) auto-inverts on its own;
+       design contains no images or background graphics, so it survives inversion. */
+  </style>
+</head>
+<body style="margin:0; padding:0; background-color:#F7F5F2; -webkit-text-size-adjust:100%;" class="dm-body">
+
+  <!-- Preheader (hidden preview text) -->
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+    We got a request to reset your bellcurve.baby password. This link is valid for 1 hour.
+    &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F7F5F2;" class="dm-body">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+
+        <table role="presentation" width="520" cellpadding="0" cellspacing="0" border="0" style="max-width:520px; width:100%;">
+
+          <!-- Card -->
+          <tr>
+            <td>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:16px; box-shadow:0 1px 3px rgba(15,23,42,0.08);" class="dm-card">
+                <tr>
+                  <td style="padding:36px 32px;">
+
+                    <h1 style="margin:0 0 12px; font-family:Arial,sans-serif; font-size:24px; line-height:1.3; font-weight:700; color:#0F172A;" class="dm-heading">
+                      Reset your password 🔑
+                    </h1>
+
+                    <p style="margin:0 0 8px; font-family:Arial,sans-serif; font-size:15px; line-height:1.6; color:#475569;" class="dm-text">
+                      Hi there! We received a request to reset the password for your bellcurve.baby account.
+                    </p>
+
+                    <p style="margin:0 0 28px; font-family:Arial,sans-serif; font-size:15px; line-height:1.6; color:#475569;" class="dm-text">
+                      Tap the button below to choose a new password. For your security, this link expires in <strong>1&nbsp;hour</strong>.
+                    </p>
+
+                    <!-- Button -->
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td align="center" style="padding-bottom:28px;">
+                          <a href="{{ .SiteURL }}/auth/verify?token_hash={{ .TokenHash }}&type=recovery&next={{ .RedirectTo }}" class="dm-btn"
+                             style="display:inline-block; background-color:#FF8C7A; color:#0F172A; font-family:Arial,sans-serif; font-size:16px; font-weight:700; text-decoration:none; padding:14px 40px; border-radius:9999px;">
+                            Reset my password
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <p style="margin:0 0 16px; font-family:Arial,sans-serif; font-size:13px; line-height:1.6; color:#94A3B8;" class="dm-muted">
+                      Button not working? Paste this link into your browser:<br>
+                      <a href="{{ .SiteURL }}/auth/verify?token_hash={{ .TokenHash }}&type=recovery&next={{ .RedirectTo }}" style="color:#FF8C7A; word-break:break-all;" class="dm-link">{{ .SiteURL }}/auth/verify?token_hash={{ .TokenHash }}&type=recovery&amp;next={{ .RedirectTo }}</a>
+                    </p>
+
+                    <!-- Safety note -->
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFF4F1; border-radius:12px;" class="dm-note">
+                      <tr>
+                        <td style="padding:14px 16px; font-family:Arial,sans-serif; font-size:13px; line-height:1.6; color:#7C4A40;" class="dm-note-txt">
+                          <strong>Didn't request this?</strong> Someone may have entered your email by mistake. You can safely ignore this message — your password won't change unless you use the link above.
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding-top:24px;">
+              <p style="margin:0 0 4px; font-family:Arial,sans-serif; font-size:13px; color:#64748B;" class="dm-muted">
+                — Heather &amp; Keegan
+              </p>
+              <p style="margin:0 0 4px; font-family:Arial,sans-serif; font-size:12px; line-height:1.6; color:#94A3B8;" class="dm-muted">
+                <a href="{{ .SiteURL }}" style="color:#94A3B8; text-decoration:underline;" class="dm-link">bellcurve.baby</a> · See where your baby lands on the curve
+              </p>
+              <p style="margin:0; font-family:Arial,sans-serif; font-size:12px; line-height:1.6; color:#94A3B8;" class="dm-muted">
+                This is a transactional email about your account, not marketing.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

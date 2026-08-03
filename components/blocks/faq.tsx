@@ -40,10 +40,11 @@ const faqs: Faq[] = [
           — and that&apos;s exactly what they pay, nothing added on top.
         </p>
         <p>
-          Creators keep {CREATOR_KEEP_PERCENT}% of every guess. We take a{" "}
-          {PLATFORM_PERCENT}% platform fee, and standard card processing
-          (2.9% + 30¢) applies. Example: on a $45 guess, the creator receives
-          about $40.50 before card processing.
+          Creators keep exactly {CREATOR_KEEP_PERCENT}% of every guess —
+          that&apos;s a flat rate with no other deductions. We take a{" "}
+          {PLATFORM_PERCENT}% platform fee and cover the card processing costs
+          out of our share. Example: on a $45 guess, the creator receives
+          exactly $40.50.
         </p>
       </>
     ),
