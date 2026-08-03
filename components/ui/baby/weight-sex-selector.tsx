@@ -1,5 +1,6 @@
 "use client";
 import clsx from "clsx";
+import { Mars, Venus, CircleHelp } from "lucide-react";
 
 export type BabySexGuess = "boy" | "girl" | "unsure";
 
@@ -10,10 +11,15 @@ export const SEX_WEIGHT_PRESETS: Record<BabySexGuess, number> = {
   unsure: 7 + 4 / 16, // split the difference: 7 lbs 4 oz
 };
 
-const OPTIONS: { value: BabySexGuess; label: string; hint: string }[] = [
-  { value: "boy", label: "Boy", hint: "7 lb 6 oz" },
-  { value: "girl", label: "Girl", hint: "7 lb 2 oz" },
-  { value: "unsure", label: "Not sure", hint: "7 lb 4 oz" },
+const OPTIONS: {
+  value: BabySexGuess;
+  label: string;
+  hint: string;
+  Icon: typeof Mars;
+}[] = [
+  { value: "girl", label: "Girl", hint: "7 lb 2 oz", Icon: Venus },
+  { value: "boy", label: "Boy", hint: "7 lb 6 oz", Icon: Mars },
+  { value: "unsure", label: "Not sure", hint: "7 lb 4 oz", Icon: CircleHelp },
 ];
 
 export function WeightSexSelector({
@@ -27,34 +33,36 @@ export function WeightSexSelector({
 }) {
   return (
     <div
-      className={clsx("flex flex-wrap gap-2", className)}
+      className={clsx("flex flex-wrap items-center gap-1.5", className)}
       role="radiogroup"
       aria-label="Baby's sex (sets average weight)"
     >
-      {OPTIONS.map((opt) => {
-        const selected = value === opt.value;
+      {OPTIONS.map(({ value: optValue, label, hint, Icon }) => {
+        const selected = value === optValue;
         return (
           <button
-            key={opt.value}
+            key={optValue}
             type="button"
             role="radio"
             aria-checked={selected}
-            onClick={() => onChange(opt.value)}
+            title={`${label} — pre-fills the US average of ${hint}`}
+            onClick={() => onChange(optValue)}
             className={clsx(
-              "inline-flex h-9 items-baseline gap-1.5 rounded-full border px-3.5 text-sm font-medium transition-colors",
+              "inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors",
               selected
                 ? "border-[#FF8C7A] bg-[#FF8C7A]/10 text-foreground"
                 : "border-input bg-background text-muted-foreground hover:border-[#FF8C7A]/60 hover:text-foreground"
             )}
           >
-            <span className="leading-none">{opt.label}</span>
+            <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="leading-none">{label}</span>
             <span
               className={clsx(
-                "text-xs leading-none",
-                selected ? "text-[#e07363]" : "text-muted-foreground"
+                "leading-none",
+                selected ? "text-[#e07363]" : "text-muted-foreground/80"
               )}
             >
-              {opt.hint}
+              {hint}
             </span>
           </button>
         );
