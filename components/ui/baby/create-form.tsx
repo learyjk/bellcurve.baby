@@ -1223,10 +1223,9 @@ export function CreateBabyPoolForm() {
             </div>
             <p className="text-xs text-muted-foreground">
               Minimum ${MIN_PRICE_FLOOR}, maximum ${MAX_PRICE_CEILING}. You
-              keep {Math.round((1 - PLATFORM_FEE_PERCENT) * 100)}% of every
-              guess — bellcurve.baby takes a{" "}
-              {Math.round(PLATFORM_FEE_PERCENT * 100)}% platform fee, and
-              standard card processing applies.
+              keep 100% of every guess — guessers pay a{" "}
+              {Math.round(PLATFORM_FEE_PERCENT * 100)}% platform + card
+              processing fee on top, shown as its own line at checkout.
             </p>
           </div>          {/* Pricing Model Selection */}
           <div>

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
-import { getStripe } from "@/lib/stripe";
+import { getFeeCents } from "@/lib/constants";
 import {
   Table,
   TableBody,
@@ -12,46 +12,18 @@ import {
 
 export const metadata = { title: "Platform Fees - Admin" };
 
+// Donor-pays model: the guess price is transferred to the creator in full
+// and the platform keeps a 10% fee charged on top (its own checkout line
+// item), so there is no Stripe application_fee object to list. The source of
+// truth for platform earnings is therefore our own guesses table.
 type FeeRow = {
   id: string;
-  created: number;
-  amount: number;
-  amountRefunded: number;
-  refunded: boolean;
-  chargeAmount: number | null;
-  account: string;
+  created_at: string | null;
+  calculated_price: number; // dollars, the guess amount the creator received
+  payment_status: string | null;
+  pool_id: string;
+  pools: { slug: string } | null;
 };
-
-async function getFees(): Promise<FeeRow[]> {
-  const stripe = getStripe();
-  const fees = await stripe.applicationFees.list({ limit: 50 });
-  return Promise.all(
-    fees.data.map(async (fee) => {
-      let chargeAmount: number | null = null;
-      // fee.charge is the charge id on the connected account; look up the
-      // originating charge amount via the balance transaction when possible.
-      if (typeof fee.originating_transaction === "string") {
-        try {
-          const charge = await stripe.charges.retrieve(
-            fee.originating_transaction
-          );
-          chargeAmount = charge.amount;
-        } catch {
-          chargeAmount = null;
-        }
-      }
-      return {
-        id: fee.id,
-        created: fee.created,
-        amount: fee.amount,
-        amountRefunded: fee.amount_refunded ?? 0,
-        refunded: fee.refunded ?? false,
-        chargeAmount,
-        account: typeof fee.account === "string" ? fee.account : fee.account.id,
-      };
-    })
-  );
-}
 
 export default async function AdminFeesPage() {
   const supabase = await createClient();
@@ -72,17 +44,30 @@ export default async function AdminFeesPage() {
     notFound();
   }
 
-  const fees = await getFees();
-  // Only count money we actually kept: refunded fees were clawed back by
-  // Stripe when the underlying charge was refunded.
-  const totalCents = fees.reduce(
-    (sum, f) => sum + (f.amount - f.amountRefunded),
-    0
-  );
-  const grossCents = fees.reduce(
-    (sum, f) => sum + (f.refunded ? 0 : (f.chargeAmount ?? 0)),
-    0
-  );
+  const { data: rows, error } = await supabase
+    .from("guesses")
+    .select("id, created_at, calculated_price, payment_status, pool_id, pools(slug)")
+    .in("payment_status", ["paid", "refunded"])
+    .order("created_at", { ascending: false })
+    .limit(200)
+    .returns<FeeRow[]>();
+
+  if (error) {
+    console.error("Failed to load platform fees:", error);
+  }
+  const fees = rows ?? [];
+
+  const isPaid = (f: FeeRow) => f.payment_status === "paid";
+
+  // Guess volume = what creators received (the guess amounts), paid only.
+  const grossCents = fees
+    .filter(isPaid)
+    .reduce((sum, f) => sum + Math.round(f.calculated_price * 100), 0);
+  // Platform fee kept = 10% surcharge on each paid guess (refunded fees were
+  // returned to the guesser).
+  const totalFeeCents = fees
+    .filter(isPaid)
+    .reduce((sum, f) => sum + getFeeCents(Math.round(f.calculated_price * 100)), 0);
 
   return (
     <div className="max-w-4xl mx-auto mt-10 px-4 py-12">
@@ -94,7 +79,7 @@ export default async function AdminFeesPage() {
         <div className="rounded-lg border p-4 text-center">
           <div className="text-sm text-muted-foreground">Fees collected</div>
           <div className="font-cherry-bomb text-4xl">
-            ${(totalCents / 100).toFixed(2)}
+            ${(totalFeeCents / 100).toFixed(2)}
           </div>
         </div>
         <div className="rounded-lg border p-4 text-center">
@@ -107,7 +92,7 @@ export default async function AdminFeesPage() {
 
       {fees.length === 0 ? (
         <p className="text-center text-muted-foreground">
-          No application fees collected yet.
+          No paid guesses yet.
         </p>
       ) : (
         <div className="rounded border">
@@ -118,48 +103,49 @@ export default async function AdminFeesPage() {
                 <TableHead>Guess amount</TableHead>
                 <TableHead>Your fee</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Connected account</TableHead>
+                <TableHead>Pool</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {fees.map((fee) => (
-                <TableRow
-                  key={fee.id}
-                  className={fee.refunded ? "opacity-60" : undefined}
-                >
-                  <TableCell>
-                    {new Date(fee.created * 1000).toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    {fee.chargeAmount !== null ? (
-                      <span
-                        className={fee.refunded ? "line-through" : undefined}
-                      >
-                        ${(fee.chargeAmount / 100).toFixed(2)}
+              {fees.map((fee) => {
+                const refunded = fee.payment_status === "refunded";
+                const guessCents = Math.round(fee.calculated_price * 100);
+                const feeCents = getFeeCents(guessCents);
+                return (
+                  <TableRow
+                    key={fee.id}
+                    className={refunded ? "opacity-60" : undefined}
+                  >
+                    <TableCell>
+                      {fee.created_at
+                        ? new Date(fee.created_at).toLocaleString()
+                        : "-"}
+                    </TableCell>
+                    <TableCell>
+                      <span className={refunded ? "line-through" : undefined}>
+                        ${(guessCents / 100).toFixed(2)}
                       </span>
-                    ) : (
-                      "-"
-                    )}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    <span className={fee.refunded ? "line-through" : undefined}>
-                      ${(fee.amount / 100).toFixed(2)}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    {fee.refunded ? (
-                      <span className="text-xs font-medium text-orange-600">
-                        Refunded
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <span className={refunded ? "line-through" : undefined}>
+                        ${(feeCents / 100).toFixed(2)}
                       </span>
-                    ) : (
-                      <span className="text-xs text-green-600">Collected</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-mono text-xs">
-                    {fee.account}
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>
+                      {refunded ? (
+                        <span className="text-xs font-medium text-orange-600">
+                          Refunded
+                        </span>
+                      ) : (
+                        <span className="text-xs text-green-600">Collected</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {fee.pools?.slug ?? fee.pool_id}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
