@@ -11,6 +11,25 @@ import GuessScatterPlot, {
 
 const DISTANCE_DECIMAL_PLACES = 3;
 
+// Format a YYYY-MM-DD string as a long English date (e.g. "December 9, 2025")
+// in a timezone-neutral way by formatting the UTC-noon date in UTC.
+function formatYmdLong(value: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(ymdToUtcNoon(value));
+}
+
+// Format a weight in pounds as "X lbs Y oz".
+function formatPoundsAsLbsOz(poundsValue: number): string {
+  const ounces = poundsValue * 16;
+  const pounds = Math.floor(ounces / 16);
+  const oz = Math.round(ounces % 16);
+  return `${pounds} lbs ${oz} oz`;
+}
+
 type RankedGuess = {
   name: string;
   guessed_birth_date: string;
@@ -181,6 +200,15 @@ export default function LockedPoolDisplay({
       <h1 className="font-cherry-bomb text-3xl md:text-6xl font-bold text-pretty text-center tracking-wide mb-4">
         Thanks for playing!
       </h1>
+      {pool.actual_birth_date &&
+        pool.actual_birth_weight !== null &&
+        pool.actual_birth_weight !== undefined && (
+          <h2 className="text-center text-xl md:text-2xl font-semibold text-balance mb-4">
+            {pool.baby_name ? `${pool.baby_name} was` : "Baby was"} born on{" "}
+            {formatYmdLong(pool.actual_birth_date)} weighing{" "}
+            {formatPoundsAsLbsOz(Number(pool.actual_birth_weight))}
+          </h2>
+        )}
       <p className="text-center mb-8">
         Stay tuned for updates from {pool.organized_by}.
       </p>
