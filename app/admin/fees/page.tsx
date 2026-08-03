@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { getFeeCents } from "@/lib/constants";
+import { getStripe } from "@/lib/stripe";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -16,14 +18,56 @@ export const metadata = { title: "Platform Fees - Admin" };
 // and the platform keeps a 10% fee charged on top (its own checkout line
 // item), so there is no Stripe application_fee object to list. The source of
 // truth for platform earnings is therefore our own guesses table.
-type FeeRow = {
+//
+// Dev and prod share one Supabase DB but use different Stripe keys (test vs
+// live), and Stripe payment ids share the pi_3... prefix, so the only way to
+// tell a sandbox payment from a real one is the charge's `livemode` flag.
+type GuessRow = {
   id: string;
   created_at: string | null;
   calculated_price: number; // dollars, the guess amount the creator received
   payment_status: string | null;
+  payment_id: string | null;
   pool_id: string;
   pools: { slug: string } | null;
 };
+
+type FeeRow = GuessRow & {
+  /** true = real money, false = sandbox, null = couldn't determine. */
+  livemode: boolean | null;
+};
+
+// Resolve livemode per payment by looking at its Stripe charge. Batched with
+// a small concurrency cap so a large page doesn't hammer the Stripe API.
+async function withLivemode(rows: GuessRow[]): Promise<FeeRow[]> {
+  const stripe = getStripe();
+  const CONCURRENCY = 5;
+  const out: FeeRow[] = new Array(rows.length);
+  let i = 0;
+  async function worker() {
+    while (i < rows.length) {
+      const idx = i++;
+      const row = rows[idx];
+      let livemode: boolean | null = null;
+      if (row.payment_id) {
+        try {
+          const pi = await stripe.paymentIntents.retrieve(row.payment_id, {
+            expand: ["latest_charge"],
+          });
+          const charge = pi.latest_charge;
+          if (charge && typeof charge !== "string") {
+            livemode = charge.livemode;
+          }
+        } catch {
+          livemode = null;
+        }
+      }
+      out[idx] = { ...row, livemode };
+    }
+  }
+  await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+  return out;
+}
 
 export default async function AdminFeesPage() {
   const supabase = await createClient();
@@ -46,28 +90,32 @@ export default async function AdminFeesPage() {
 
   const { data: rows, error } = await supabase
     .from("guesses")
-    .select("id, created_at, calculated_price, payment_status, pool_id, pools(slug)")
+    .select(
+      "id, created_at, calculated_price, payment_status, payment_id, pool_id, pools(slug)"
+    )
     .in("payment_status", ["paid", "refunded"])
     .order("created_at", { ascending: false })
-    .limit(200)
-    .returns<FeeRow[]>();
+    .limit(100)
+    .returns<GuessRow[]>();
 
   if (error) {
     console.error("Failed to load platform fees:", error);
   }
-  const fees = rows ?? [];
+  const fees = await withLivemode(rows ?? []);
 
   const isPaid = (f: FeeRow) => f.payment_status === "paid";
+  const isLive = (f: FeeRow) => f.livemode === true;
+  const guessCents = (f: FeeRow) => Math.round(f.calculated_price * 100);
+  const feeCentsFor = (f: FeeRow) => getFeeCents(guessCents(f));
 
-  // Guess volume = what creators received (the guess amounts), paid only.
-  const grossCents = fees
-    .filter(isPaid)
-    .reduce((sum, f) => sum + Math.round(f.calculated_price * 100), 0);
-  // Platform fee kept = 10% surcharge on each paid guess (refunded fees were
-  // returned to the guesser).
-  const totalFeeCents = fees
-    .filter(isPaid)
-    .reduce((sum, f) => sum + getFeeCents(Math.round(f.calculated_price * 100)), 0);
+  // Live (real-money) totals — the headline numbers.
+  const liveFees = fees.filter((f) => isPaid(f) && isLive(f));
+  const liveFeeCents = liveFees.reduce((s, f) => s + feeCentsFor(f), 0);
+  const liveGrossCents = liveFees.reduce((s, f) => s + guessCents(f), 0);
+  // Sandbox totals, shown separately so they don't inflate the real numbers.
+  const testFees = fees.filter((f) => isPaid(f) && f.livemode === false);
+  const testFeeCents = testFees.reduce((s, f) => s + feeCentsFor(f), 0);
+  const testGrossCents = testFees.reduce((s, f) => s + guessCents(f), 0);
 
   return (
     <div className="max-w-4xl mx-auto mt-10 px-4 py-12">
@@ -75,20 +123,38 @@ export default async function AdminFeesPage() {
         Platform Fees
       </h1>
 
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="rounded-lg border p-4 text-center">
-          <div className="text-sm text-muted-foreground">Fees collected</div>
+          <div className="text-sm text-muted-foreground">
+            Fees collected (live)
+          </div>
           <div className="font-cherry-bomb text-4xl">
-            ${(totalFeeCents / 100).toFixed(2)}
+            ${(liveFeeCents / 100).toFixed(2)}
           </div>
         </div>
         <div className="rounded-lg border p-4 text-center">
-          <div className="text-sm text-muted-foreground">Guess volume</div>
+          <div className="text-sm text-muted-foreground">
+            Guess volume (live)
+          </div>
           <div className="font-cherry-bomb text-4xl">
-            ${(grossCents / 100).toFixed(2)}
+            ${(liveGrossCents / 100).toFixed(2)}
           </div>
         </div>
       </div>
+
+      {testFees.length > 0 && (
+        <p className="text-center text-xs text-muted-foreground mb-8">
+          Plus{" "}
+          <span className="font-medium">
+            ${(testFeeCents / 100).toFixed(2)}
+          </span>{" "}
+          in fees on{" "}
+          <span className="font-medium">
+            ${(testGrossCents / 100).toFixed(2)}
+          </span>{" "}
+          of sandbox (test-mode) guesses — not real money.
+        </p>
+      )}
 
       {fees.length === 0 ? (
         <p className="text-center text-muted-foreground">
@@ -102,6 +168,7 @@ export default async function AdminFeesPage() {
                 <TableHead>Date</TableHead>
                 <TableHead>Guess amount</TableHead>
                 <TableHead>Your fee</TableHead>
+                <TableHead>Mode</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Pool</TableHead>
               </TableRow>
@@ -109,8 +176,6 @@ export default async function AdminFeesPage() {
             <TableBody>
               {fees.map((fee) => {
                 const refunded = fee.payment_status === "refunded";
-                const guessCents = Math.round(fee.calculated_price * 100);
-                const feeCents = getFeeCents(guessCents);
                 return (
                   <TableRow
                     key={fee.id}
@@ -123,13 +188,22 @@ export default async function AdminFeesPage() {
                     </TableCell>
                     <TableCell>
                       <span className={refunded ? "line-through" : undefined}>
-                        ${(guessCents / 100).toFixed(2)}
+                        ${(guessCents(fee) / 100).toFixed(2)}
                       </span>
                     </TableCell>
                     <TableCell className="font-medium">
                       <span className={refunded ? "line-through" : undefined}>
-                        ${(feeCents / 100).toFixed(2)}
+                        ${(feeCentsFor(fee) / 100).toFixed(2)}
                       </span>
+                    </TableCell>
+                    <TableCell>
+                      {fee.livemode === true ? (
+                        <Badge variant="default">Live</Badge>
+                      ) : fee.livemode === false ? (
+                        <Badge variant="secondary">Test</Badge>
+                      ) : (
+                        <Badge variant="outline">—</Badge>
+                      )}
                     </TableCell>
                     <TableCell>
                       {refunded ? (
