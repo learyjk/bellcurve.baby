@@ -972,6 +972,10 @@ export function CreateBabyPoolForm() {
                   Expected Due Date
                   <RequiredMark />
                 </Label>
+                <p className="text-xs text-muted-foreground">
+                  This is the center of the date price curve — guesses cost
+                  the most right around the due date.
+                </p>
                 <div
                   ref={(el) => {
                     fieldRefs.current.due_date = el;
@@ -1008,6 +1012,10 @@ export function CreateBabyPoolForm() {
                   Expected Weight
                   <RequiredMark />
                 </Label>
+                <p className="text-xs text-muted-foreground">
+                  Use the buttons below to pre-fill US national averages, or
+                  enter your own.
+                </p>
                 <WeightSexSelector
                   className="mt-2 max-w-sm"
                   value={sexGuess}
