@@ -27,8 +27,8 @@ export default function Home() {
         <section className="w-full max-w-2xl flex flex-col items-start gap-4 px-4 py-12">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-lg text-muted-foreground font-medium mb-8">
-              After baby is born: Close the pool, see how the guesses
-              ranked!
+              After baby is born: Close the pool, see how close the guesses
+              were!
             </h2>
             <div className="space-y-4">
               <p>
