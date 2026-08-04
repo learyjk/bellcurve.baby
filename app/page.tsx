@@ -24,6 +24,22 @@ export default function Home() {
             </CardContent>
           </Card>
         </section>
+        <section className="w-full max-w-2xl flex flex-col items-start gap-4 px-4 py-12">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-lg text-muted-foreground font-medium mb-8">
+              After baby is born: Visualize guesses and crown the winners
+            </h2>
+            <div className="space-y-4">
+              <p>
+                After baby is born, close the pool and enter in their actual
+                birth weight and date. The guesses will appear in a visual and
+                table in the order of how close they were to the actual.
+              </p>
+              <p>The top 3 closest guesses will be crowned the winners!</p>
+              {/* GIF will be inserted here */}
+            </div>
+          </div>
+        </section>
         <Faq />
       </div>
     </main>
