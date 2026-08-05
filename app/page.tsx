@@ -4,6 +4,7 @@ import Image from "next/image";
 import MainHero from "@/components/blocks/hero-sections/main-hero";
 import { Card, CardContent } from "@/components/ui/card";
 import priceSurface from "../public/price_surface.gif";
+import closedPoolViz from "../public/closed-pool-viz.gif";
 
 export default function Home() {
   return (
@@ -37,9 +38,21 @@ export default function Home() {
                 + table in the order of how close they were to the actual.
               </p>
               <p>The top 3 closest guesses will be crowned the winners!</p>
-              {/* GIF will be inserted here */}
             </div>
           </div>
+        </section>
+        <section className="w-full max-w-2xl flex flex-col items-center px-4 pb-12">
+          <Card className="overflow-hidden shadow-none">
+            <CardContent className="p-0">
+              <Image
+                src={closedPoolViz}
+                alt="Closed pool results: guesses ranked by how close they were to the actual birth weight and date"
+                width={672}
+                style={{ height: "auto" }}
+                className="mx-auto"
+              />
+            </CardContent>
+          </Card>
         </section>
         <Faq />
       </div>
